@@ -39,16 +39,16 @@ const LoginPage = {
         </div>
 
         <div class="login-branding">
-          <h2 class="login-branding-line1">Sistem Aplikasi</h2>
-          <h2 class="login-branding-line2">Pengelolaan <em>Kinerja</em></h2>
+          <h2 class="login-branding-line1">Sistem Database</h2>
+          <h2 class="login-branding-line2">Status <em>Kerja Sama</em></h2>
           <img src="assets/login-illustration.png" alt="Illustration" class="login-illustration" />
         </div>
 
         <div class="login-card">
           <div class="login-header">
-            <div class="login-logo"><img src="assets/logo-kinerjaku.png" alt="Logo KKP" style="width:120px;height:120px;object-fit:contain"></div>
-            <h1 class="login-title">KinerjaKu</h1>
-            <p class="login-subtitle">Aplikasi Pengelolaan Kinerja Organisasi Terintegrasi</p>
+            <div class="login-logo"><img src="assets/logo-kkp.png" alt="Logo KKP" style="width:120px;height:120px;object-fit:contain"></div>
+            <h1 class="login-title">Kerja Sama</h1>
+            <p class="login-subtitle">Database Status Kerja Sama</p>
             <p class="login-subtitle" style="margin-top:2px">Kementerian Kelautan dan Perikanan</p>
           </div>
 
@@ -114,7 +114,7 @@ const LoginPage = {
     App.isLoggedIn = true;
     localStorage.setItem('kinerjaku_loggedIn', 'true');
     localStorage.setItem('kinerjaku_user', JSON.stringify(MockData.currentUser));
-    MockData.pushActivityLog('login', 'Sistem', 'Login ke sistem KinerjaKu');
+    MockData.pushActivityLog('login', 'Sistem', 'Login ke sistem Kerja Sama');
     App.navigate('dashboard');
   }
 };
