@@ -160,7 +160,7 @@ const App = {
   },
 
   toggleSidebar() {
-    if (window.innerWidth <= 992) {
+    if (window.innerWidth <= 1024) {
       this.mobileMenuOpen = !this.mobileMenuOpen;
       this.renderPage();
     } else {

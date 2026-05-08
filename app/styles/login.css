@@ -233,13 +233,13 @@
 }
 
 /* ── Responsive ──────────────────────────── */
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .login-left {
     display: none;
   }
   
   .login-right {
-    background: linear-gradient(135deg, #004e92, #000428); /* Give mobile some branding color */
+    background: linear-gradient(135deg, #004e92, #000428);
     padding: 20px;
   }
 
@@ -258,21 +258,261 @@
   }
 }
 
-@media (max-width: 480px) {
-  .login-card-v2 {
-    padding: 24px 16px;
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
   }
-  
+
+  .login-left {
+    display: flex;
+    flex: 0;
+    padding: 20px;
+    min-height: auto;
+    max-height: 40vh;
+  }
+
+  .login-left-content {
+    max-width: 100%;
+  }
+
+  .kkp-logo {
+    width: 120px;
+  }
+
+  .branding-title {
+    font-size: 1.5rem;
+  }
+
+  .branding-subtitle {
+    font-size: 1.2rem;
+    margin: 8px 0 16px;
+  }
+
+  .branding-tagline {
+    font-size: 0.9rem;
+  }
+
+  .login-right {
+    flex: 1;
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .login-card-v2 {
+    max-width: 100%;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
   .card-title {
     font-size: 1.25rem;
+    margin-bottom: 8px;
   }
-  
+
   .card-subtitle {
     font-size: 0.85rem;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
-  
+
+  .input-v2 {
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
   .btn-login-v2 {
-    padding: 14px;
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .form-group-v2 {
+    margin-bottom: 16px;
+  }
+
+  .label-v2 {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .login-left {
+    flex: 0;
+    max-height: auto;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-left-content {
+    max-width: 100%;
+  }
+
+  .login-left-footer {
+    display: none;
+  }
+
+  .kkp-logo-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .kkp-logo {
+    width: 100px;
+  }
+
+  .branding-title {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .branding-subtitle {
+    font-size: 1rem;
+    margin: 6px 0 12px;
+  }
+
+  .branding-tagline {
+    font-size: 0.85rem;
+  }
+
+  .login-right {
+    flex: 1;
+    padding: 12px;
+    background: linear-gradient(135deg, #004e92, #000428);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-card-v2 {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    background: white;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .card-subtitle {
+    font-size: 0.75rem;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .form-group-v2 {
+    margin-bottom: 12px;
+  }
+
+  .label-v2 {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .input-v2 {
+    padding: 11px 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #E0E7FF;
+  }
+
+  .input-v2:focus {
+    outline: none;
+    border-color: #0055A4;
+    box-shadow: 0 0 0 3px rgba(0, 85, 164, 0.08);
+  }
+
+  .password-toggle {
+    right: 10px;
+    padding: 6px;
+    font-size: 16px;
+  }
+
+  .btn-login-v2 {
+    padding: 11px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .btn-login-v2:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-login-v2:active {
+    transform: translateY(0);
+  }
+
+  /* Ensure touch targets are large enough */
+  .input-v2,
+  .btn-login-v2,
+  .password-toggle {
+    min-height: 44px;
+  }
+
+  .login-error-v2 {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+    border-left-width: 3px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card-v2 {
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+  }
+
+  .card-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .label-v2 {
+    font-size: 0.75rem;
+  }
+
+  .input-v2,
+  .btn-login-v2 {
+    font-size: 0.85rem;
+  }
+
+  .branding-title {
+    font-size: 1rem;
+  }
+
+  .branding-subtitle {
+    font-size: 0.85rem;
+  }
+}
+
+/* Touch device optimizations for login */
+@media (hover: none) and (pointer: coarse) {
+  .input-v2,
+  .btn-login-v2,
+  .password-toggle {
+    min-height: 44px;
+  }
+
+  .btn-login-v2:hover {
+    transform: none;
+  }
+
+  .btn-login-v2:active {
+    background-color: #004488;
   }
 }

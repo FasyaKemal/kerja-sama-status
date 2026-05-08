@@ -3709,7 +3709,7 @@ const KebijakanPrioritasPage = {
       </div>
 
       <!-- FILTER & SEARCH BAR -->
-      <div class="card glass" style="margin-bottom:24px;padding:24px;display:flex;align-items:flex-end;gap:16px;border:none;box-shadow:var(--shadow-lg);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);overflow-x:auto;">
+      <div class="card glass page-filter-bar" style="margin-bottom:24px;padding:24px;border:none;box-shadow:var(--shadow-lg);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);">
         <div class="search-container" style="flex:2;min-width:250px;">
           <span class="search-icon" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--neutral-400);">🔍</span>
           <input type="text" id="kp-search" class="search-input" style="width:100%;padding:12px 12px 12px 45px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" placeholder="Cari mitra, jenis, nomor, atau pihak..." value="${this.state.searchQuery}" oninput="KebijakanPrioritasPage.handleSearch(this.value)" onkeydown="if(event.key==='Enter') event.preventDefault()">

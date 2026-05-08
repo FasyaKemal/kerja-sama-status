@@ -239,7 +239,7 @@ const DatabasePage = {
         </div>
 
         <!-- FILTER & SEARCH BAR -->
-        <div class="card glass" style="margin-bottom:24px;padding:24px;display:flex;align-items:flex-end;gap:16px;border:none;box-shadow:var(--shadow-lg);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);overflow-x:auto;">
+        <div class="card glass page-filter-bar" style="margin-bottom:24px;padding:24px;border:none;box-shadow:var(--shadow-lg);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);">
           <div class="search-container" style="flex:2;min-width:250px;">
             <span class="search-icon" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--neutral-400);">🔍</span>
             <input type="text" id="db-search" class="search-input" style="width:100%;padding:12px 12px 12px 45px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" placeholder="Cari mitra, jenis, nomor, atau pihak..." value="${this.state.searchQuery}" oninput="DatabasePage.handleFilter('searchQuery', this.value)" onkeydown="if(event.key==='Enter') event.preventDefault()">
@@ -284,7 +284,7 @@ const DatabasePage = {
   renderModal() {
     return `
       <div id="dbModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index:1100;">
-        <div class="modal-content" style="width:100%; max-width:800px; max-height:90vh; overflow-y:auto; border-radius:20px; padding:0; box-shadow:var(--shadow-2xl);">
+        <div class="modal-content" style="width:95%; max-width:800px; max-height:90vh; overflow-y:auto; border-radius:20px; padding:0; box-shadow:var(--shadow-2xl);">
           <div style="padding:20px 24px; border-bottom:1px solid var(--neutral-100); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#fff; z-index:10;">
             <h3 id="dbModalTitle" style="margin:0; color:var(--primary-900);">Tambah Data Kerja Sama</h3>
             <button onclick="DatabasePage.closeModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:var(--neutral-400);">✕</button>
