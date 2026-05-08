@@ -25,78 +25,104 @@ const LoginPage = {
   ],
 
   render() {
+    // Generate a simple math captcha
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    this.captchaResult = num1 + num2;
+
     return `
-      <div class="login-page">
-        <div class="login-bg-pattern"></div>
-        <div class="login-contour"></div>
-        <div class="login-particles">
-          <div class="login-particle"></div>
-          <div class="login-particle"></div>
-          <div class="login-particle"></div>
-          <div class="login-particle"></div>
-          <div class="login-particle"></div>
-          <div class="login-particle"></div>
-        </div>
-
-        <div class="login-branding">
-          <h2 class="login-branding-line1">Sistem Database</h2>
-          <h2 class="login-branding-line2">Status <em>Kerja Sama</em></h2>
-          <img src="assets/login-illustration.png" alt="Illustration" class="login-illustration" />
-        </div>
-
-        <div class="login-card">
-          <div class="login-header">
-            <div class="login-logo"><img src="assets/logo-kkp.png" alt="Logo KKP" style="width:120px;height:120px;object-fit:contain"></div>
-            <h1 class="login-title">Kerja Sama</h1>
-            <p class="login-subtitle">Database Status Kerja Sama</p>
-            <p class="login-subtitle" style="margin-top:2px">Kementerian Kelautan dan Perikanan</p>
-          </div>
-
-          <div class="login-error" id="login-error">
-            ⚠️ <span id="login-error-text">Username atau password salah.</span>
-          </div>
-
-          <form class="login-form" onsubmit="LoginPage.handleLogin(event)">
-            <div class="form-group">
-              <label class="form-label">Username</label>
-              <input class="form-input" type="text" id="login-username" placeholder="Masukkan username" />
+      <div class="login-container">
+        <!-- Left Side: Branding -->
+        <div class="login-left">
+          <div class="login-left-content">
+            <div class="kkp-logo-wrapper">
+              <img src="assets/logo-kkp.png" alt="Logo KKP" class="kkp-logo">
             </div>
-            <div class="form-group">
-              <label class="form-label">Password</label>
-              <input class="form-input" type="password" id="login-password" placeholder="Masukkan password" />
-            </div>
-            <button type="submit" class="login-submit">Masuk</button>
-          </form>
-
-          <div class="login-forgot">
-            <a href="#">Lupa Password?</a>
+            <h1 class="branding-title">Biro Perencanaan</h1>
+            <h2 class="branding-subtitle">Kementerian Kelautan dan Perikanan</h2>
+            <p class="branding-tagline">Sistem Monitoring Database<br>Kerja Sama </p>
+          </div>
+          <div class="login-left-footer">
+            © 2026 Monev KNMP - Kementerian Kelautan dan Perikanan
           </div>
         </div>
 
-        <div class="login-contact">
-          <p><strong>Kontak Pengaduan Layanan Biro Perencanaan</strong></p>
-          <p>Email : pusatlayananroren@kkp.go.id</p>
-          <p>Telp : 0821-2495-3333</p>
+        <!-- Right Side: Login Form -->
+        <div class="login-right">
+          <div class="login-card-v2">
+            <h2 class="card-title">Selamat Datang</h2>
+            <p class="card-subtitle">Masukan username dan password Anda untuk mengakses sistem.</p>
+
+            <div class="login-error-v2" id="login-error">
+               <span id="login-error-text"></span>
+            </div>
+
+            <form class="login-form-v2" onsubmit="LoginPage.handleLogin(event)">
+              <div class="form-group-v2">
+                <label class="label-v2">Username</label>
+                <input class="input-v2" type="text" id="login-username" placeholder="Masukan username anda" required />
+              </div>
+              
+              <div class="form-group-v2">
+                <label class="label-v2">Password</label>
+                <div class="password-wrapper">
+                  <input class="input-v2" type="password" id="login-password" placeholder="Masukan password anda" required />
+                  <button type="button" class="password-toggle" onclick="LoginPage.togglePassword()">
+                    <span id="pass-icon">👁️</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group-v2">
+                <label class="label-v2">Berapa hasil dari: ${num1} + ${num2} = ?</label>
+                <input class="input-v2" type="number" id="login-captcha" placeholder="Masukkan jawaban" required />
+              </div>
+
+              <button type="submit" class="btn-login-v2">
+                <span>&#10140; Masuk</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>`;
+  },
+
+  togglePassword() {
+    const input = document.getElementById('login-password');
+    const icon = document.getElementById('pass-icon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = '🔒';
+    } else {
+      input.type = 'password';
+      icon.textContent = '👁️';
+    }
   },
 
   handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
+    const captchaInput = document.getElementById('login-captcha').value;
     const err = document.getElementById('login-error');
+    const errText = document.getElementById('login-error-text');
 
-    if (!username || !password) {
+    if (!username || !password || !captchaInput) {
       err.classList.add('show');
-      document.getElementById('login-error-text').textContent = 'Username dan password wajib diisi.';
+      errText.textContent = 'Semua kolom wajib diisi.';
+      return;
+    }
+
+    if (parseInt(captchaInput) !== this.captchaResult) {
+      err.classList.add('show');
+      errText.textContent = 'Jawaban captcha salah.';
       return;
     }
 
     const account = this.accounts.find(a => a.username === username && a.password === password);
     if (!account) {
       err.classList.add('show');
-      document.getElementById('login-error-text').textContent = 'Username atau password salah.';
+      errText.textContent = 'Username atau password salah.';
       return;
     }
 

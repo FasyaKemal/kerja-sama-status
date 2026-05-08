@@ -3,9 +3,29 @@
    ============================================ */
 
 const MockData = {
+  timelineSteps: [
+    'Surat Usulan Penyusunan/Perpanjangan Kerja Sama',
+    'Disposisi Pimpinan',
+    'Pembahasan Penyusunan Naskah Kerja Sama (3 hari)',
+    'Surat ke Mitra terkait hasil pembahasan (1 hari)',
+    'Menerima Masukan Kerja Sama dari Mitra',
+    'Memo Roren Rokum hasil masukan dari mitra (1 hari)',
+    'Memo Rokum Roren finalisasi',
+    'Memo Roren Sekjen persetujuan paraf (2 hari)',
+    'Memo Sekjen MKP penandatanganan (1 hari)',
+    'Penandatanganan'
+  ],
+
+  progressDokumen: [
+    { id: '1', no: '01/PKS/2026', judul: 'Kerja Sama Pengawasan Laut', mitra: 'Kementerian Pertahanan', step: 8, update: '12 Mei 2026', progress: 80, status: 'Memo Roren Sekjen', tahun: '2026' },
+    { id: '2', no: '02/NK/2026', judul: 'Pengembangan SDM Kelautan', mitra: 'Universitas Indonesia', step: 4, update: '10 Mei 2026', progress: 40, status: 'Surat ke Mitra', tahun: '2026' },
+    { id: '3', no: '03/MoU/2026', judul: 'Riset Biodiversitas Maritim', mitra: 'BRIN', step: 10, update: '05 Mei 2026', progress: 100, status: 'Selesai', tahun: '2026' },
+    { id: '4', no: '04/KB/2026', judul: 'Pemberdayaan Nelayan Lokal', mitra: 'Pemda Maluku', step: 2, update: '15 Mei 2026', progress: 20, status: 'Disposisi Pimpinan', tahun: '2026' }
+  ],
+
   databaseKerjaSama: [
     {
-        "id": "KSM-004",
+        "id": "KSM-001",
         "tahun": "2017",
         "kategoriMitra": "Ormas",
         "mitra": "Himpunan Nelayan Seluruh Indonesia",
@@ -21,7 +41,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1WssyAf_n1CETl0HJN2-OwAILqC8okMLU/view?usp=drive_link"
     },
     {
-        "id": "KSM-005",
+        "id": "KSM-002",
         "tahun": "2017",
         "kategoriMitra": "BUMN",
         "mitra": "BRI",
@@ -37,7 +57,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1WoCJe4-cquw7M9v6Hks6mFkMIrlD4xhP/view?usp=drive_link"
     },
     {
-        "id": "KSM-006",
+        "id": "KSM-003",
         "tahun": "2017",
         "kategoriMitra": "BUMN",
         "mitra": "PT. PERTAMINA",
@@ -53,7 +73,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1io-7-4NMO1QNGUi7rfbgW5UllyOaPmwN/view?usp=drive_link"
     },
     {
-        "id": "KSM-007",
+        "id": "KSM-004",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "LKPP",
@@ -69,7 +89,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1BmQHRbB8i_GbaJde0L0jAYaIvJyVY5Ge/view?usp=drive_link"
     },
     {
-        "id": "KSM-008",
+        "id": "KSM-005",
         "tahun": "2017",
         "kategoriMitra": "BUMN",
         "mitra": "PT POS Indonesia",
@@ -85,7 +105,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/drive/folders/1StF072uFgAhfGrQT-Bzt-qgpchSRc-1c?usp=drive_link"
     },
     {
-        "id": "KSM-009",
+        "id": "KSM-006",
         "tahun": "2017",
         "kategoriMitra": "BUMN",
         "mitra": "BRI",
@@ -101,7 +121,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1OLCNORc7MCsQP-EPCDh3YbmgbdASzW73/view?usp=drive_link"
     },
     {
-        "id": "KSM-010",
+        "id": "KSM-007",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "KPPPA",
@@ -117,7 +137,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1S0h1CWFPCtCiwYfP_SI0p1QBAfc17tYx/view?usp=drive_link"
     },
     {
-        "id": "KSM-011",
+        "id": "KSM-008",
         "tahun": "2017",
         "kategoriMitra": "BUMN",
         "mitra": "PLN",
@@ -133,7 +153,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1fGrRnlPbl_Qh_NrpDfWEOyQt4t9OaQBM/view?usp=drive_link"
     },
     {
-        "id": "KSM-012",
+        "id": "KSM-009",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "LAPAN",
@@ -149,7 +169,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1rWeo7UxSoYA89wKDKFH6M3gMSBVTmnwQ/view?usp=drive_link"
     },
     {
-        "id": "KSM-013",
+        "id": "KSM-010",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "BPPT",
@@ -165,7 +185,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/17qSm_N12_T53SMH-wzwVQnqoEa_V1vxZ/view?usp=drive_link"
     },
     {
-        "id": "KSM-014",
+        "id": "KSM-011",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "BPPT",
@@ -181,7 +201,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/15HhIRKS7FMty_W-pYZpEMsWgZxrGBvQ3/view?usp=drive_link"
     },
     {
-        "id": "KSM-015",
+        "id": "KSM-012",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "BPPT",
@@ -197,7 +217,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1qwJGVEfMMLsNFOHFIwlA0nfZwd5gMX_M/view?usp=drive_link"
     },
     {
-        "id": "KSM-016",
+        "id": "KSM-013",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "Balitbang Kemdikbud",
@@ -213,7 +233,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1mHf_Z4nhfWHhvZek3_QLA5x2HVrlKAoE/view?usp=drive_link"
     },
     {
-        "id": "KSM-017",
+        "id": "KSM-014",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "Kemdikbud",
@@ -229,7 +249,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1TkPnwjQ-A_cm6t0EgQI7i91YondycngJ/view?usp=drive_link"
     },
     {
-        "id": "KSM-018",
+        "id": "KSM-015",
         "tahun": "2017",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Muhaammadiyah Malang",
@@ -245,7 +265,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1c2q2vw6sOXmNnvUvmuNJoWHzaVYDy7Dt/view?usp=share_link"
     },
     {
-        "id": "KSM-019",
+        "id": "KSM-016",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "Deputi Bidang Pengembangan Kelembagaan Kepariwisataan",
@@ -261,7 +281,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1_kD9f72I8GcYV8ChH1w401y1WJt1Xhf9/view?usp=drive_link"
     },
     {
-        "id": "KSM-020",
+        "id": "KSM-017",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "Kemenpar",
@@ -277,7 +297,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1oiaTxQGMAsu5HXKmWqebxKnKsmzKSfza/view?usp=drive_link"
     },
     {
-        "id": "KSM-022",
+        "id": "KSM-018",
         "tahun": "2017",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Dana Sejahtera Mandiri                                                                                                                                                                                                                                                                                                                                                                                                                  Universitas Trilogi",
@@ -293,7 +313,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1YXV0hRDjZERE112QYvogosCS1D69cC77/view?usp=drive_link"
     },
     {
-        "id": "KSM-023",
+        "id": "KSM-019",
         "tahun": "2017",
         "kategoriMitra": "K/L",
         "mitra": "BPPT",
@@ -309,7 +329,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1RZuSivXSbxBqj1TJZnOLZsVOb2g5fbJ9/view?usp=drive_link"
     },
     {
-        "id": "KSM-024",
+        "id": "KSM-020",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "SKK Migas",
@@ -325,7 +345,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/18fxyd_EbULlTPv3SlJQK4P8LmdixcQfF/view?usp=drive_link"
     },
     {
-        "id": "KSM-025",
+        "id": "KSM-021",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Ditjen Dukcapil, Kemendagri",
@@ -341,7 +361,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1XAyKIHSG1KJl-DDKu7SuMzmXD-kMPVIu/view?usp=drive_link"
     },
     {
-        "id": "KSM-026",
+        "id": "KSM-022",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Pusat Alikasi Isotop dan Radiasi, BATAN",
@@ -357,7 +377,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1RDTKmVtj7t9CgpTymf-ukc0rfJx9WszZ/view?usp=drive_link"
     },
     {
-        "id": "KSM-027",
+        "id": "KSM-023",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Brawijaya",
@@ -373,7 +393,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1aNypabo7sICCVPnKaEMSBJivuMPQYca_/view?usp=drive_link"
     },
     {
-        "id": "KSM-028",
+        "id": "KSM-024",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Diponegoro",
@@ -389,7 +409,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/10HXxjaQVumZ295Gg2wFrO7siR84p1Pg6/view?usp=drive_link"
     },
     {
-        "id": "KSM-029",
+        "id": "KSM-025",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "BPOM",
@@ -405,7 +425,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1iSMciGmH8ntSUhyaeL5-ELGP0VC2Ldwd/view?usp=drive_link"
     },
     {
-        "id": "KSM-030",
+        "id": "KSM-026",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Kemendagri",
@@ -421,7 +441,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1r5ePGxu391qLt8MZGJjCtCZZCNI-x-3f/view?usp=drive_link"
     },
     {
-        "id": "KSM-031",
+        "id": "KSM-027",
         "tahun": "2018",
         "kategoriMitra": "Pemda",
         "mitra": "Kabupaten Karangasem",
@@ -437,7 +457,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1G96b-GHvTiWM-1zAtORhzI2jCKgs2DTy/view?usp=drive_link"
     },
     {
-        "id": "KSM-032",
+        "id": "KSM-028",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "FPIK UNIBRAW",
@@ -453,36 +473,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1shsM6VoiO6FN6-4oYVKOpvRJQXn9dArN/view?usp=drive_link"
     },
     {
-        "id": "KSM-033",
+        "id": "KSM-029",
         "tahun": "2018",
         "kategoriMitra": "K/L",
-        "mitra": "Dirjen Hubungan Hukum Keagrariaan, Kementerian Agraria dan Tata Ruang",
-        "linkDokumen": ""
+        "mitra": "Dirjen Hubungan Hukum Keagrariaan, Kementerian Agraria dan Tata Ruang Dirjen Bina Pembangunan Daerah, Kemendagri Deputi Bidang Pembiayaan, KemKop UKM,  Dirjen Prasarana dan Sarana Pertanian, Kementan                                                                                                                                                                                                                                                                                                                                                                                                                    Dirjen PT, KKP Dirjen PB, KKP",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Dirjen Hub Hukum Keagrariaan, Kementerian Agraria dan Tata Ruang",
+        "noPihak1": "29/SKB-400/IV/2018",
+        "pihak2": "Dirjen Hubungan Hukum Keagrariaan, Kementerian Agraria dan Tata Ruang Dirjen Bina Pembangunan Daerah, Kemendagri Deputi Bidang Pembiayaan, KemKop UKM,  Dirjen Prasarana dan Sarana Pertanian, Kementan                                                                                                                                                                                                                                                                                                                                                                                                                    Dirjen PT, KKP Dirjen PB, KKP",
+        "noPihak2": "500/1738/Banda/2018                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             01/PKS/Dep.2/IV/2018                                                                                           03/MoU/OT.160/B/04/2018                                                                                                   01/PKS/DJPT-KKP/IV/2018                                                                                                                      01/DJPB-KKP/PKS/IV/2018",
+        "masaBerlaku": "5",
+        "tanggalMulai": "4/5/2018",
+        "tanggalSelesai": "4/5/2023",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1frADh0fpFOVC1TzolEnD0CtoWDLoCyXs/view?usp=drive_link"
     },
     {
-        "id": "KSM-036",
-        "tahun": "Dirjen Prasarana dan Sarana Pertanian",
-        "kategoriMitra": "Kementan                                                                                                                                                                                                                                                                                                                                                                                                                    Dirjen PT",
-        "mitra": "KKP",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-038",
-        "tahun": "Dirjen PB",
-        "kategoriMitra": "KKP,Perjanjian Kerja Sama,Dirjen Hub Hukum Keagrariaan",
-        "mitra": "Kementerian Agraria dan Tata Ruang,29/SKB-400/IV/2018,Dirjen Hubungan Hukum Keagrariaan",
-        "jenisKerjasama": "Kementerian Agraria dan Tata Ruang",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-041",
-        "tahun": "Dirjen Prasarana dan Sarana Pertanian",
-        "kategoriMitra": "Kementan                                                                                                                                                                                                                                                                                                                                                                                                                    Dirjen PT",
-        "mitra": "KKP",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-043",
+        "id": "KSM-030",
         "tahun": "2018",
         "kategoriMitra": "BUMN",
         "mitra": "BNI",
@@ -498,7 +505,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1W_uh_RYBXWK8_OXbxDftoXHxSWkXX7ET/view?usp=drive_link"
     },
     {
-        "id": "KSM-044",
+        "id": "KSM-031",
         "tahun": "2018",
         "kategoriMitra": "Ormas",
         "mitra": "MDPI",
@@ -514,7 +521,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1bVbgunScSyGNlRUEBOURJ4FT0Wff0_qE/view?usp=drive_link"
     },
     {
-        "id": "KSM-045",
+        "id": "KSM-032",
         "tahun": "2018",
         "kategoriMitra": "Swasta",
         "mitra": "PT. Martina Berto",
@@ -530,7 +537,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1xOwrYXEVIqnYOYmu3gEbZRQy4WIO3E8i/view?usp=drive_link"
     },
     {
-        "id": "KSM-046",
+        "id": "KSM-033",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Mulawarman",
@@ -546,14 +553,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1jjR3IpqcX4wpY8pkLQTVwmyQ-Rp0W4Bx/view?usp=drive_link"
     },
     {
-        "id": "KSM-047",
+        "id": "KSM-034",
         "tahun": "2018",
         "kategoriMitra": "K/L",
-        "mitra": "Badan Ketahanan Pangan",
-        "linkDokumen": ""
+        "mitra": "Badan Ketahanan Pangan UGM",
+        "jenisKerjasama": "Nota Kesepahaman",
+        "pihak1": "Ka. Badan Ketahanan Pangan",
+        "noPihak1": "B-386/HK.220/J/09/2018",
+        "pihak2": "Dirjen PDSPKP",
+        "noPihak2": "05/PDSPKP-KKP/PKS/IX/2018",
+        "masaBerlaku": "3",
+        "tanggalMulai": "9/18/2018",
+        "tanggalSelesai": "9/18/2021",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/15aa3HZM08qzh5Ftnc0G1mCybHYP2yCT7/view?usp=drive_link"
     },
     {
-        "id": "KSM-049",
+        "id": "KSM-035",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Halu Oleo",
@@ -569,7 +585,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1YSIZnmXqAeovpdlWZAGN_2EJIVo32v1y/view?usp=drive_link"
     },
     {
-        "id": "KSM-050",
+        "id": "KSM-036",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Lembaga Biologi Molekuler EIJKMAN, RISTEKDIKTI",
@@ -585,7 +601,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1YTXEWlo1nJIgEuz4BdqHs2ULp3-xyHFI/view?usp=drive_link"
     },
     {
-        "id": "KSM-051",
+        "id": "KSM-037",
         "tahun": "2018",
         "kategoriMitra": "Ormas",
         "mitra": "Perhimpunan Pelestarian Burung Liar Indonesia",
@@ -601,7 +617,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1bvTPSwTDEUSDbfrp6VyROUZmquBWR7co/view?usp=drive_link"
     },
     {
-        "id": "KSM-053",
+        "id": "KSM-038",
         "tahun": "2018",
         "kategoriMitra": "BUMN",
         "mitra": "PT. Garam",
@@ -617,7 +633,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1VbEzFPcKcVnZ7-uRJUKJOtWKm6cykdfw/view?usp=drive_link"
     },
     {
-        "id": "KSM-054",
+        "id": "KSM-039",
         "tahun": "2018",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Singaperbangsa Karawang",
@@ -633,7 +649,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1wDceVrjM9GCJbiTJKXv21UtTPk0mxiRE/view?usp=drive_link"
     },
     {
-        "id": "KSM-055",
+        "id": "KSM-040",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Pupuk Indonesia (Persero)",
@@ -649,7 +665,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1dUDcMQNhIzq3uBwYJhCF6VVBsqZbxWVj/view?usp=drive_link"
     },
     {
-        "id": "KSM-056",
+        "id": "KSM-041",
         "tahun": "2018",
         "kategoriMitra": "Swasta",
         "mitra": "LPK Wakashio Gakkou",
@@ -665,7 +681,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/15XYVQ4qol1wYVTyDN-KxTpctvCc4jks2/view?usp=drive_link"
     },
     {
-        "id": "KSM-057",
+        "id": "KSM-042",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "BMKG",
@@ -681,7 +697,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1kU6OF0WWtFPWDfzYFZBR1kiDoefV8sO_/view?usp=drive_link"
     },
     {
-        "id": "KSM-058",
+        "id": "KSM-043",
         "tahun": "2018",
         "kategoriMitra": "BUMN",
         "mitra": "Garuda Indonesia",
@@ -697,7 +713,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/13EHVEcW1dORnmI1SKBb1V0WB3qVrn9w0/view?usp=drive_link"
     },
     {
-        "id": "KSM-059",
+        "id": "KSM-044",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "KemKominfo",
@@ -713,7 +729,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sUzb6pTnDj5BbtbpDFGIjTInhvcWgFIV/view?usp=drive_link"
     },
     {
-        "id": "KSM-060",
+        "id": "KSM-045",
         "tahun": "2018",
         "kategoriMitra": "BUMN",
         "mitra": "PT. PERTAMINA GAS",
@@ -729,7 +745,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1kBAAJce7Mgs7Q2it6JzPkSl-OxD6SdEk/view?usp=drive_link"
     },
     {
-        "id": "KSM-061",
+        "id": "KSM-046",
         "tahun": "2018",
         "kategoriMitra": "Ormas",
         "mitra": "Asosiasi Perikanan Pole & Line dan Handline Indonesia (AP2HI)",
@@ -745,7 +761,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/18bxaxYLKGvac8LFVyL42Dle64qHnSTcc/view?usp=drive_link"
     },
     {
-        "id": "KSM-062",
+        "id": "KSM-047",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "TNI AL",
@@ -761,7 +777,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1e5NNeXMYwZs6QGGOyGd7WPYv8s3mTmlI/view?usp=drive_link"
     },
     {
-        "id": "KSM-063",
+        "id": "KSM-048",
         "tahun": "2018",
         "kategoriMitra": "Ormas",
         "mitra": "KemenTan",
@@ -777,7 +793,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1TBVnBVhuClmRgJ-kYElIKeoyto6oSE3S/view?usp=drive_link"
     },
     {
-        "id": "KSM-064",
+        "id": "KSM-049",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "BNN Kabupaten Karawang",
@@ -793,7 +809,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1qXXcO56QutWa03tF2Ydhda0s21YxAxS9/view?usp=drive_link"
     },
     {
-        "id": "KSM-065",
+        "id": "KSM-050",
         "tahun": "2018",
         "kategoriMitra": "K/L",
         "mitra": "Dit. Statistik Harga, BPS",
@@ -809,7 +825,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Dwg1ftHUutinLbWF9Y4NXhxEuZE_KGLD/view?usp=drive_link"
     },
     {
-        "id": "KSM-066",
+        "id": "KSM-051",
         "tahun": "2018",
         "kategoriMitra": "BUMN",
         "mitra": "Bank Mandiri",
@@ -825,7 +841,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Q57OCBW5yIMZXjVlOi2cLF2rCoL9Dx7Z/view?usp=drive_link"
     },
     {
-        "id": "KSM-067",
+        "id": "KSM-052",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Ditjen Kesehatan Masyarakat, Kemenkes",
@@ -841,7 +857,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1coqP9fUgxH2nNyrw9EFG13k7kWrUVOIj/view?usp=drive_link"
     },
     {
-        "id": "KSM-068",
+        "id": "KSM-053",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Kemenhub",
@@ -857,7 +873,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1LU1BdrodGlj03qHB9zX7uR9c-q_in0ZG/view?usp=drive_link"
     },
     {
-        "id": "KSM-069",
+        "id": "KSM-054",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BNN",
@@ -873,7 +889,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1LaXHYImTYUHOynssS1rNe6R4zHx_CP5K/view?usp=drive_link"
     },
     {
-        "id": "KSM-071",
+        "id": "KSM-055",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BAKAMLA",
@@ -889,7 +905,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1K-EX6R5ot3cPszGCCj0FiOijqyz0tgob/view?usp=drive_link"
     },
     {
-        "id": "KSM-072",
+        "id": "KSM-056",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Deputi Bid Pencegahan, Perlindungan, dan Deradikalisasi, BNPT",
@@ -905,7 +921,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1g8GiIk-gprUDMGqnckFjmaRpgUUCfcgD/view?usp=drive_link"
     },
     {
-        "id": "KSM-073",
+        "id": "KSM-057",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BNPT",
@@ -921,7 +937,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1wQMLI6sxC3LK65zbhrmng6XvbeVO36hG/view?usp=drive_link"
     },
     {
-        "id": "KSM-074",
+        "id": "KSM-058",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BNP2TKI",
@@ -937,7 +953,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sDpEWO8BMnmOWGK44LTknkVLhQDERdY_/view?usp=drive_link"
     },
     {
-        "id": "KSM-075",
+        "id": "KSM-059",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "LIPI",
@@ -953,7 +969,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1GbguVhlSkbGqibI7P6OYmQlL2Mmsbd9l/view?usp=drive_link"
     },
     {
-        "id": "KSM-076",
+        "id": "KSM-060",
         "tahun": "2019",
         "kategoriMitra": "BUMN",
         "mitra": "Biro Klasifikasi Indonesia (PERSERO)",
@@ -969,7 +985,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1HS2NbKxdbG8Ga0bQi-FKnLmvM_Bur9tZ/view?usp=drive_link"
     },
     {
-        "id": "KSM-077",
+        "id": "KSM-061",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Pusat Riset dan Pengembangan SDM, BSN",
@@ -985,7 +1001,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1v8AtoziXmmF1WRvqBYTbL0E2d9HP1sRi/view?usp=drive_link"
     },
     {
-        "id": "KSM-078",
+        "id": "KSM-062",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "POLRI",
@@ -1001,14 +1017,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1HhamCeNqsFlAyk_LX3V5_C1ehORG3Enq/view?usp=drive_link"
     },
     {
-        "id": "KSM-079",
+        "id": "KSM-063",
         "tahun": "2019",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenkomar",
-        "linkDokumen": ""
+        "mitra": "Kemenkomar Kemenhub KLHK KKP Kemenpar TNI BIG",
+        "jenisKerjasama": "Kesepakatan Bersama",
+        "pihak1": "Menkomar",
+        "noPihak1": "03/NKB/MARITIM//III/2019",
+        "pihak2": "Menhub Men LHK MKP Menpar Panglima TNI Ka. BIG",
+        "noPihak2": "03/MEN-KP/KB/III/2019",
+        "masaBerlaku": "5",
+        "tanggalMulai": "3/26/2019",
+        "tanggalSelesai": "3/26/2024",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1IzL9kIJFNTFZZ7mNbChD-lVxeWrdtBKd/view?usp=drive_link"
     },
     {
-        "id": "KSM-092",
+        "id": "KSM-064",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BNPB",
@@ -1024,7 +1049,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1nwzgpeJoqUcZM42G9thqpwjZy2MAK9_d/view?usp=drive_link"
     },
     {
-        "id": "KSM-093",
+        "id": "KSM-065",
         "tahun": "2019",
         "kategoriMitra": "BUMN",
         "mitra": "Angkasa Pura I",
@@ -1040,7 +1065,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/10JsXop2Ib3HDy1loZ3C_oeco6bBZZIa0/view?usp=drive_link"
     },
     {
-        "id": "KSM-094",
+        "id": "KSM-066",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "TNI",
@@ -1056,7 +1081,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1XV53pH93iaS7Qkf0T_FnVywTGJYVX-lX/view?usp=drive_link"
     },
     {
-        "id": "KSM-095",
+        "id": "KSM-067",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BPJS Ketenagakerjaan",
@@ -1072,7 +1097,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1G95ki7azFu3kYeYVFU4r9sgDOvhuSPth/view?usp=drive_link"
     },
     {
-        "id": "KSM-096",
+        "id": "KSM-068",
         "tahun": "2019",
         "kategoriMitra": "Ormas",
         "mitra": "WWF Indonesia",
@@ -1088,7 +1113,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1HwIXsHhBrRTJ_JkSbYknq41YHpMh03GC/view?usp=drive_link"
     },
     {
-        "id": "KSM-097",
+        "id": "KSM-069",
         "tahun": "2019",
         "kategoriMitra": "BUMN",
         "mitra": "PT. Pertamina (Persero) Marketing Operation Region VIII",
@@ -1104,7 +1129,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1iJuh-EovQyCVVQEAl3CEfLEo64wANsVU/view?usp=drive_link"
     },
     {
-        "id": "KSM-098",
+        "id": "KSM-070",
         "tahun": "2019",
         "kategoriMitra": "Ormas Asing",
         "mitra": "SFPF",
@@ -1120,7 +1145,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1yiOsHATqph9TH5UMRMe-GhebxOMTREi3/view?usp=drive_link"
     },
     {
-        "id": "KSM-099",
+        "id": "KSM-071",
         "tahun": "2019",
         "kategoriMitra": "Ormas Asing",
         "mitra": "MSC",
@@ -1136,14 +1161,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1j-EENT-gVEBf6IKh1d934HNegSoouwe5/view?usp=drive_link"
     },
     {
-        "id": "KSM-100",
+        "id": "KSM-072",
         "tahun": "2019",
         "kategoriMitra": "K/L",
-        "mitra": "Ditjen Bea Cukai",
-        "linkDokumen": ""
+        "mitra": "Ditjen Bea Cukai Badan Karantina Pertanian",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Dir. Teknis Kepabeanan",
+        "noPihak1": "KEP-197/BC/2019",
+        "pihak2": "Sekretaris BKIPMKHP",
+        "noPihak2": "3408/BKIPM.1/KS.300/VII/2019",
+        "masaBerlaku": "3",
+        "tanggalMulai": "7/3/2019",
+        "tanggalSelesai": "7/3/2022",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1tCoh5p5pnlpI_unakwy4efjzR_YkruAu/view?usp=drive_link"
     },
     {
-        "id": "KSM-103",
+        "id": "KSM-073",
         "tahun": "2019",
         "kategoriMitra": "Ormas Asing",
         "mitra": "EDF",
@@ -1159,7 +1193,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1WVmvwvcw9frC6quS3fxQ0UP60HkwbSEa/view?usp=drive_link"
     },
     {
-        "id": "KSM-104",
+        "id": "KSM-074",
         "tahun": "2019",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Diponegoro",
@@ -1175,7 +1209,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ggv7ayCz48n58E5rg1ER23uaQ1RRt-st/view?usp=drive_link"
     },
     {
-        "id": "KSM-105",
+        "id": "KSM-075",
         "tahun": "2019",
         "kategoriMitra": "Swasta",
         "mitra": "PT. ASTRA Daihatsu Motor",
@@ -1191,7 +1225,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1KaYmS3TSqlQW8bxEHsruYvavY3_HBmup/view?usp=drive_link"
     },
     {
-        "id": "KSM-106",
+        "id": "KSM-076",
         "tahun": "2019",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Penyu Indonesia",
@@ -1207,7 +1241,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1GECp280aJJdkSjQe6lJqWPi0sWn0Upn7/view?usp=drive_link"
     },
     {
-        "id": "KSM-107",
+        "id": "KSM-077",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Balai Besar Kalibrasi Fasilitas Penerbangan, DitJen HubUd, Kemenhub",
@@ -1223,7 +1257,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1k0oiY53QMRzH0xzmUaoMW4oddpsA_Qnh/view?usp=drive_link"
     },
     {
-        "id": "KSM-108",
+        "id": "KSM-078",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Ditjen HubLa, Kemenhub",
@@ -1239,7 +1273,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Au2lYA_1GNJiN-yr4cxWfg3YMVybnnqz/view?usp=drive_link"
     },
     {
-        "id": "KSM-109",
+        "id": "KSM-079",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BPPT",
@@ -1255,7 +1289,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/133iNajsjj71vsGNVP_AyqQpgacvZzoWF/view?usp=drive_link"
     },
     {
-        "id": "KSM-110",
+        "id": "KSM-080",
         "tahun": "2019",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas KP Jabar",
@@ -1271,7 +1305,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1_8xqFXTeHoDCJ8uI-rSklLtYhnKO_Jsq/view?usp=drive_link"
     },
     {
-        "id": "KSM-111",
+        "id": "KSM-081",
         "tahun": "2019",
         "kategoriMitra": "Swasta",
         "mitra": "Yayasan Pendidikan Pembinaan Manajemen",
@@ -1287,7 +1321,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/122-oRSs0VTtXGvq6NllJbHWhrbwLQzpp/view?usp=drive_link"
     },
     {
-        "id": "KSM-112",
+        "id": "KSM-082",
         "tahun": "2019",
         "kategoriMitra": "BUMN",
         "mitra": "BRI",
@@ -1303,7 +1337,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1wP2Fw2yRAZpNZi-XaSfK9NkSwrAQTgyF/view?usp=drive_link"
     },
     {
-        "id": "KSM-113",
+        "id": "KSM-083",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "POLRI",
@@ -1319,7 +1353,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1m1i2QPQVF3sCLh4Bf5CqfPnmxepdaYfX/view?usp=drive_link"
     },
     {
-        "id": "KSM-114",
+        "id": "KSM-084",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "Pusdik Intelkam Lemdiklat POLRI",
@@ -1335,7 +1369,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Brgyuapz9DbUIg51othDucFjROgViuAv/view?usp=drive_link"
     },
     {
-        "id": "KSM-115",
+        "id": "KSM-085",
         "tahun": "2019",
         "kategoriMitra": "K/L",
         "mitra": "BNPT",
@@ -1351,7 +1385,7 @@ const MockData = {
         "linkDokumen": ""
     },
     {
-        "id": "KSM-116",
+        "id": "KSM-086",
         "tahun": "2019",
         "kategoriMitra": "Ormas",
         "mitra": "HKBP",
@@ -1367,7 +1401,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1bwc9nRCX80-_Y83PyJsM_MJ40vGma0Ej/view?usp=drive_link"
     },
     {
-        "id": "KSM-117",
+        "id": "KSM-087",
         "tahun": "2019",
         "kategoriMitra": "BUMN",
         "mitra": "BRI",
@@ -1383,7 +1417,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Th52zIDxFWpdeZG5oNSgDsETa4Z3LPxZ/view?usp=drive_link"
     },
     {
-        "id": "KSM-118",
+        "id": "KSM-088",
         "tahun": "2020",
         "kategoriMitra": "K/L",
         "mitra": "KPK",
@@ -1399,7 +1433,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1oWYNZ0XKVaMabDZ1PUbpdKUGoaHxLLRS/view?usp=share_link"
     },
     {
-        "id": "KSM-119",
+        "id": "KSM-089",
         "tahun": "2020",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Pusat Segitiga Karang (CTC)",
@@ -1415,7 +1449,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1T4f0PfPMyC59InouQ0557sHedFvEzSlI/view?usp=share_link"
     },
     {
-        "id": "KSM-121",
+        "id": "KSM-090",
         "tahun": "2020",
         "kategoriMitra": "K/L",
         "mitra": "Bappenas",
@@ -1431,7 +1465,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1y3BVHNZxkIPN3fqC7v83rcXFR1x6le4T/view?usp=share_link"
     },
     {
-        "id": "KSM-122",
+        "id": "KSM-091",
         "tahun": "2020",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Keuangan",
@@ -1447,7 +1481,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/16gzUexZxyjEcnMQtdW7qh-G7enq_AfyK/view?usp=share_link"
     },
     {
-        "id": "KSM-123",
+        "id": "KSM-092",
         "tahun": "2020",
         "kategoriMitra": "Universitas",
         "mitra": "Fakultas Kelautan dan Perikanan UNSYIAH",
@@ -1463,7 +1497,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1MqwQxqIhfy7OtpP6mKZfa33Uya6t1bwR/view?usp=drive_link"
     },
     {
-        "id": "KSM-124",
+        "id": "KSM-093",
         "tahun": "2020",
         "kategoriMitra": "BUMN",
         "mitra": "BNI",
@@ -1479,7 +1513,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Gl6nbsrm4wy61j1xKloHun2XSF97UyfA/view?usp=share_link"
     },
     {
-        "id": "KSM-125",
+        "id": "KSM-094",
         "tahun": "2020",
         "kategoriMitra": "Swasta",
         "mitra": "PT Grab Teknologi Indonesia",
@@ -1495,14 +1529,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1zczjeRxH7m288CnspwRp3s4dIsxp_j6n/view?usp=share_link"
     },
     {
-        "id": "KSM-126",
+        "id": "KSM-095",
         "tahun": "2020",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenkomarves",
-        "linkDokumen": ""
+        "mitra": "Kemenkomarves Kemenhub KLHK KKP Kemenparekraf TNI BIG",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Sekjen KKP",
+        "noPihak1": "01/SJ-KKP/PKS/II/2020",
+        "pihak2": "Deputi Kedaulatan Maritim Dirjen Hubla Sekjen KLHK Sekjen KKP Sekjen Kemenparekraf Kepala Deshidros Sestama BIG",
+        "noPihak2": "",
+        "masaBerlaku": "5",
+        "tanggalMulai": "2/12/2020",
+        "tanggalSelesai": "2/12/2025",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1Toj0gJx3-C2fqeoimjUDyX8KsN-EA4UH/view?usp=share_link"
     },
     {
-        "id": "KSM-139",
+        "id": "KSM-096",
         "tahun": "2020",
         "kategoriMitra": "BUMN",
         "mitra": "BNI",
@@ -1518,7 +1561,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1-CKs57dL5FSK1hlj07Yex-LwM--6H4k-/view?usp=share_link"
     },
     {
-        "id": "KSM-140",
+        "id": "KSM-097",
         "tahun": "2020",
         "kategoriMitra": "K/L",
         "mitra": "Kemendes",
@@ -1534,14 +1577,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1aDlcZly8mn2w4hoAw6zN6FKlw7nzkbJN/view?usp=share_link"
     },
     {
-        "id": "KSM-141",
+        "id": "KSM-098",
         "tahun": "2020",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenkomarves",
-        "linkDokumen": ""
+        "mitra": "Kemenkomarves Kemenhub KLHK KKP Kemenparekraf TNI BIG",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Sekjen KKP",
+        "noPihak1": "02/SJ-KKP/PKS/II/2020",
+        "pihak2": "Deputi Kedaulatan Maritim Dirjen Hubla Sekjen KLHK Sekjen KKP Sekjen Kemenparekraf Kepala Deshidros Sestama BIG",
+        "noPihak2": "",
+        "masaBerlaku": "4",
+        "tanggalMulai": "2/12/2020",
+        "tanggalSelesai": "2/12/2024",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1733315g6K9dXhFxXhbvavVJQz0nVbhcb/view?usp=share_link"
     },
     {
-        "id": "KSM-154",
+        "id": "KSM-099",
         "tahun": "2020",
         "kategoriMitra": "BUMN",
         "mitra": "PT Pelni",
@@ -1557,7 +1609,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1xlPc8evlboW1OjJ8EXuA1je98Z5Cam_g/view?usp=share_link"
     },
     {
-        "id": "KSM-155",
+        "id": "KSM-100",
         "tahun": "2020",
         "kategoriMitra": "K/L",
         "mitra": "Divisi Hubungan Internasional POLRI",
@@ -1573,7 +1625,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1urKeunVapMoF3uW3ONnGylIHc-52RZ34/view?usp=drive_link"
     },
     {
-        "id": "KSM-156",
+        "id": "KSM-101",
         "tahun": "2020",
         "kategoriMitra": "Universitas",
         "mitra": "Fakultas Biologi Unsoed",
@@ -1589,7 +1641,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1DEuAdnNORt8SFRIi4cSDrVAnsv7mlpg2/view?usp=drive_link"
     },
     {
-        "id": "KSM-157",
+        "id": "KSM-102",
         "tahun": "2020",
         "kategoriMitra": "Swasta",
         "mitra": "PT Aruna Jaya Nuswantara",
@@ -1605,7 +1657,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1xLBSkscQz14Tlx9QtolWGjmsrUiYpHpW/view?usp=share_link"
     },
     {
-        "id": "KSM-158",
+        "id": "KSM-103",
         "tahun": "2020",
         "kategoriMitra": "Swasta",
         "mitra": "PT Tani Grup Indonesia",
@@ -1621,14 +1673,39 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1XZczQFfr0XDZSXaMm9OvDgUUXLQzX3cZ/view?usp=share_link"
     },
     {
-        "id": "KSM-159",
+        "id": "KSM-104",
         "tahun": "2020",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenko Polhukam",
+        "mitra": "Kemenko Polhukam Kemenkum HAM Kemenkeu Kemenhub KLHK KKP TNI POLRI Bakamla PT Pertamina ANSI HNSI Kel. Nelayan Mandiri",
+        "jenisKerjasama": "Kesepakatan Bersama",
+        "pihak1": "Dirjen PT",
+        "noPihak1": "02/MEN-KP/KB/II/2020",
+        "pihak2": "Deputi Pertahanan Dirjen Imigrasi Dirjen Bea dan Cukai Dirjen Hubla Dirjen Pencemaran Dirjen PT Asop Kapolairud Deputi Operasi dan Latihan Dirut Pertamina Ketua ASNI Ketua HNSI Ketua Nelayan Mandiri",
+        "noPihak2": "",
+        "masaBerlaku": "1",
+        "tanggalMulai": "2/21/2020",
+        "tanggalSelesai": "2/21/2021",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1J_pP4qsXN-WJFXJOm5RJqlGm5o-4Dbis/view?usp=share_link"
+    },
+    {
+        "id": "KSM-105",
+        "tahun": "2020",
+        "kategoriMitra": "K/L",
+        "mitra": "",
+        "jenisKerjasama": "",
+        "pihak1": "",
+        "noPihak1": "",
+        "pihak2": "",
+        "noPihak2": "",
+        "masaBerlaku": "",
+        "tanggalMulai": "",
+        "tanggalSelesai": "",
+        "status": "",
         "linkDokumen": ""
     },
     {
-        "id": "KSM-186",
+        "id": "KSM-106",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "BPS",
@@ -1644,7 +1721,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1TnHQyyv48mjkOuFRomAMxt2xj6Sy5DaG/view?usp=share_link"
     },
     {
-        "id": "KSM-187",
+        "id": "KSM-107",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "BMKG",
@@ -1660,14 +1737,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1NG8boaNpE3elruq3SIZzTtjcoNtRvpc2/view?usp=share_link"
     },
     {
-        "id": "KSM-188",
+        "id": "KSM-108",
         "tahun": "2021",
         "kategoriMitra": "K/L",
-        "mitra": "Deputi Bidang Perkoperasian",
-        "linkDokumen": ""
+        "mitra": "Deputi Bidang Perkoperasian  Deputi Bidang Usaha Mikro  Deputi Bidang Usaha Kecil dan menengah Deputi Bidang Kewirausahaan Kementerian Koperasi dan UMKM",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Dirjen PDS PKP",
+        "noPihak1": "02/PDSPKP/KKP/PKS/X/2021",
+        "pihak2": "Deputi Bidang Perkoperasian  Deputi Bidang Usaha Mikro  Deputi Bidang Usaha Kecil dan menengah Deputi Bidang Kewirausahaan Kementerian Koperasi dan UMKM",
+        "noPihak2": "08/PKS/DEP.1/X/2021 250/PKS/DEP.2/X/2021 55/PKS/DEP.3/X/2021 36/PKS/DEP.4/X/2021",
+        "masaBerlaku": "5",
+        "tanggalMulai": "10/21/2021",
+        "tanggalSelesai": "10/21/2026",
+        "status": "Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1Ch4sAsBbWKavFtJOXVClD42kG90fnRxN/view?usp=share_link"
     },
     {
-        "id": "KSM-200",
+        "id": "KSM-109",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Kemen Koperasi UKM",
@@ -1683,7 +1769,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1bqZ02hK9_r2nOUvFw4nnDiQmD-IHk9-Z/view?usp=share_link"
     },
     {
-        "id": "KSM-201",
+        "id": "KSM-110",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Ditjen Protokoler dan Konsuler Kemenlu",
@@ -1699,7 +1785,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1FnfqeaZOZy9TMycodhe6fr1I5POKmyDr/view?usp=drive_link"
     },
     {
-        "id": "KSM-202",
+        "id": "KSM-111",
         "tahun": "2021",
         "kategoriMitra": "Universitas",
         "mitra": "IPB",
@@ -1715,7 +1801,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1M-EZHhZR3uX8lq6MEUwOUqSZug291fTq/view?usp=share_link"
     },
     {
-        "id": "KSM-203",
+        "id": "KSM-112",
         "tahun": "2021",
         "kategoriMitra": "Universitas",
         "mitra": "UGM",
@@ -1731,7 +1817,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1X_plA_mqifg5BJbUcxVMA37Omo0rireJ/view?usp=share_link"
     },
     {
-        "id": "KSM-204",
+        "id": "KSM-113",
         "tahun": "2021",
         "kategoriMitra": "Pemda",
         "mitra": "DKI",
@@ -1747,7 +1833,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1DenRtkDFhIivLi1h4cqjO5v_NECe0MOe/view?usp=share_link"
     },
     {
-        "id": "KSM-205",
+        "id": "KSM-114",
         "tahun": "2021",
         "kategoriMitra": "Pemda",
         "mitra": "Provinsi Jawa Barat",
@@ -1763,7 +1849,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1jm95_5j3nXBJRgR2DIxLEMldomV3bNmN/view?usp=drive_link"
     },
     {
-        "id": "KSM-206",
+        "id": "KSM-115",
         "tahun": "2021",
         "kategoriMitra": "Ormas",
         "mitra": "YKAN",
@@ -1779,7 +1865,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1CBLuK75sRvWwbNDwLs37YVe3wNH_ffEk/view?usp=share_link"
     },
     {
-        "id": "KSM-207",
+        "id": "KSM-116",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "KPPPA",
@@ -1795,30 +1881,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1jN7GxsNT6Txg6yoakjQSEYvb-LbcasZE/view?usp=share_link"
     },
     {
-        "id": "KSM-208",
+        "id": "KSM-117",
         "tahun": "2021",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenkomarves",
-        "linkDokumen": ""
+        "mitra": "Kemenkomarves KLHK KKP PT PELINDO I,II,III,IV GAPKI APHI APROBI",
+        "jenisKerjasama": "Kesepakatan Bersama",
+        "pihak1": "Sekjen KKP",
+        "noPihak1": "03/SJ-KKP/KB/VIII/2021",
+        "pihak2": "Deputi Pengelolaan Lingkungan Sekjen KLHK Sekjen KKP Dirut PT PELINDO I,II,III,IV GAPKI APHI APROBI",
+        "noPihak2": "8/NKB/MARVES/2021 PKS.2/SETJEN/ROCAN/SET.1/8/2021 03/SJ-KKP/KB/VIII/2021 UM.57/37/20/PI-21.TU 018/SPK/GAPKI/VIII/2021 MOU APHI 365/DP-APHI/Vlll/2021 050/VIII-APROBI/2021",
+        "masaBerlaku": "4",
+        "tanggalMulai": "8/10/2021",
+        "tanggalSelesai": "8/10/2025",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1P6_GJp4sSqydosLtceBqTJWPnoKK1DDg/view?usp=share_link"
     },
     {
-        "id": "KSM-211",
-        "tahun": "PT PELINDO I",
-        "kategoriMitra": "II",
-        "mitra": "III",
-        "jenisKerjasama": "IV",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-217",
-        "tahun": "Dirut PT PELINDO I",
-        "kategoriMitra": "II",
-        "mitra": "III",
-        "jenisKerjasama": "IV",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-227",
+        "id": "KSM-118",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pertanian",
@@ -1834,7 +1913,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1voWuYnKwzOtsWlaJOF3f5KCYgporerCH/view?usp=share_link"
     },
     {
-        "id": "KSM-228",
+        "id": "KSM-119",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "BPJS Ketenagakerjaan",
@@ -1850,7 +1929,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/14tfZ5M78iXGQL4xweEYpEThU3H6WRn4V/view?usp=share_link"
     },
     {
-        "id": "KSM-229",
+        "id": "KSM-120",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "BPJS Ketenagakerjaan",
@@ -1866,7 +1945,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1GhDoIuuzItwsVIV877w6Mn61Kk_XBYY3/view?usp=share_link"
     },
     {
-        "id": "KSM-231",
+        "id": "KSM-121",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Dirjen PKTN Kemdag",
@@ -1882,7 +1961,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1467Ff0DYmjMkySUQZPfjWdwXQZLcSV6o/view?usp=share_link"
     },
     {
-        "id": "KSM-232",
+        "id": "KSM-122",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Ditjen Perlindungan Konsumen dan Tertib Niaga Kemendag",
@@ -1898,7 +1977,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1AsTlJZEgQRujh6m3Dhmycb415f79qFUJ/view?usp=drive_link"
     },
     {
-        "id": "KSM-233",
+        "id": "KSM-123",
         "tahun": "2021",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan WWF Indonesia",
@@ -1914,7 +1993,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1iV9qseZj-s0MWss2Ku9NehzRhyf-Qk3b/view?usp=share_link"
     },
     {
-        "id": "KSM-234",
+        "id": "KSM-124",
         "tahun": "2021",
         "kategoriMitra": "Ormas Asing",
         "mitra": "RARE",
@@ -1930,14 +2009,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1hz8yzCzb7SeXBhexWfm1CjxRiJ2MnACE/view?usp=share_link"
     },
     {
-        "id": "KSM-235",
+        "id": "KSM-125",
         "tahun": "2021",
         "kategoriMitra": "K/L",
-        "mitra": "Deputi Pemberantasan BNN                                                                                                                                                                                                                                                                                                                                                    D",
-        "linkDokumen": ""
+        "mitra": "Deputi Pemberantasan BNN                                                                                                                                                                                                                                                                                                                                                    \"D  Ditjen Bea Cukai, Kemenkeu  Ditjen Perhubungan Laut, Kemenhub POLRI",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Deputi Pemberantasan, BNN",
+        "noPihak1": "PKS/51/IX//2021/BNN",
+        "pihak2": "Dirjen PSDKP",
+        "noPihak2": "08/PKS_DJPSDKP/IX/2021",
+        "masaBerlaku": "3",
+        "tanggalMulai": "9/14/2021",
+        "tanggalSelesai": "9/14/2024",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1vAUKT2H5LBQWYrMkr2L6Gm1ST0rP0Vfm/view?usp=drive_link"
     },
     {
-        "id": "KSM-239",
+        "id": "KSM-126",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Perpusnas",
@@ -1953,7 +2041,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1eMIZ6e716tTT_pzmeu3LXk3wXije1JE2/view?usp=share_link"
     },
     {
-        "id": "KSM-240",
+        "id": "KSM-127",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Kejaksaan RI",
@@ -1969,7 +2057,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1U4XAldEfNR_ucjSSMIrJ0hamoh4zaF-d/view?usp=share_link"
     },
     {
-        "id": "KSM-241",
+        "id": "KSM-128",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Kejaksaan RI",
@@ -1985,7 +2073,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1q1-S9MN-3F9u_oOL4FAWRLx4RFBJ2Z-_/view?usp=share_link"
     },
     {
-        "id": "KSM-242",
+        "id": "KSM-129",
         "tahun": "2021",
         "kategoriMitra": "BUMN",
         "mitra": "PLN",
@@ -2001,7 +2089,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1toTwSEQLYHdnQoRFqlJc_h2PIx2Ev173/view?usp=share_link"
     },
     {
-        "id": "KSM-243",
+        "id": "KSM-130",
         "tahun": "2021",
         "kategoriMitra": "Universitas",
         "mitra": "LPPM Unsoed",
@@ -2017,7 +2105,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1jkL6sr4HuPnQH4uwmXlXB2VJPMOhzdhR/view?usp=drive_link"
     },
     {
-        "id": "KSM-244",
+        "id": "KSM-131",
         "tahun": "2021",
         "kategoriMitra": "BUMN",
         "mitra": "PT POS Indonesia",
@@ -2033,14 +2121,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/19CE3R7ihv9oiiGGRWbqOF2i7fk9wS1KW/view?usp=share_link"
     },
     {
-        "id": "KSM-245",
+        "id": "KSM-132",
         "tahun": "2021",
         "kategoriMitra": "K/L",
-        "mitra": "Kemhan",
-        "linkDokumen": ""
+        "mitra": "Kemhan Kemenkopolhukam Kemendagri Kemen PAN RB Kemendikbud  Kemenag Kemenpora Kemenhub Kominfo KKP Polri Lembaga Ketahanan Indones BNPT BNN",
+        "jenisKerjasama": "Kesepakatan Bersama",
+        "pihak1": "MKP",
+        "noPihak1": "03/MEN-KP/KB/V/2021",
+        "pihak2": "Menhan Menkopolhukam Mendagri Men PAN RB Mendikbud  Menag Menpora Menhub Menkominfo MKP Kapolri Lembaga Ketahanan Indonesia Kepala BNPT Kepala BNN",
+        "noPihak2": "",
+        "masaBerlaku": "5",
+        "tanggalMulai": "5/7/2021",
+        "tanggalSelesai": "5/7/2021",
+        "status": "Tidak Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/142uQ-5sIdz0EHSFgySAnSEiyhw9wXD2L/view?usp=share_link"
     },
     {
-        "id": "KSM-272",
+        "id": "KSM-133",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "BPJS Ketenagakerjaan",
@@ -2056,7 +2153,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1UsqEMlxCIdNVMmh2xgJSc1DEhBh4dIAk/view?usp=share_link"
     },
     {
-        "id": "KSM-273",
+        "id": "KSM-134",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "Kemenhub",
@@ -2072,7 +2169,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1HfOods9-9Yn8hwN9uVJD3gL-2YXwAN1Z/view?usp=share_link"
     },
     {
-        "id": "KSM-274",
+        "id": "KSM-135",
         "tahun": "2021",
         "kategoriMitra": "K/L",
         "mitra": "KLHK",
@@ -2088,7 +2185,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1mbkAXKj5gKofYz0AJhD3TRj1VQKh7urt/view?usp=share_link"
     },
     {
-        "id": "KSM-276",
+        "id": "KSM-136",
         "tahun": "2022",
         "kategoriMitra": "BUMN",
         "mitra": "PT Pos Indonesia",
@@ -2104,7 +2201,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1n5Q9-oE9vINSvIcFzO5sN72myfD1_HOG/view?usp=share_link"
     },
     {
-        "id": "KSM-277",
+        "id": "KSM-137",
         "tahun": "2022",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Hang Tuah",
@@ -2120,7 +2217,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1-1XfebTQ6e55pp-P9QUu998OqVOdL9VC/view?usp=share_link"
     },
     {
-        "id": "KSM-278",
+        "id": "KSM-138",
         "tahun": "2022",
         "kategoriMitra": "BUMN",
         "mitra": "PT Kereta Api Logistik",
@@ -2136,7 +2233,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1NsRb5xNREZE35SQ4Yp6SZUgWDpBQpWCP/view?usp=share_link"
     },
     {
-        "id": "KSM-279",
+        "id": "KSM-139",
         "tahun": "2022",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Strategi Konservasi Indonesia",
@@ -2152,7 +2249,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1zmw_OqrHty6Ma6VqLfAsXEkuGVWzrQyV/view?usp=share_link"
     },
     {
-        "id": "KSM-280",
+        "id": "KSM-140",
         "tahun": "2022",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Ketenagakerjaan",
@@ -2168,7 +2265,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1W6J0RI_ThFrPuD7F4hvvyrYOQkz-Q9wF/view?usp=share_link"
     },
     {
-        "id": "KSM-281",
+        "id": "KSM-141",
         "tahun": "2022",
         "kategoriMitra": "K/L",
         "mitra": "Kemendikbudristek",
@@ -2184,7 +2281,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1W6J0RI_ThFrPuD7F4hvvyrYOQkz-Q9wF/view?usp=share_link"
     },
     {
-        "id": "KSM-282",
+        "id": "KSM-142",
         "tahun": "2022",
         "kategoriMitra": "Ormas",
         "mitra": "Kamar Dagang dan Industri Indonesia (KADIN)",
@@ -2200,7 +2297,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1CN_28o13ODek0z-0Tx3idt3SKcBfgwvl/view?usp=share_link"
     },
     {
-        "id": "KSM-283",
+        "id": "KSM-143",
         "tahun": "2022",
         "kategoriMitra": "Ormas",
         "mitra": "Ikatan Wanita Pengusaha Indonesia (IWAPI)",
@@ -2216,7 +2313,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1nBeAxCfT71IKS8oL1N9IBaTnATCUQAqF/view?usp=share_link"
     },
     {
-        "id": "KSM-284",
+        "id": "KSM-144",
         "tahun": "2022",
         "kategoriMitra": "K/L",
         "mitra": "BASARNAS",
@@ -2232,7 +2329,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sC_ELlGgjyUswc-xf4DkJ-dZ-aj5Rc2P/view?usp=share_link"
     },
     {
-        "id": "KSM-285",
+        "id": "KSM-145",
         "tahun": "2022",
         "kategoriMitra": "K/L",
         "mitra": "Deputi Bidang Perkoperasian",
@@ -2248,7 +2345,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1CY3Io9Lt8x7HE4GieAOcsb83_xXkzFui/view?usp=share_link"
     },
     {
-        "id": "KSM-286",
+        "id": "KSM-146",
         "tahun": "2022",
         "kategoriMitra": "Ormas",
         "mitra": "Pengurus Besar Nahdlatul Ulama",
@@ -2264,7 +2361,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Sqo_OaF2Q5_oPbY5X4IXZ1SZvaSDurlx/view?usp=share_link"
     },
     {
-        "id": "KSM-287",
+        "id": "KSM-147",
         "tahun": "2022",
         "kategoriMitra": "BUMN",
         "mitra": "PT Bank Negara Indonesia (Persero) TBK",
@@ -2280,7 +2377,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1hbx2Eml7zZkyXmYABLa1IqctimJ0ITLC/view?usp=share_link"
     },
     {
-        "id": "KSM-288",
+        "id": "KSM-148",
         "tahun": "2022",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Masyarakat dan Perikanan Indonesia (MDPI)",
@@ -2296,7 +2393,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1wXet7dWV_Qwf1DQ-g6Yb3wshS98Y5KF4/view?usp=share_link"
     },
     {
-        "id": "KSM-289",
+        "id": "KSM-149",
         "tahun": "2022",
         "kategoriMitra": "Universitas",
         "mitra": "Fakultas Pertanian UGM",
@@ -2312,7 +2409,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1kyot_I3unGK7wUoCe380QF0y27l3a3nP/view?usp=share_link"
     },
     {
-        "id": "KSM-290",
+        "id": "KSM-150",
         "tahun": "2022",
         "kategoriMitra": "K/L",
         "mitra": "Kemenkominfo",
@@ -2328,7 +2425,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/151Uu4i3wn_QyJiqr68gG8Asr-EVYf_AZ/view?usp=share_link"
     },
     {
-        "id": "KSM-291",
+        "id": "KSM-151",
         "tahun": "2022",
         "kategoriMitra": "Ormas Asing",
         "mitra": "Marine Steward Council",
@@ -2344,7 +2441,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1XOGsM4XdemffQT_Ak_uOC9Xld4jAxLUn/view?usp=share_link"
     },
     {
-        "id": "KSM-292",
+        "id": "KSM-152",
         "tahun": "2022",
         "kategoriMitra": "Universitas",
         "mitra": "Fakultas Hukum Universitas Diponegoro",
@@ -2360,7 +2457,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1HHPKDy2jfVJUK7Q9RwRXoswA0MXvdoVf/view?usp=share_link"
     },
     {
-        "id": "KSM-294",
+        "id": "KSM-153",
         "tahun": "2022",
         "kategoriMitra": "Pemda",
         "mitra": "Pemprov KalBar",
@@ -2376,7 +2473,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1qqAgquiuFjpcjewmXY-NcWwUCWMTtevF/view?usp=drive_link"
     },
     {
-        "id": "KSM-295",
+        "id": "KSM-154",
         "tahun": "2022",
         "kategoriMitra": "Universitas",
         "mitra": "LPPM Universitas Bengkulu",
@@ -2392,7 +2489,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Sgii8PsBdTNsPxFV7CHfwspLGuzPkTQZ/view?usp=share_link"
     },
     {
-        "id": "KSM-296",
+        "id": "KSM-155",
         "tahun": "2022",
         "kategoriMitra": "BUMN",
         "mitra": "PT Bank Negara Indonesia (Persero) TBK",
@@ -2408,7 +2505,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1RKpEINqbiGHGJBZMrYBxiwuGNOnMcl94/view?usp=share_link"
     },
     {
-        "id": "KSM-297",
+        "id": "KSM-156",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Pesisir Lestari",
@@ -2424,7 +2521,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1CRLF67IYm7WphabUlbIgzxdBgmQcjXQg/view?usp=drive_link"
     },
     {
-        "id": "KSM-298",
+        "id": "KSM-157",
         "tahun": "2023",
         "kategoriMitra": "K/L",
         "mitra": "BPOM",
@@ -2440,7 +2537,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/163Jb5FQS9xvRtlhjFsrwkEY2-hPonfoC/view?usp=drive_link"
     },
     {
-        "id": "KSM-299",
+        "id": "KSM-158",
         "tahun": "2023",
         "kategoriMitra": "K/L",
         "mitra": "Badan Inteljen Nasional",
@@ -2456,14 +2553,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1zTDqHphJ82GGfjmrUba4Hp_HBbkgHzT_/view?usp=share_link"
     },
     {
-        "id": "KSM-300",
+        "id": "KSM-159",
         "tahun": "2023",
         "kategoriMitra": "K/L",
-        "mitra": "Kemenko Marves",
-        "linkDokumen": ""
+        "mitra": "Kemenko Marves Kemen ESDM KKP Kemenhub Kemen PPN/BAPPENAS TNI BMG BIG BRIN",
+        "jenisKerjasama": "Nota Kesepahaman",
+        "pihak1": "MKP",
+        "noPihak1": "04/MEN-KP/KB/IV/2023",
+        "pihak2": "Menko Marves Men ESDM Men KKP Menhub Men Bappenas Panglima TNI Kepala BMKG Kepala BIG Kepala BRIN",
+        "noPihak2": "2/NKB/MARVES/2023 1.Pj/KS.01/MEM.S/2023 04/MEN-KP/KB/III/2023 PJ 129 Tahun 2023 NK 01/M.PPN/03/2023 NK/2/11/2023/TNI MoU/002/KB/DN/11/2023 1/KA-BIG/HK.01.03/3/2023 26/1/KS/03/2023",
+        "masaBerlaku": "5",
+        "tanggalMulai": "3/13/2023",
+        "tanggalSelesai": "3/13/2028",
+        "status": "Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1syW5m5TklTkbi6-7fM2siqpewS_TjB6D/view?usp=share_link"
     },
     {
-        "id": "KSM-325",
+        "id": "KSM-160",
         "tahun": "2023",
         "kategoriMitra": "BUMN",
         "mitra": "PT Bank Rakyat Indonesia",
@@ -2479,7 +2585,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/12qsTzZK2todQb6vHcx55U-XlMauSW0Zx/view?usp=share_link"
     },
     {
-        "id": "KSM-326",
+        "id": "KSM-161",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "IKA UNDIP",
@@ -2495,7 +2601,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1dpyB4_FFmF23RARKrz4sY58LLNNJpwnH/view?usp=share_linkDokumen"
     },
     {
-        "id": "KSM-327",
+        "id": "KSM-162",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Ketahanan Pangan, Kelautan dan Pertanian, PemProv DKI",
@@ -2511,7 +2617,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1r_3iV9VxoTulPyme-nNnOQojeZ1wpRol/view?usp=drive_link"
     },
     {
-        "id": "KSM-328",
+        "id": "KSM-163",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Wakatobi",
@@ -2527,7 +2633,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1zWQX7FeDHre4PJGW3kPALIW9kZvoo0PX/view?usp=drive_link"
     },
     {
-        "id": "KSM-329",
+        "id": "KSM-164",
         "tahun": "2023",
         "kategoriMitra": "K/L",
         "mitra": "Deputi Bidang Perkoperasian KemenkopUKM",
@@ -2543,7 +2649,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ChJPMaPykM7UWxyZXo226LTAZnJgSO9E/view?usp=drive_link"
     },
     {
-        "id": "KSM-330",
+        "id": "KSM-165",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemda Wakatobi",
@@ -2559,7 +2665,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sCoyLS85G3gk7qiOUMBlpBnUkH4ZrEos/view?usp=drive_link"
     },
     {
-        "id": "KSM-331",
+        "id": "KSM-166",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Bangka",
@@ -2575,7 +2681,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1OtrdlYu5vW_roCvzIgOU6dV5bMO6iI16/view?usp=drive_link"
     },
     {
-        "id": "KSM-332",
+        "id": "KSM-167",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Bangka Selatan",
@@ -2591,7 +2697,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1OuGfwHLl1PM1WBJhcWCEPKAKcGSUzXyM/view?usp=drive_link"
     },
     {
-        "id": "KSM-333",
+        "id": "KSM-168",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Bangka Tengah",
@@ -2607,7 +2713,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1-ywRsZJmOcRi9q03VfzPy1ntVea4Cyd-/view?usp=drive_link"
     },
     {
-        "id": "KSM-335",
+        "id": "KSM-169",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Belitung Timur",
@@ -2623,7 +2729,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1eIMRTrhlOdQAUp_UTj5pUAT_mw1tYJO-/view?usp=drive_link"
     },
     {
-        "id": "KSM-336",
+        "id": "KSM-170",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Belitung",
@@ -2639,7 +2745,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/15pmUia1zHU6A8sSYxtyzWfAm_9O8XI1b/view?usp=drive_link"
     },
     {
-        "id": "KSM-337",
+        "id": "KSM-171",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Bangka Barat",
@@ -2655,7 +2761,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1qPKK6GNYkG-PU0hd0HsOwBtwW_9SSLen/view?usp=drive_link"
     },
     {
-        "id": "KSM-338",
+        "id": "KSM-172",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Perikanan Kabupaten Belitung Timur",
@@ -2671,7 +2777,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/15FI3Zrn15_Q4p3NKTOM_Dvchj9nrLc-m/view?usp=drive_link"
     },
     {
-        "id": "KSM-339",
+        "id": "KSM-173",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Kelautan dan Perikanan Kota Pangkalpinang",
@@ -2687,7 +2793,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1SkiM5kjc7kXO49YJIa205AVsH8TW9QAN/view?usp=drive_link"
     },
     {
-        "id": "KSM-340",
+        "id": "KSM-174",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Perikanan Kabupaten Belitung",
@@ -2703,7 +2809,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1UjQB6Yevf7N_CatXLHe1k4OERtzL-11K/view?usp=drive_link"
     },
     {
-        "id": "KSM-341",
+        "id": "KSM-175",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Perikanan Kabupaten Bangka Tengah",
@@ -2719,7 +2825,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sL0vZSifJ_wlM0NkNOi-m0_KlkgcLcQG/view?usp=drive_link"
     },
     {
-        "id": "KSM-342",
+        "id": "KSM-176",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Pertanian, Pangan, Perikanan Kab Bangka Selatan",
@@ -2735,7 +2841,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1c7u4zStAKyTrhBId9cCKSR3vaKk0xI7S/view?usp=drive_link"
     },
     {
-        "id": "KSM-343",
+        "id": "KSM-177",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Perikanan Kabupaten Bangka Barat",
@@ -2751,7 +2857,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Xuw4joblkywptVbpDpzQTA2Jc8MEr82k/view?usp=drive_link"
     },
     {
-        "id": "KSM-344",
+        "id": "KSM-178",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Dinas Perikanan Kabupaten Bangka",
@@ -2767,7 +2873,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/163yn6G8UwWwIUGXOAoHiCADik06AtiL7/view?usp=drive_link"
     },
     {
-        "id": "KSM-345",
+        "id": "KSM-179",
         "tahun": "2023",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkot Pangkalpinang",
@@ -2783,7 +2889,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1bVMKmRfqEjWmNKImss6eLTv8Un7mIYqB/view?usp=drive_link"
     },
     {
-        "id": "KSM-346",
+        "id": "KSM-180",
         "tahun": "2023",
         "kategoriMitra": "BUMN",
         "mitra": "Pertamina Patra Niaga",
@@ -2799,7 +2905,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1oBThu56YJ86LEB3XoJjsLHEr6lbFaq8R/view?usp=share_link"
     },
     {
-        "id": "KSM-347",
+        "id": "KSM-181",
         "tahun": "2023",
         "kategoriMitra": "K/L",
         "mitra": "Kemen BUMN",
@@ -2815,7 +2921,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1A-FGOQAqzx4P6Hd-QC4-9uUm7INd6Qx3/view?usp=share_link"
     },
     {
-        "id": "KSM-348",
+        "id": "KSM-182",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan Rekam Jejak Alam Nusantara",
@@ -2831,7 +2937,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1IlUo539cwr2Dha4Mpao4yqwZ15QZfQG9/view?usp=drive_link"
     },
     {
-        "id": "KSM-349",
+        "id": "KSM-183",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "GISLI (Gerakan Ingat Selamat Layar Indonesia)",
@@ -2847,7 +2953,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1fu6OiQS2dwLRj6NZVQckq4R_ng5LtqTn/view?usp=drive_link"
     },
     {
-        "id": "KSM-351",
+        "id": "KSM-184",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "GISLI (Gerakan Ingat Selamat Layar Indonesia)",
@@ -2863,7 +2969,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1fu6OiQS2dwLRj6NZVQckq4R_ng5LtqTn/view?usp=drive_link"
     },
     {
-        "id": "KSM-352",
+        "id": "KSM-185",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "Perkumpulan Saya Perempuan Anti Korupsi (SPAK)",
@@ -2879,7 +2985,7 @@ const MockData = {
         "linkDokumen": ""
     },
     {
-        "id": "KSM-353",
+        "id": "KSM-186",
         "tahun": "2023",
         "kategoriMitra": "Ormas",
         "mitra": "Perkumpulan Saya Perempuan Anti Korupsi",
@@ -2895,7 +3001,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1XLw5A4RY75s2PMtbVlSjQnBwn2LIGuNN/view?usp=drive_link"
     },
     {
-        "id": "KSM-354",
+        "id": "KSM-187",
         "tahun": "2023",
         "kategoriMitra": "K/L",
         "mitra": "Kemenko PMK",
@@ -2911,7 +3017,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1LgXZbKhTzmZCgax4leAqTDtlunBHE7iH/view?usp=share_link"
     },
     {
-        "id": "KSM-355",
+        "id": "KSM-188",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Badan Pengatur Hilir Minyak dan Gas Bumi",
@@ -2927,7 +3033,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1lJ06qRLtc_N2Gh9IQ_sEg8kbUwZNut-Y/view?usp=drive_link"
     },
     {
-        "id": "KSM-356",
+        "id": "KSM-189",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Desa dan Pembangunan Daerah Tertinggal",
@@ -2943,7 +3049,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1eN0Fo--zwj_UlCvMf5FW_ouqSU-ZqH98/view?usp=sharing"
     },
     {
-        "id": "KSM-357",
+        "id": "KSM-190",
         "tahun": "2024",
         "kategoriMitra": "Ormas",
         "mitra": "Yayasan WWF Indonesia",
@@ -2959,7 +3065,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ZoWccBGTDCLJGRGbSyV659Vo2wkRt9yt/view?usp=sharing"
     },
     {
-        "id": "KSM-358",
+        "id": "KSM-191",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Badan Keamanan Laut (Bakamla)",
@@ -2975,7 +3081,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1KBD9uYZ8eDBHmjWK8NRafcR2_sQGwsZG/view?usp=drive_link"
     },
     {
-        "id": "KSM-359",
+        "id": "KSM-192",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Badan Kependudukan dan Keluarga Berencana Nasional (BKKBN)",
@@ -2991,7 +3097,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1tMS6RfpAV4d2QDG9-5m__jGcBMsH8UNd/view?usp=sharing"
     },
     {
-        "id": "KSM-360",
+        "id": "KSM-193",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kepolisian Negara Republik Indonesia",
@@ -3007,7 +3113,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ILTV4Fqcbcbn_DjdcSRiL3er0jWRGcJd/view?usp=sharing"
     },
     {
-        "id": "KSM-361",
+        "id": "KSM-194",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Diponegoro",
@@ -3023,7 +3129,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/18kpRu_0IYRuS8vNtSpIXYtB0_o15OPFK/view?usp=drive_link"
     },
     {
-        "id": "KSM-362",
+        "id": "KSM-195",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "BRIN",
@@ -3039,7 +3145,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1FH7zoKuCZLBoD2u6OjLnNwOLi2v526pT/view?usp=drive_link"
     },
     {
-        "id": "KSM-363",
+        "id": "KSM-196",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Badan Karantina Indonesia",
@@ -3055,7 +3161,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1TYBodEzBMyVgwHgL2cl6NTE9l5TjA6d5/view?usp=drive_link"
     },
     {
-        "id": "KSM-364",
+        "id": "KSM-197",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pekerjaan Umum dan Perumahan Rakyat",
@@ -3071,7 +3177,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1CvmRYNL_7U5v8CGOkqN2eW-1cEsSKtbH/view?usp=drive_link"
     },
     {
-        "id": "KSM-365",
+        "id": "KSM-198",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pertanian",
@@ -3087,7 +3193,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1cYKc4vlBm5iT44NrFOp6RsBRiGbpq7ur/view?usp=drive_link"
     },
     {
-        "id": "KSM-366",
+        "id": "KSM-199",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Syiah Kuala",
@@ -3103,7 +3209,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ekvWcJuPOuJz1_0Bn7p1n9hH8c7p2aTe/view?usp=drive_link"
     },
     {
-        "id": "KSM-367",
+        "id": "KSM-200",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Dalam Negeri",
@@ -3119,7 +3225,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1LE1evabMX9j4mj2S-P5naQBPJPeCvzmC/view?usp=sharing"
     },
     {
-        "id": "KSM-369",
+        "id": "KSM-201",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Agraria dan Tata Ruang/ATR BPN",
@@ -3135,7 +3241,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1d6lZnAoRVRWr1UvTTAFKD3jRnvTocyls/view?usp=sharing"
     },
     {
-        "id": "KSM-370",
+        "id": "KSM-202",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Badan Pengawasan Keuangan dan Pembangunan )BPKP)",
@@ -3151,7 +3257,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1OKPe7-nMeh42t_eLWNU9kwLx8A9YQhRC/view?usp=sharing"
     },
     {
-        "id": "KSM-371",
+        "id": "KSM-203",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Hasanuddin",
@@ -3167,7 +3273,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1I_r578tnDT6d0EPbsyTKWBZ5wmcCWwrn/view?usp=sharing"
     },
     {
-        "id": "KSM-372",
+        "id": "KSM-204",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Brawijaya",
@@ -3183,7 +3289,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1-BXr8xGdLNQOWk8vsfkyb5jw1wNR6Md0/view?usp=sharing"
     },
     {
-        "id": "KSM-373",
+        "id": "KSM-205",
         "tahun": "2024",
         "kategoriMitra": "K/L",
         "mitra": "Kejaksaan Republik Indonesia",
@@ -3199,7 +3305,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1IAv4BFC1ry37RZn0QegPv9ICqoNM3wCT/view?usp=sharing"
     },
     {
-        "id": "KSM-374",
+        "id": "KSM-206",
         "tahun": "2024",
         "kategoriMitra": "BUMN",
         "mitra": "PT Bank Mandiri (PERSERO) Tbk",
@@ -3215,21 +3321,23 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Dd3MYViYz6EGHZg03WZ8ctxZ-rewNdic/view?usp=sharing"
     },
     {
-        "id": "KSM-375",
+        "id": "KSM-207",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
-        "mitra": "1. Fakultas Ilmu Budaya, UGM",
-        "linkDokumen": ""
+        "mitra": "1. Fakultas Ilmu Budaya, UGM   2. Fakultas Ilmu Budaya, UI  3. Fakultas Ilmu Budaya, UnHas",
+        "jenisKerjasama": "Perjanjian Kerja Sama",
+        "pihak1": "Dirjen PKRL",
+        "noPihak1": "11/DJPKRL/KS.320/VIII/2024",
+        "pihak2": "1. Dekan Fakultas Ilmu Budaya, UGM 2. Dekan Fakultas Ilmu Pengetahuan Budaya, UI 3. Dekan Fakultas Ilmu Budaya, UnHas",
+        "noPihak2": "2633/UN1.FIB/Sek.Dek/2024         /PKS/FIB/UI/2024 3943/UN4.9/HK.07.00/2024",
+        "masaBerlaku": "3",
+        "tanggalMulai": "8/29/2024",
+        "tanggalSelesai": "8/29/2027",
+        "status": "Berlaku",
+        "linkDokumen": "https://drive.google.com/file/d/1Y6aMl450sZRyCOcuYVomtLfFxPVbvLEo/view?usp=sharing"
     },
     {
-        "id": "KSM-377",
-        "tahun": "3. Fakultas Ilmu Budaya",
-        "kategoriMitra": "UnHas,Perjanjian Kerja Sama,Dirjen PKRL,11/DJPKRL/KS.320/VIII/2024,1. Dekan Fakultas Ilmu Budaya",
-        "mitra": "UGM",
-        "linkDokumen": ""
-    },
-    {
-        "id": "KSM-382",
+        "id": "KSM-208",
         "tahun": "2024",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Padjadjaran",
@@ -3245,7 +3353,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1SBEITyM1nz3wdjzFPKR2b7p5u4C-X9oq/view?usp=drive_link"
     },
     {
-        "id": "KSM-383",
+        "id": "KSM-209",
         "tahun": "2025",
         "kategoriMitra": "Swasta",
         "mitra": "PT. Jatim Grha Utama",
@@ -3261,7 +3369,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/11MoEF9t_a8KuUAE1tINpYOx7I_wq0SoT/view?usp=drive_link"
     },
     {
-        "id": "KSM-384",
+        "id": "KSM-210",
         "tahun": "2025",
         "kategoriMitra": "Universitas",
         "mitra": "Institut Teknologi Bandung",
@@ -3277,7 +3385,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Be8XDkcHQfNkF0GMRfjZgO_56e-Fvg_u/view?usp=drive_link"
     },
     {
-        "id": "KSM-385",
+        "id": "KSM-211",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Imigrasi dan Pemasyarakatan",
@@ -3293,7 +3401,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/14gosnafOvjxiJCiYE0FD_iV198DSNeI7/view?usp=drive_link"
     },
     {
-        "id": "KSM-386",
+        "id": "KSM-212",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Hukum",
@@ -3309,7 +3417,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1pHy-anVrzOQVGe3J7jW-ualmhEIcXgOd/view?usp=drive_link"
     },
     {
-        "id": "KSM-387",
+        "id": "KSM-213",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Agama",
@@ -3325,7 +3433,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/12iVcE-__vZh_bENOSeHmbYz0V7RQWN71/view?usp=drive_link"
     },
     {
-        "id": "KSM-388",
+        "id": "KSM-214",
         "tahun": "2025",
         "kategoriMitra": "Ormas",
         "mitra": "Asosiasi Pengusaha Bumiputera Nusantara Indonesia",
@@ -3341,7 +3449,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1eACYiceIFGHBYCViN19AcHk5Etr0IHPL/view?usp=drive_link"
     },
     {
-        "id": "KSM-389",
+        "id": "KSM-215",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pekerjaan Umum",
@@ -3357,7 +3465,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Hs47H14835DeKXl02dWZmPNieEojHgu1/view?usp=drive_link"
     },
     {
-        "id": "KSM-390",
+        "id": "KSM-216",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemprov DKI",
@@ -3373,7 +3481,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1UtW3BKaKvP69DKu12O52W8IHXs5YS66t/view?usp=drive_link"
     },
     {
-        "id": "KSM-391",
+        "id": "KSM-217",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Direktorat Jenderal Anggaran",
@@ -3389,7 +3497,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1c_i6-xoWkdwnKsL2gcxTZl-5IhYwQjbw/view?usp=drive_link"
     },
     {
-        "id": "KSM-393",
+        "id": "KSM-218",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Indramayu",
@@ -3405,7 +3513,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1h0sJ4g4k8V8Vq63kkpeo5Hakwiwpepn5/view?usp=drive_link"
     },
     {
-        "id": "KSM-394",
+        "id": "KSM-219",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Subang",
@@ -3421,7 +3529,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1f1YgU1Hh81WXEggwuCF4ZM8_fgIg7sy0/view?usp=drive_link"
     },
     {
-        "id": "KSM-395",
+        "id": "KSM-220",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Karawang",
@@ -3437,7 +3545,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1inYJlnvmi20SrNJ9p2Tb482pvMnJhM7X/view?usp=drive_link"
     },
     {
-        "id": "KSM-396",
+        "id": "KSM-221",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemprov Jawa Barat",
@@ -3453,7 +3561,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1O9mwuTVFIbdayhljTrIDYRkgosvlfbpr/view?usp=drive_link"
     },
     {
-        "id": "KSM-397",
+        "id": "KSM-222",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemkab Bekasi",
@@ -3469,7 +3577,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1yFOr8phQ1yoq8u_Pc9Q06SbaetUcS2PL/view?usp=drive_link"
     },
     {
-        "id": "KSM-398",
+        "id": "KSM-223",
         "tahun": "2025",
         "kategoriMitra": "Ormas",
         "mitra": "Perkumpulan Prakarsa Laut Berkelanjutan dan Berkeadilan Indonesia",
@@ -3485,7 +3593,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1wgtaZgmqkkGFrZrr5AaDMBk-XAY7yHQ6/view?usp=drive_link"
     },
     {
-        "id": "KSM-399",
+        "id": "KSM-224",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pemberdayaan Perempuan dan Perlindungan Anak",
@@ -3501,7 +3609,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1u5MneTNMfSlymbAV5lcyUzuXqt0pfbf7/view?usp=drive_link"
     },
     {
-        "id": "KSM-400",
+        "id": "KSM-225",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "PP Muhammadiyah",
@@ -3517,7 +3625,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1pleqV9cvj6av4JmghUkd-56CaAcXuDuA/view?usp=drive_link"
     },
     {
-        "id": "KSM-401",
+        "id": "KSM-226",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Pelindungan Pekerja Migran Indonesia",
@@ -3533,7 +3641,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/111e7PiUjnim182fvuFnySxeJzqn285B9/view?usp=drive_link"
     },
     {
-        "id": "KSM-402",
+        "id": "KSM-227",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Badan Standardisasi Nasional",
@@ -3549,7 +3657,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1c1neMHCkGKo3ElwnWvMpRvoF2S6CGV9k/view?usp=drive_link"
     },
     {
-        "id": "KSM-403",
+        "id": "KSM-228",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Pusat Hidro-Oseanografi TNI AL",
@@ -3565,7 +3673,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1ED-jcYNfB0kt_urISShxjGexYNEm25h8/view?usp=drive_link"
     },
     {
-        "id": "KSM-404",
+        "id": "KSM-229",
         "tahun": "2025",
         "kategoriMitra": "Universitas",
         "mitra": "Universitas Muslim Indonesia",
@@ -3581,7 +3689,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1EQdaqQidTCyiCOwZo67bUi5Yv8pGzF6s/view?usp=drive_link"
     },
     {
-        "id": "KSM-405",
+        "id": "KSM-230",
         "tahun": "2025",
         "kategoriMitra": "BUMN",
         "mitra": "PT Bank Negara Indonesia (PERSERO) Tbk",
@@ -3597,7 +3705,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1misbFUIptXm-PlaqrGmjQ2egsfzY_1g9/view?usp=drive_link"
     },
     {
-        "id": "KSM-406",
+        "id": "KSM-231",
         "tahun": "2025",
         "kategoriMitra": "Ormas",
         "mitra": "RARE",
@@ -3613,7 +3721,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1xaEeWXQqiD-xt6tEopXLKFKJ2aeBlwkT/view?usp=drive_link"
     },
     {
-        "id": "KSM-407",
+        "id": "KSM-232",
         "tahun": "2025",
         "kategoriMitra": "Pemda",
         "mitra": "Pemprov Bali",
@@ -3629,7 +3737,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1sPcUvsLALRV-cVSdFpAFZou1HF8HRdPg/view?usp=drive_link"
     },
     {
-        "id": "KSM-408",
+        "id": "KSM-233",
         "tahun": "2025",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Lingkungan Hidup",
@@ -3645,7 +3753,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Jmvx6L0JQbv2_4yhSST6_TsLSagvlxpE/view?usp=drive_link"
     },
     {
-        "id": "KSM-409",
+        "id": "KSM-234",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Ketenagakerjaan",
@@ -3661,7 +3769,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1p9Big-PHfNowSVNuVn2GKKOyKbOFdweZ/view?usp=drive_link"
     },
     {
-        "id": "KSM-411",
+        "id": "KSM-235",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Badan Percepatan Pengentasan Kemiskinan",
@@ -3677,7 +3785,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1Hj9WpVnDTUXblHp8WymtNVePGrakoeDU/view?usp=drive_link"
     },
     {
-        "id": "KSM-412",
+        "id": "KSM-236",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Badan Penyelenggara Jaminan Produk Halal",
@@ -3693,7 +3801,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1MruwEVrrgp7y-O1KDyNWu376w900CgdV/view?usp=drive_link"
     },
     {
-        "id": "KSM-413",
+        "id": "KSM-237",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Kementerian Parawisata",
@@ -3709,7 +3817,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/10-hBjIxSQU2KAppStFNqU1a5O8dZ-Sh8/view?usp=drive_link"
     },
     {
-        "id": "KSM-414",
+        "id": "KSM-238",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Badan Pusat Statistik",
@@ -3725,7 +3833,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1YdFA7-fZRlDSSS82KOvfm-3D-q6V410q/view?usp=drive_link"
     },
     {
-        "id": "KSM-415",
+        "id": "KSM-239",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Tentara Nasional Indonesia",
@@ -3741,7 +3849,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1O8VXmcQGDPNWxg0umdtsYiimQ1iP7arL/view?usp=drive_link"
     },
     {
-        "id": "KSM-416",
+        "id": "KSM-240",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Badan Gizi Nasional",
@@ -3757,7 +3865,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1AafoJMI5ejVIF3LsaUgTYdGLV827GAQN/view?usp=drive_link"
     },
     {
-        "id": "KSM-417",
+        "id": "KSM-241",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Badan Narkotika Nasional",
@@ -3773,7 +3881,7 @@ const MockData = {
         "linkDokumen": "https://drive.google.com/file/d/1G_1WL6DIL2w5w3Vq6TvzFcy4sbKOP5zl/view?usp=drive_link"
     },
     {
-        "id": "KSM-418",
+        "id": "KSM-242",
         "tahun": "2026",
         "kategoriMitra": "K/L",
         "mitra": "Pusat Pelaporan dan Analisis Transaksi Keuangan",
@@ -3787,6 +3895,22 @@ const MockData = {
         "tanggalSelesai": "2/19/2031",
         "status": "Berlaku",
         "linkDokumen": "https://drive.google.com/file/d/17VjXJV26lh2mTrjpZ9JVMoXpcnp8dFgd/view?usp=drive_link"
+    },
+    {
+        "id": "KSM-243",
+        "tahun": "",
+        "kategoriMitra": "",
+        "mitra": "",
+        "jenisKerjasama": "",
+        "pihak1": "",
+        "noPihak1": "",
+        "pihak2": "",
+        "noPihak2": "",
+        "masaBerlaku": "",
+        "tanggalMulai": "",
+        "tanggalSelesai": "",
+        "status": "",
+        "linkDokumen": ""
     }
 ],
   // --- Current User Session ---

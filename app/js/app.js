@@ -15,10 +15,10 @@ const App = {
 
   /* ── Menu Structure ─────────────────────────── */
   menuItems: [
-    { id: 'dashboard', icon: '📊', label: 'Dashboard Kerja Sama' },
-    { id: 'database_kerja_sama', icon: '🗄️', label: 'Database Kerja Sama' },
-    { id: 'kebijakan_prioritas', icon: '🎯', label: 'Dukungan Kebijakan Prioritas' },
-    { id: 'progress_dokumen', icon: '⏳', label: 'Progress Penyusunan Dokumen' },
+    { id: 'dashboard', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>', label: 'Monev Dashboard' },
+    { id: 'database_kerja_sama', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>', label: 'Database Kerja Sama' },
+    { id: 'kebijakan_prioritas', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', label: 'Dukungan Kebijakan Prioritas' },
+    { id: 'progress_dokumen', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', label: 'Progress Penyusunan Dokumen' },
   ],
 
   /* ── RBAC: role → visible menu ids ──────────── */
@@ -34,11 +34,11 @@ const App = {
 
   /* ── Page renderers ─────────────────────────── */
   pages: {
-    dashboard: { renderer: () => DashboardPage.render(), breadcrumb: ['Dashboard Kerja Sama'] },
-    database_kerja_sama: { renderer: () => DatabasePage.render(), breadcrumb: ['Database Kerja Sama'] },
-    update_data: { renderer: () => UpdateDataPage.render(), breadcrumb: ['Update Data Kerja Sama'] },
+    dashboard: { renderer: () => DashboardPage.render(), breadcrumb: ['Monev Dashboard'] },
+    database_kerja_sama: { renderer: () => DatabasePage.render(), breadcrumb: ['Database Monitoring'] },
+    update_data: { renderer: () => UpdateDataPage.render(), breadcrumb: ['Update Data Monitoring'] },
     kebijakan_prioritas: { renderer: () => KebijakanPrioritasPage.render(), breadcrumb: ['Dukungan Kebijakan Prioritas'] },
-    progress_dokumen: { renderer: () => ProgressDokumenPage.render(), breadcrumb: ['Progress Penyusunan Dokumen'] },
+    progress_dokumen: { renderer: () => ProgressDokumenPage.render(), breadcrumb: ['Progress Kampung Nelayan'] },
   },
 
   /* ── Helpers ───────────────────────────────── */
@@ -70,6 +70,14 @@ const App = {
 
   /* ── Navigation ────────────────────────────── */
   init() {
+    console.log('Initializing App...');
+    
+    // Restore theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+
     // Restore user session from localStorage
     if (this.isLoggedIn) {
       const savedUser = localStorage.getItem('kinerjaku_user');
@@ -180,10 +188,15 @@ const App = {
     setTimeout(() => {
       const mc = document.getElementById('main-content');
       if (mc) mc.classList.remove('is-loading');
-      // Call afterRender hook for Chart.js & other post-render init
-      const currentPage = this.pages[this.currentPage] || this.pages.dashboard;
-      if (this.currentPage === 'dashboard' && DashboardPage.afterRender) {
-        DashboardPage.afterRender();
+      // Call afterRender hook for any page that supports it
+      const pageMap = {
+        dashboard: typeof DashboardPage !== 'undefined' ? DashboardPage : null,
+        database_kerja_sama: typeof DatabasePage !== 'undefined' ? DatabasePage : null,
+        kebijakan_prioritas: typeof KebijakanPrioritasPage !== 'undefined' ? KebijakanPrioritasPage : null,
+      };
+      const activePageObj = pageMap[this.currentPage];
+      if (activePageObj && typeof activePageObj.afterRender === 'function') {
+        activePageObj.afterRender();
       }
     }, 100);
 
@@ -231,19 +244,56 @@ const App = {
       <header class="header">
         <div class="header-left">
           <button class="header-hamburger" onclick="App.toggleSidebar()" aria-label="Menu">☰</button>
-          <div style="font-weight: 700; font-size: 1.125rem; display: flex; align-items: center; gap: 8px;">
-            Halo, admin <span style="font-size: 1.2rem;">👋</span>
+          <div class="global-search-wrapper">
+             <span class="search-icon">🔍</span>
+             <input type="text" class="global-search-input" placeholder="Cari nomor dokumen, mitra, atau menu..." oninput="App.handleGlobalSearch(this.value)">
           </div>
         </div>
         <div class="header-right" style="display: flex; align-items: center; gap: 16px;">
-          <button class="btn btn-ghost" style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--neutral-100); border: 1px solid var(--neutral-200); font-size: 1.1rem; color: var(--neutral-600);" aria-label="Toggle Dark Mode">
-            🌙
-          </button>
-          <div style="color: var(--neutral-600); font-weight: 500; font-size: 0.875rem; display: flex; align-items: center; gap: 8px; border: 1px solid var(--neutral-200); padding: 8px 16px; border-radius: 999px; background: var(--neutral-white);">
-            <span style="opacity: 0.7;">📅</span> ${dateString}
+          <div class="user-profile-wrapper">
+            <div class="user-profile-btn" onclick="App.toggleProfile()">
+              <div class="user-avatar">${(MockData.currentUser?.fullName || 'A').charAt(0)}</div>
+              <div class="user-info-text">
+                <div class="user-name">${MockData.currentUser?.fullName || 'Admin'}</div>
+                <div class="user-role">${MockData.currentUser?.role || 'Super Admin'}</div>
+              </div>
+              <span class="chevron-down">▾</span>
+            </div>
+            <div id="profile-dropdown" class="header-dropdown">
+              <a href="#" onclick="App.showProfile()"><span class="icon">👤</span> Profil Saya</a>
+              <a href="#" onclick="App.showSettings()"><span class="icon">⚙️</span> Pengaturan</a>
+              <hr>
+              <a href="#" onclick="App.logout()" style="color: var(--red-500)"><span class="icon">🚪</span> Keluar</a>
+            </div>
           </div>
         </div>
       </header>`;
+  },
+
+  /* ── Header Actions ────────────────────────── */
+  toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    this.render(); // Re-render to update icon
+  },
+
+  handleGlobalSearch(query) {
+    if (!query) return;
+    console.log('Global search for:', query);
+    // In a real app, this would show a search result overlay
+  },
+
+  toggleNotifications() {
+    const dropdown = document.getElementById('notif-dropdown');
+    dropdown.classList.toggle('show');
+    document.getElementById('profile-dropdown').classList.remove('show');
+  },
+
+  toggleProfile() {
+    const dropdown = document.getElementById('profile-dropdown');
+    dropdown.classList.toggle('show');
+    document.getElementById('notif-dropdown').classList.remove('show');
   },
 
   /* ── Sidebar ───────────────────────────────── */
@@ -296,8 +346,8 @@ const App = {
           <div class="sidebar-brand">
             <div class="sidebar-brand-icon"><img src="assets/logo-kkp.png" alt="Logo KKP" style="height:48px;object-fit:contain"></div>
             <div>
-              <div class="sidebar-brand-text">Kerja Sama</div>
-              <div class="sidebar-brand-sub">Kementerian Kelautan dan Perikanan</div>
+              <div class="sidebar-brand-text">Monev KNMP</div>
+              <div class="sidebar-brand-sub">Biro Perencanaan KKP</div>
             </div>
           </div>
         </div>
@@ -307,7 +357,7 @@ const App = {
         </nav>
         <div class="sidebar-footer">
           <a class="sidebar-item" onclick="App.logout()">
-            <span class="sidebar-item-icon">🚪</span>
+            <span class="sidebar-item-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span>
             <span class="sidebar-item-label">Keluar</span>
           </a>
         </div>
@@ -422,6 +472,39 @@ const App = {
       document.body.appendChild(container.firstElementChild);
       this.showNotifPanel = true;
     }
+  },
+
+  /* ── Toast Notifications ── */
+  showToast(message, type = 'success', duration = 3000) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✅',
+      error: '❌',
+      info: 'ℹ️',
+      warning: '⚠️'
+    };
+
+    toast.innerHTML = `
+      <span class="toast-icon">${icons[type] || '🔔'}</span>
+      <span class="toast-message">${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
   },
 
   closeModal() {
