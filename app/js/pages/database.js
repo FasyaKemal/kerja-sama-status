@@ -354,14 +354,14 @@ const DatabasePage = {
     document.getElementById('dbFormId').value = id || '';
     const fileNameDiv = document.getElementById('dbFileName');
     if (fileNameDiv) fileNameDiv.textContent = '';
+    
     if (id) {
       const r = (MockData.databaseKerjaSama || []).find(x => x.id === id);
       if (r) {
-        document.getElementById('dbTahun').value = r.tahun || '';
         document.getElementById('dbKategori').value = r.kategoriMitra || '';
         document.getElementById('dbMitra').value = r.mitra || '';
         document.getElementById('dbJenis').value = r.jenisKerjasama || '';
-        document.getElementById('dbNomorDokumen').value = r.noPihak1 || '';
+        document.getElementById('dbNomorDokumen').value = r.no || r.noPihak1 || '';
         document.getElementById('dbPihak1').value = r.pihak1 || '';
         document.getElementById('dbNoPihak1').value = r.noPihak1 || '';
         document.getElementById('dbPihak2').value = r.pihak2 || '';
@@ -388,7 +388,7 @@ const DatabasePage = {
     const file = input.files[0];
     const div = document.getElementById('dbFileName');
     if (file && div) {
-      div.innerHTML = `✅ <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) dipilih`;
+      div.innerHTML = `✅ <strong>${file.name}</strong> dipilih`;
     }
   },
 
@@ -396,13 +396,21 @@ const DatabasePage = {
     e.preventDefault();
     const id = document.getElementById('dbFormId').value;
     const tglMulai = document.getElementById('dbTglMulai').value;
-    const autoTahun = tglMulai ? new Date(tglMulai).getFullYear().toString() : new Date().getFullYear().toString();
+    
+    // Auto-detect tahun dari tanggal mulai
+    let autoTahun = new Date().getFullYear().toString();
+    if (tglMulai) {
+      const dateParts = tglMulai.split('-');
+      if (dateParts[0]) autoTahun = dateParts[0];
+    }
+
     const item = {
       id: id || 'KSM-NEW-' + Date.now(),
       tahun: autoTahun,
       kategoriMitra: document.getElementById('dbKategori').value,
       mitra: document.getElementById('dbMitra').value,
       jenisKerjasama: document.getElementById('dbJenis').value,
+      no: document.getElementById('dbNomorDokumen').value,
       pihak1: document.getElementById('dbPihak1').value,
       noPihak1: document.getElementById('dbNoPihak1').value,
       pihak2: document.getElementById('dbPihak2').value,
@@ -413,6 +421,7 @@ const DatabasePage = {
       tanggalSelesai: document.getElementById('dbTglSelesai').value,
       linkDokumen: document.getElementById('dbLink').value,
     };
+
     if (!MockData.databaseKerjaSama) MockData.databaseKerjaSama = [];
     if (id) {
       const idx = MockData.databaseKerjaSama.findIndex(x => x.id === id);
@@ -420,8 +429,9 @@ const DatabasePage = {
     } else {
       MockData.databaseKerjaSama.unshift(item);
     }
+
     this.closeModal();
-    App.showToast(id ? 'Data berhasil diperbarui!' : 'Data berhasil ditambahkan!', 'success');
+    App.showToast(id ? 'Data diperbarui!' : 'Data ditambahkan!', 'success');
     this.state.page = 1;
     App.renderPage();
   },

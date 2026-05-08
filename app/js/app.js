@@ -271,29 +271,14 @@ const App = {
   },
 
   /* ── Header Actions ────────────────────────── */
-  toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    this.render(); // Re-render to update icon
-  },
-
   handleGlobalSearch(query) {
     if (!query) return;
     console.log('Global search for:', query);
-    // In a real app, this would show a search result overlay
-  },
-
-  toggleNotifications() {
-    const dropdown = document.getElementById('notif-dropdown');
-    dropdown.classList.toggle('show');
-    document.getElementById('profile-dropdown').classList.remove('show');
   },
 
   toggleProfile() {
     const dropdown = document.getElementById('profile-dropdown');
-    dropdown.classList.toggle('show');
-    document.getElementById('notif-dropdown').classList.remove('show');
+    if (dropdown) dropdown.classList.toggle('show');
   },
 
   /* ── Sidebar ───────────────────────────────── */
