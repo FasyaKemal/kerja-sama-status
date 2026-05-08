@@ -43,7 +43,7 @@ const LoginPage = {
             <p class="branding-tagline">Sistem Monitoring Database<br>Kerja Sama </p>
           </div>
           <div class="login-left-footer">
-            © 2026 Monev KNMP - Kementerian Kelautan dan Perikanan
+            © 2026 Database Kerja Sama - Kementerian Kelautan dan Perikanan
           </div>
         </div>
 

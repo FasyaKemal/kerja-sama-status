@@ -12,6 +12,7 @@ const App = {
   mobileMenuOpen: false,
   sidebarCollapsed: false,
   activeUnitFilter: 'all',
+  prevPage: null,
 
   /* ── Menu Structure ─────────────────────────── */
   menuItems: [
@@ -38,7 +39,8 @@ const App = {
     database_kerja_sama: { renderer: () => DatabasePage.render(), breadcrumb: ['Database Monitoring'] },
     update_data: { renderer: () => UpdateDataPage.render(), breadcrumb: ['Update Data Monitoring'] },
     kebijakan_prioritas: { renderer: () => KebijakanPrioritasPage.render(), breadcrumb: ['Dukungan Kebijakan Prioritas'] },
-    progress_dokumen: { renderer: () => ProgressDokumenPage.render(), breadcrumb: ['Progress Kampung Nelayan'] },
+    progress_dokumen: { renderer: () => ProgressDokumenPage.render(), breadcrumb: ['Progress Penyusunan Dokumen'] },
+    pengukuran: { renderer: () => PengukuranPage.render(), breadcrumb: ['Pengukuran Kinerja'] },
   },
 
   /* ── Helpers ───────────────────────────────── */
@@ -72,10 +74,15 @@ const App = {
   init() {
     console.log('Initializing App...');
     
-    // Restore theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
+    // Load Persistent Data for Database Kerja Sama
+    const savedData = localStorage.getItem('db_kerja_sama_persistent');
+    if (savedData) {
+      try {
+        MockData.databaseKerjaSama = JSON.parse(savedData);
+        console.log('Persistent data loaded:', MockData.databaseKerjaSama.length, 'records');
+      } catch (e) {
+        console.error('Error loading persistent data:', e);
+      }
     }
 
     // Restore user session from localStorage
@@ -149,9 +156,14 @@ const App = {
   },
 
   toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
-    const layout = document.querySelector('.app-layout');
-    if (layout) layout.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
+    if (window.innerWidth <= 992) {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+      this.renderPage();
+    } else {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+      const layout = document.querySelector('.app-layout');
+      if (layout) layout.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
+    }
   },
 
   /* ── Render orchestrator ───────────────────── */
@@ -169,20 +181,50 @@ const App = {
     const page = this.pages[this.currentPage] || this.pages.dashboard;
     const breadcrumbItems = page.breadcrumb || ['Dashboard'];
 
-    app.innerHTML = `
-      <div class="app-layout ${this.mobileMenuOpen ? 'mobile-menu-open' : ''} ${this.sidebarCollapsed ? 'sidebar-collapsed' : ''}">
-        <div class="sidebar-hover-zone" id="sidebar-hover-zone"></div>
-        ${this.renderSidebar()}
-        ${this.renderHeader()}
-        <div class="main-content page-fade-in is-loading" id="main-content" onclick="if(App.mobileMenuOpen){App.mobileMenuOpen=false;App.renderPage();}">
-          ${page.renderer()}
-        </div>
-      </div>
-      <div id="modal-container"></div>
+    // Check if shell exists to avoid full re-render
+    const existingLayout = document.querySelector('.app-layout');
+    
+    // Store focused element ID to restore it later
+    const activeId = document.activeElement ? document.activeElement.id : null;
+    const selectionStart = document.activeElement ? document.activeElement.selectionStart : null;
+    const selectionEnd = document.activeElement ? document.activeElement.selectionEnd : null;
 
-      ${this.showNotifPanel ? this.renderNotifPanel() : ''}
-      ${this.mobileMenuOpen ? '<div class="sidebar-overlay" onclick="App.toggleMobileMenu()"></div>' : ''}
-    `;
+    if (existingLayout && this.currentPage === this.prevPage) {
+      // Only update content area if we're on the same page (e.g. filtering)
+      const mc = document.getElementById('main-content');
+      if (mc) {
+        mc.innerHTML = page.renderer();
+      }
+    } else {
+      // Full render for page navigation or first load
+      app.innerHTML = `
+        <div class="app-layout ${this.mobileMenuOpen ? 'mobile-menu-open' : ''} ${this.sidebarCollapsed ? 'sidebar-collapsed' : ''}">
+          <div class="sidebar-hover-zone" id="sidebar-hover-zone"></div>
+          ${this.renderSidebar()}
+          ${this.renderHeader()}
+          <div class="main-content page-fade-in is-loading" id="main-content" onclick="if(App.mobileMenuOpen){App.mobileMenuOpen=false;App.renderPage();}">
+            ${page.renderer()}
+          </div>
+        </div>
+        <div id="modal-container"></div>
+
+        ${this.showNotifPanel ? this.renderNotifPanel() : ''}
+        ${this.mobileMenuOpen ? '<div class="sidebar-overlay" onclick="App.toggleMobileMenu()"></div>' : ''}
+      `;
+    }
+
+    this.prevPage = this.currentPage;
+
+    // Restore focus if element still exists
+    if (activeId) {
+      const el = document.getElementById(activeId);
+      if (el) {
+        el.focus();
+        if (selectionStart !== null && selectionEnd !== null) {
+          el.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
+    }
 
     // Remove loading class after a brief moment to create a transition skeleton effect
     setTimeout(() => {
@@ -326,12 +368,12 @@ const App = {
     };
 
     return `
-      <aside class="sidebar">
+      <aside class="sidebar ${this.mobileMenuOpen ? 'mobile-open' : ''}">
         <div class="sidebar-header">
           <div class="sidebar-brand">
             <div class="sidebar-brand-icon"><img src="assets/logo-kkp.png" alt="Logo KKP" style="height:48px;object-fit:contain"></div>
             <div>
-              <div class="sidebar-brand-text">Monev KNMP</div>
+              <div class="sidebar-brand-text">Database Kerja Sama</div>
               <div class="sidebar-brand-sub">Biro Perencanaan KKP</div>
             </div>
           </div>
@@ -495,6 +537,40 @@ const App = {
   closeModal() {
     const mc = document.getElementById('modal-container');
     if (mc) mc.innerHTML = '';
+  },
+
+  showProfile() {
+    const u = MockData.currentUser;
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) dropdown.classList.remove('show');
+    const content = `
+      <div style="text-align:center;padding:var(--space-xl)">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary-600),var(--primary-900));color:#fff;font-size:2rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-md)">${(u.fullName||'A').charAt(0)}</div>
+        <h3 style="margin:0 0 4px;color:var(--primary-900)">${u.fullName || 'Pengguna'}</h3>
+        <div style="font-size:13px;color:var(--neutral-500);margin-bottom:var(--space-md)">${u.role || '-'}</div>
+        <div style="text-align:left;background:var(--neutral-50);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;font-size:13px">
+          <div><span style="color:var(--neutral-500);font-weight:600">NIP:</span> <span style="margin-left:8px">${u.nip || '-'}</span></div>
+          <div><span style="color:var(--neutral-500);font-weight:600">Email:</span> <span style="margin-left:8px">${u.email || '-'}</span></div>
+          <div><span style="color:var(--neutral-500);font-weight:600">Unit:</span> <span style="margin-left:8px">${u.unitName || '-'}</span></div>
+        </div>
+      </div>`;
+    const footer = `<button class="btn btn-primary" onclick="App.closeModal()">Tutup</button>`;
+    document.getElementById('modal-container').innerHTML = UI.modal('Profil Pengguna', content, footer);
+  },
+
+  showSettings() {
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) dropdown.classList.remove('show');
+    const content = `
+      <div style="padding:var(--space-md)">
+        <p style="color:var(--neutral-600);font-size:14px;margin-bottom:var(--space-lg)">Pengaturan sistem akan tersedia pada pembaruan berikutnya.</p>
+        <div style="background:var(--neutral-50);border-radius:12px;padding:16px">
+          <div style="font-weight:700;margin-bottom:8px;color:var(--primary-900)">🔐 Keamanan Akun</div>
+          <p style="font-size:13px;color:var(--neutral-600);margin:0">Untuk mengubah password, silakan hubungi Administrator sistem.</p>
+        </div>
+      </div>`;
+    const footer = `<button class="btn btn-primary" onclick="App.closeModal()">Tutup</button>`;
+    document.getElementById('modal-container').innerHTML = UI.modal('Pengaturan', content, footer);
   },
 
   logout() {

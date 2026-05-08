@@ -237,4 +237,42 @@
   .login-left {
     display: none;
   }
+  
+  .login-right {
+    background: linear-gradient(135deg, #004e92, #000428); /* Give mobile some branding color */
+    padding: 20px;
+  }
+
+  .login-card-v2 {
+    padding: 32px 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .branding-tagline {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card-v2 {
+    padding: 24px 16px;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+  }
+  
+  .card-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  
+  .btn-login-v2 {
+    padding: 14px;
+  }
 }

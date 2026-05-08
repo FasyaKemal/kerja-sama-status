@@ -4,44 +4,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description"
-    content="Database Status Kerja Sama Kementerian Kelautan dan Perikanan">
+  <meta name="description" content="Database Status Kerja Sama Kementerian Kelautan dan Perikanan">
   <title>Dashboard Kerja Sama</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/main.css?v=1778137534335">
-  <link rel="stylesheet" href="styles/login.css?v=1778137534335">
+  <link rel="stylesheet" href="styles/main.css?v=v335">
+  <link rel="stylesheet" href="styles/login.css?v=v335">
 </head>
 
 <body>
   
-  <script>
-    window.addEventListener('error', function(e) {
-      document.body.innerHTML += '<div style="color:red;padding:20px;z-index:9999;position:relative;background:white;"><h2>Error!</h2><pre>' + e.error.stack + '</pre></div>';
-    });
-  </script>
-
   <div id="app"></div>
   <div id="toast-container"></div>
 
-  <!-- Export libraries -->
+  <!-- Third Party Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-  <!-- Script Dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=1778137534335"></script>
-  <script src="js/components.js?v=1778137534335"></script>
-  <script src="js/pages/login.js?v=1778137534335"></script>
-  <script src="js/pages/kebijakan_prioritas.js?v=1778137534335"></script>
-  <script src="js/pages/dashboard.js?v=1778137534335"></script>
-  <script src="js/pages/database.js?v=1778137534335"></script>
-  <script src="js/pages/update_data.js?v=1778137534335"></script>
-  <script src="js/pages/progress.js?v=177813753330"></script>
-  <script src="js/app.js?v=1778137534335"></script>
+
+  <!-- Core Data -->
+  <script src="js/data.js?v=v335"></script>
+
+  <!-- Reusable UI Components (must be before page scripts) -->
+  <script src="js/components.js?v=v335"></script>
+
+  <!-- Page Scripts -->
+  <script src="js/pages/login.js?v=v335"></script>
+  <script src="js/pages/dashboard.js?v=v335"></script>
+  <script src="js/pages/database.js?v=v335"></script>
+  <script src="js/pages/kebijakan_prioritas.js?v=v335"></script>
+  <script src="js/pages/progress.js?v=v335"></script>
+  <script src="js/pages/update_data.js?v=v335"></script>
+  <script src="js/pages/pengukuran.js?v=v335"></script>
+
+  <!-- Main App Shell (Must be last) -->
+  <script src="js/app.js?v=v335"></script>
 </body>
 
 </html>

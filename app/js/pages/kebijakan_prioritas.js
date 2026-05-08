@@ -516,27 +516,17 @@ const KebijakanPrioritasPage = {
       "linkDokumen": ""
     },
     {
-      "tahun": "2. Fakultas Ilmu Budaya",
-      "kategoriMitra": "UI",
-      "status": "-",
-      "linkDokumen": ""
-    },
-    {
-      "tahun": "3. Fakultas Ilmu Budaya",
-      "kategoriMitra": "UnHas,Perjanjian Kerja Sama,Dirjen PKRL,11/DJPKRL/KS.320/VIII/2024,1. Dekan Fakultas Ilmu Budaya",
-      "mitra": "UGM",
-      "status": "-",
-      "linkDokumen": ""
-    },
-    {
-      "tahun": "2. Dekan Fakultas Ilmu Pengetahuan Budaya",
-      "kategoriMitra": "UI",
-      "status": "-",
-      "linkDokumen": ""
-    },
-    {
-      "tahun": "3. Dekan Fakultas Ilmu Budaya",
-      "kategoriMitra": "UnHas,2633/UN1.FIB/Sek.Dek/2024",
+      "tahun": "2024",
+      "kategoriMitra": "Universitas",
+      "mitra": "Fakultas Ilmu Budaya UGM, UI, dan UnHas",
+      "jenisKerjasama": "Perjanjian Kerja Sama",
+      "pihak1": "Dirjen PKRL",
+      "noPihak1": "11/DJPKRL/KS.320/VIII/2024",
+      "pihak2": "Dekan FIB UGM, UI, UnHas",
+      "noPihak2": "2633/UN1.FIB/Sek.Dek/2024",
+      "masaBerlaku": "3",
+      "tanggalMulai": "",
+      "tanggalSelesai": "",
       "status": "-",
       "linkDokumen": ""
     },
@@ -3599,7 +3589,11 @@ const KebijakanPrioritasPage = {
   handleSearch(val) {
     this.state.searchQuery = val.toLowerCase();
     this.state.page = 1;
-    this.updateUI();
+    
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.updateUI();
+    }, 300);
   },
 
   handleFilter(key, val) {
@@ -3615,11 +3609,11 @@ const KebijakanPrioritasPage = {
     this.state.filterStatus = 'all';
     this.state.page = 1;
 
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) searchInput.value = '';
-
-    const selects = document.querySelectorAll('.form-select');
-    selects.forEach(s => s.value = 'all');
+    // Sync input values back to DOM
+    const s = document.getElementById('kp-search'); if(s) s.value = '';
+    const y = document.getElementById('kp-filter-year'); if(y) y.value = 'all';
+    const c = document.getElementById('kp-filter-cat'); if(c) c.value = 'all';
+    const st = document.getElementById('kp-filter-status'); if(st) st.value = 'all';
 
     this.updateUI();
   },
@@ -3657,10 +3651,11 @@ const KebijakanPrioritasPage = {
     return this.data.filter(r => {
       const q = this.state.searchQuery.trim().toLowerCase();
       const matchSearch = !q ||
-        (r.mitra && r.mitra.toLowerCase().includes(q)) ||
-        (r.jenisKerjasama && r.jenisKerjasama.toLowerCase().includes(q)) ||
-        (r.pihak1 && r.pihak1.toLowerCase().includes(q)) ||
-        (r.pihak2 && r.pihak2.toLowerCase().includes(q));
+        String(r.mitra || '').toLowerCase().includes(q) ||
+        String(r.jenisKerjasama || '').toLowerCase().includes(q) ||
+        String(r.pihak1 || '').toLowerCase().includes(q) ||
+        String(r.pihak2 || '').toLowerCase().includes(q) ||
+        String(r.judul || '').toLowerCase().includes(q);
 
       const matchYear = this.state.filterYear === 'all' || String(r.tahun || '').trim() === String(this.state.filterYear).trim();
       const matchCategory = this.state.filterCategory === 'all' || String(r.kategoriMitra || '').toLowerCase().trim() === String(this.state.filterCategory).toLowerCase().trim();
@@ -3674,11 +3669,13 @@ const KebijakanPrioritasPage = {
     });
   },
 
+  afterRender() {
+    this.updateUI();
+  },
+
   render() {
     const years = [...new Set(this.data.map(d => String(d.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))].sort((a, b) => b - a);
-    const categories = ['Pemda', 'K/L', 'BUMN', 'Universitas', 'Ormas', 'Swasta', 'Lainnya'];
-
-    setTimeout(() => this.updateUI(), 0);
+    const categories = [...new Set(this.data.map(d => String(d.kategoriMitra || '').trim()).filter(Boolean))].sort();
 
     return `
       <div class="page-header" style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
@@ -3692,56 +3689,56 @@ const KebijakanPrioritasPage = {
         </div>
       </div>
 
-      <!-- FILTER & SEARCH BAR -->
-      <div class="card glass fade-in" style="margin-bottom:24px;padding:24px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;border:none;box-shadow:var(--shadow-lg);">
-        <div class="search-container" style="flex:1;min-width:300px;">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" style="width:100%;padding:10px 10px 10px 40px;border-radius:var(--radius-md);border:1px solid var(--neutral-300);" placeholder="Cari mitra, jenis, atau unit..." value="${this.state.searchQuery}" oninput="KebijakanPrioritasPage.handleSearch(this.value)">
-        </div>
-        
-        <div class="filter-group">
-          <div class="form-group" style="margin-bottom:0">
-            <label class="filter-label" style="font-weight:600;color:var(--primary-900);">Tahun</label>
-            <select class="form-select" style="padding:10px 12px;min-width:100px;border-radius:var(--radius-md);" onchange="KebijakanPrioritasPage.handleFilter('filterYear', this.value)">
-              <option value="all">Semua</option>
-              ${years.map(y => `<option value="${y}" ${this.state.filterYear === y ? 'selected' : ''}>${y}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <div class="form-group" style="margin-bottom:0">
-            <label class="filter-label" style="font-weight:600;color:var(--primary-900);">Kategori</label>
-            <select class="form-select" style="padding:10px 12px;min-width:160px;border-radius:var(--radius-md);" onchange="KebijakanPrioritasPage.handleFilter('filterCategory', this.value)">
-              <option value="all">Semua Kategori</option>
-              ${categories.map(c => `<option value="${c}" ${this.state.filterCategory === c ? 'selected' : ''}>${c}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <div class="form-group" style="margin-bottom:0">
-            <label class="filter-label" style="font-weight:600;color:var(--primary-900);">Status</label>
-            <select class="form-select" style="padding:10px 12px;min-width:160px;border-radius:var(--radius-md);" onchange="KebijakanPrioritasPage.handleFilter('filterStatus', this.value)">
-              <option value="all">Semua Status</option>
-              <option value="Berlaku" ${this.state.filterStatus === 'Berlaku' ? 'selected' : ''}>Berlaku</option>
-              <option value="Tidak Berlaku" ${this.state.filterStatus === 'Tidak Berlaku' ? 'selected' : ''}>Tidak Berlaku</option>
-            </select>
-          </div>
-        </div>
-
-        <button class="btn btn-ghost btn-sm" style="color:var(--danger-600);font-weight:600;" onclick="KebijakanPrioritasPage.resetFilters()">✕ Reset</button>
+      <!-- RINGKASAN DATA (STATS) -->
+      <div id="kp-stats-container">
+        <!-- Stats cards load here -->
       </div>
 
-      <div id="kpDynamicContainer">
-        <!-- Stats and Table render here -->
+      <!-- FILTER & SEARCH BAR -->
+      <div class="card glass" style="margin-bottom:24px;padding:24px;display:flex;align-items:flex-end;gap:16px;border:none;box-shadow:var(--shadow-lg);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);overflow-x:auto;">
+        <div class="search-container" style="flex:2;min-width:250px;">
+          <span class="search-icon" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--neutral-400);">🔍</span>
+          <input type="text" id="kp-search" class="search-input" style="width:100%;padding:12px 12px 12px 45px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" placeholder="Cari mitra, jenis, nomor, atau pihak..." value="${this.state.searchQuery}" oninput="KebijakanPrioritasPage.handleSearch(this.value)" onkeydown="if(event.key==='Enter') event.preventDefault()">
+        </div>
+        
+        <div style="flex:1;min-width:100px;">
+          <label style="font-size:12px;font-weight:700;color:var(--neutral-800);display:block;margin-bottom:8px;">Tahun</label>
+          <select id="kp-filter-year" class="form-select" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" onchange="KebijakanPrioritasPage.handleFilter('filterYear', this.value)">
+            <option value="all">Semua</option>
+            ${years.map(y => `<option value="${y}" ${this.state.filterYear === y ? 'selected' : ''}>${y}</option>`).join('')}
+          </select>
+        </div>
+
+        <div style="flex:1.5;min-width:160px;">
+          <label style="font-size:12px;font-weight:700;color:var(--neutral-800);display:block;margin-bottom:8px;">Kategori</label>
+          <select id="kp-filter-cat" class="form-select" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" onchange="KebijakanPrioritasPage.handleFilter('filterCategory', this.value)">
+            <option value="all">Semua Kategori</option>
+            ${categories.map(c => `<option value="${c}" ${this.state.filterCategory === c ? 'selected' : ''}>${c}</option>`).join('')}
+          </select>
+        </div>
+
+        <div style="flex:1.5;min-width:160px;">
+          <label style="font-size:12px;font-weight:700;color:var(--neutral-800);display:block;margin-bottom:8px;">Status</label>
+          <select id="kp-filter-status" class="form-select" style="width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid var(--neutral-200);background:#fff;font-size:14px;" onchange="KebijakanPrioritasPage.handleFilter('filterStatus', this.value)">
+            <option value="all">Semua Status</option>
+            <option value="Berlaku" ${this.state.filterStatus === 'Berlaku' ? 'selected' : ''}>Berlaku</option>
+            <option value="Tidak Berlaku" ${this.state.filterStatus === 'Tidak Berlaku' ? 'selected' : ''}>Tidak Berlaku</option>
+          </select>
+        </div>
+
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger-600);font-weight:600;margin-bottom:6px;flex-shrink:0;" onclick="KebijakanPrioritasPage.resetFilters()">✕ Reset</button>
+      </div>
+
+      <div id="kp-table-container">
+        <!-- Table load here -->
       </div>
     `;
   },
 
   updateUI() {
-    const container = document.getElementById('kpDynamicContainer');
-    if (!container) return;
+    const statsContainer = document.getElementById('kp-stats-container');
+    const tableContainer = document.getElementById('kp-table-container');
+    if (!statsContainer || !tableContainer) return;
 
     const filteredData = this.getFilteredData();
     const totalData = filteredData.length;
@@ -3753,34 +3750,37 @@ const KebijakanPrioritasPage = {
     const tidakAktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('tidak')).length;
     const prosesCount = totalData - aktifCount - tidakAktifCount;
 
-    container.innerHTML = `
+    statsContainer.innerHTML = `
       <!-- CARD STATISTIK -->
-      <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:24px;margin-bottom:32px">
-        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--primary-50) 100%); position:relative; overflow:hidden;">
+      <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:24px;margin-bottom:32px">
+        <div class="card" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--primary-50) 100%); position:relative; overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.05;">📊</div>
           <div style="font-size:13px;font-weight:700;color:var(--primary-700);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.1em">Total Kerja Sama</div>
           <div style="font-size:32px;font-weight:800;color:var(--primary-900);line-height:1">${totalData}</div>
           <div style="font-size:12px;color:var(--neutral-500);margin-top:8px">Data terfilter</div>
         </div>
-        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--success-100) 100%); position:relative; overflow:hidden; animation-delay: 0.1s;">
+        <div class="card" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--success-100) 100%); position:relative; overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.05;">✅</div>
           <div style="font-size:13px;font-weight:700;color:var(--success-600);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.1em">Berlaku</div>
           <div style="font-size:32px;font-weight:800;color:var(--success-600);line-height:1">${aktifCount}</div>
           <div style="font-size:12px;color:var(--success-500);margin-top:8px">Status aktif</div>
         </div>
-        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--danger-100) 100%); position:relative; overflow:hidden; animation-delay: 0.2s;">
+        <div class="card" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--danger-100) 100%); position:relative; overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.05;">⚠️</div>
           <div style="font-size:13px;font-weight:700;color:var(--danger-600);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.1em">Tidak Berlaku</div>
           <div style="font-size:32px;font-weight:800;color:var(--danger-600);line-height:1">${tidakAktifCount}</div>
           <div style="font-size:12px;color:var(--danger-500);margin-top:8px">Masa berlaku habis</div>
         </div>
-        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--neutral-100) 100%); position:relative; overflow:hidden; animation-delay: 0.3s;">
+        <div class="card" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--neutral-100) 100%); position:relative; overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.05;">⚙️</div>
           <div style="font-size:13px;font-weight:700;color:var(--neutral-600);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.1em">Lainnya</div>
           <div style="font-size:32px;font-weight:800;color:var(--neutral-800);line-height:1">${prosesCount}</div>
           <div style="font-size:12px;color:var(--neutral-500);margin-top:8px">Status lainnya</div>
         </div>
       </div>
+    `;
+
+    tableContainer.innerHTML = `
 
       <!-- DATA TABLE -->
       <div class="card" style="overflow-x:auto; width: 100%; border-radius: var(--radius-md);">
