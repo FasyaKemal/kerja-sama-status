@@ -231,13 +231,19 @@ const ProgressDokumenPage = {
     }
 
     App.closeModal();
+    this.saveToStorage();
     App.showToast(id ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan');
     App.renderPage();
+  },
+
+  saveToStorage() {
+    localStorage.setItem('progress_dokumen_persistent', JSON.stringify(MockData.progressDokumen));
   },
 
   deleteItem(id) {
     if (confirm('Apakah Anda yakin ingin menghapus data monitoring ini?')) {
       MockData.progressDokumen = MockData.progressDokumen.filter(d => d.id !== id);
+      this.saveToStorage();
       App.showToast('Data berhasil dihapus', 'info');
       App.renderPage();
     }

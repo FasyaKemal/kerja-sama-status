@@ -3577,8 +3577,22 @@ const KebijakanPrioritasPage = {
       App.showToast('Data kerja sama berhasil diperbarui!', 'success');
     }
 
+    this.saveToStorage();
     this.closeForm();
     App.renderPage();
+  },
+
+  deleteItem(idx) {
+    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+      this.data.splice(idx, 1);
+      this.saveToStorage();
+      App.showToast('Data berhasil dihapus', 'success');
+      App.renderPage();
+    }
+  },
+
+  saveToStorage() {
+    localStorage.setItem('kp_prioritas_persistent', JSON.stringify(this.data));
   },
 
   setPage(p) {
@@ -3823,7 +3837,8 @@ const KebijakanPrioritasPage = {
                   ${r.linkDokumen ? `<a href="${r.linkDokumen}" target="_blank" class="btn btn-ghost btn-sm" style="padding:6px 12px; background:var(--primary-50); color:var(--primary-700); border-radius:var(--radius-md); font-weight:600;">📄 Lihat</a>` : '-'}
                 </td>
                 <td style="padding: 16px; white-space:nowrap; text-align:center;">
-                  <button class="btn btn-primary btn-sm" onclick="KebijakanPrioritasPage.openForm(${startIndex + i})" style="padding:8px 16px; border-radius: var(--radius-md); background:linear-gradient(135deg, var(--primary-600), var(--primary-800)); border:none; box-shadow: var(--shadow-sm); font-weight:600;">✏️ Edit</button>
+                  <button class="btn btn-primary btn-sm" onclick="KebijakanPrioritasPage.openForm(${startIndex + i})" style="padding:8px 12px; border-radius: var(--radius-md); background:linear-gradient(135deg, var(--primary-600), var(--primary-800)); border:none; box-shadow: var(--shadow-sm); font-weight:600;">✏️ Edit</button>
+                  <button class="btn btn-ghost btn-sm" onclick="KebijakanPrioritasPage.deleteItem(${startIndex + i})" style="padding:8px 12px; color:var(--danger-600); font-weight:600;">🗑️ Hapus</button>
                 </td>
               </tr>
             `).join('')}

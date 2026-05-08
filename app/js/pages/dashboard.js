@@ -83,7 +83,13 @@ const DashboardPage = {
                   <td style="padding:16px"><span style="font-weight:700;color:${diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)'}">${diff} Hari</span></td>
                   <td style="padding:16px">${statusBadge}</td>
                   <td style="padding:16px;text-align:right">
-                    <button class="btn btn-primary btn-sm" style="font-size:11px;padding:6px 12px; border-radius:var(--radius-md); background:var(--primary-700); border:none;" onclick="App.navigate('update_data')">Perbarui Data</button>
+                    <button class="btn btn-primary btn-sm" style="font-size:11px;padding:6px 12px; border-radius:var(--radius-md); background:var(--primary-700); border:none;" 
+                      onclick="App.navigate('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kebijakan_prioritas' : 'database_kerja_sama'}'); setTimeout(() => { 
+                        const searchEl = document.getElementById('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kp-search' : 'db-search'}');
+                        if(searchEl) { searchEl.value = '${r.mitra.replace(/'/g, "\\'")}'; searchEl.dispatchEvent(new Event('input')); }
+                      }, 100)">
+                      Perbarui Data
+                    </button>
                   </td>
                 </tr>
               `;
@@ -143,18 +149,34 @@ const DashboardPage = {
       <div class="dashboard-charts-grid" style="display:grid;grid-template-columns:3fr 2fr;gap:24px;margin-bottom:32px">
         <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.4s;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-            <h3 style="margin:0;font-size:16px;font-weight:700;color:var(--primary-900)">Tren Pertumbuhan Kerja Sama</h3>
-            <span style="font-size:12px;color:var(--neutral-500);background:var(--neutral-100);padding:4px 8px;border-radius:4px">Data per Tahun</span>
+            <h3 style="margin:0;font-size:16px;font-weight:700;color:var(--primary-900)">📈 Tren Pertumbuhan Kerja Sama</h3>
+            <span style="font-size:11px;color:var(--primary-600);background:var(--primary-50);padding:4px 10px;border-radius:20px;font-weight:700;">Data Historis</span>
           </div>
-          <div style="position:relative;height:280px;width:100%">
+          <div style="position:relative;height:320px;width:100%">
             <canvas id="trendChart"></canvas>
           </div>
         </div>
  
         <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.5s;">
-          <h3 style="margin:0 0 24px 0;font-size:16px;font-weight:700;color:var(--primary-900)">Distribusi Kategori Mitra</h3>
-          <div style="position:relative;height:280px;width:100%;display:flex;justify-content:center">
+          <h3 style="margin:0 0 24px 0;font-size:16px;font-weight:700;color:var(--primary-900)">🏢 Distribusi Kategori Mitra</h3>
+          <div style="position:relative;height:320px;width:100%;display:flex;justify-content:center">
             <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADDITIONAL ANALYTICS -->
+      <div class="dashboard-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.55s;">
+          <h3 style="margin:0 0 24px 0;font-size:16px;font-weight:700;color:var(--primary-900)">📊 Status & Jenis Kerja Sama</h3>
+          <div style="position:relative;height:300px;width:100%">
+            <canvas id="statusPolarChart"></canvas>
+          </div>
+        </div>
+        <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.6s;">
+          <h3 style="margin:0 0 24px 0;font-size:16px;font-weight:700;color:var(--primary-900)">🏆 Top 5 Mitra Teraktif</h3>
+          <div style="position:relative;height:300px;width:100%">
+            <canvas id="topMitraChart"></canvas>
           </div>
         </div>
       </div>
@@ -230,7 +252,7 @@ const DashboardPage = {
     const catColors = ['#0C4A6E', '#0284c7', '#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd'];
 
     if (typeof Chart !== 'undefined') {
-      // Bar Chart
+      // Bar Chart (Trend)
       const trendCtx = document.getElementById('trendChart');
       if (trendCtx) {
         new Chart(trendCtx, {
@@ -276,7 +298,7 @@ const DashboardPage = {
         });
       }
 
-      // Donut Chart
+      // Donut Chart (Distribution)
       const donutCtx = document.getElementById('donutChart');
       if (donutCtx) {
         new Chart(donutCtx, {
@@ -295,29 +317,99 @@ const DashboardPage = {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '65%',
-            onClick: (e, activeEls) => {
-              if (activeEls.length > 0) {
-                const idx = activeEls[0].index;
-                const cat = catLabels[idx];
-                App.showToast(`Memfilter kategori: ${cat}`, 'info');
-              }
-            },
             plugins: {
               legend: {
                 position: 'right',
                 labels: {
                   usePointStyle: true,
                   padding: 16,
-                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 12 }
+                  font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
                 }
-              },
+              }
+            }
+          }
+        });
+      }
+
+      // Status Polar Chart
+      const statusCounts = { 'Berlaku': 0, 'Tidak Berlaku': 0, 'Lainnya': 0 };
+      allData.forEach(r => {
+        const s = String(r.status || '').toLowerCase();
+        if (s.includes('berlaku') && !s.includes('tidak')) statusCounts['Berlaku']++;
+        else if (s.includes('tidak')) statusCounts['Tidak Berlaku']++;
+        else statusCounts['Lainnya']++;
+      });
+
+      const polarCtx = document.getElementById('statusPolarChart');
+      if (polarCtx) {
+        new Chart(polarCtx, {
+          type: 'polarArea',
+          data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+              data: Object.values(statusCounts),
+              backgroundColor: [
+                'rgba(16, 185, 129, 0.7)', // Success
+                'rgba(239, 68, 68, 0.7)',  // Danger
+                'rgba(100, 116, 139, 0.7)' // Neutral
+              ],
+              borderColor: '#fff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { usePointStyle: true, font: { size: 11 } } }
+            },
+            scales: {
+              r: { ticks: { display: false }, grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      }
+
+      // Top Mitra Chart (Horizontal Bar)
+      const mitraCounts = {};
+      allData.forEach(r => {
+        if (r.mitra) mitraCounts[r.mitra] = (mitraCounts[r.mitra] || 0) + 1;
+      });
+      const sortedMitra = Object.entries(mitraCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      
+      const topMitraCtx = document.getElementById('topMitraChart');
+      if (topMitraCtx) {
+        new Chart(topMitraCtx, {
+          type: 'bar',
+          data: {
+            labels: sortedMitra.map(m => m[0].length > 20 ? m[0].substring(0, 20) + '...' : m[0]),
+            datasets: [{
+              label: 'Jumlah Kerja Sama',
+              data: sortedMitra.map(m => m[1]),
+              backgroundColor: 'rgba(2, 132, 199, 0.8)',
+              hoverBackgroundColor: 'var(--primary-700)',
+              borderRadius: 6,
+              maxBarThickness: 30
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
               tooltip: {
-                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                padding: 12,
-                cornerRadius: 8,
+                callbacks: {
+                  title: (context) => sortedMitra[context[0].dataIndex][0]
+                }
               }
             },
-            animation: { duration: 1000, easing: 'easeOutBounce' }
+            scales: {
+              x: { beginAtZero: true, grid: { display: false }, ticks: { stepSize: 1 } },
+              y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
           }
         });
       }
@@ -327,17 +419,17 @@ const DashboardPage = {
   exportReport() {
     App.showToast('Menyiapkan ekspor PDF...', 'info');
     if (typeof html2pdf !== 'undefined') {
-      const element = document.getElementById('app-content');
+      const element = document.getElementById('main-content');
       const opt = {
-        margin: 10,
-        filename: 'Laporan_Monev_KNMP.pdf',
+        margin: [10, 10],
+        filename: 'Laporan_Dashboard_Kerjasama_KKP.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
       html2pdf().set(opt).from(element).save();
     } else {
-      alert('Library html2pdf tidak tersedia.');
+      App.showToast('Gagal: Library PDF tidak ditemukan', 'error');
     }
   }
 };

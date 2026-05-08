@@ -74,16 +74,20 @@ const App = {
   init() {
     console.log('Initializing App...');
     
-    // Load Persistent Data for Database Kerja Sama
-    const savedData = localStorage.getItem('db_kerja_sama_persistent');
-    if (savedData) {
-      try {
-        MockData.databaseKerjaSama = JSON.parse(savedData);
-        console.log('Persistent data loaded:', MockData.databaseKerjaSama.length, 'records');
-      } catch (e) {
-        console.error('Error loading persistent data:', e);
+    // Load Persistent Data
+    const loadPersistence = (key, target) => {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          MockData[target] = JSON.parse(saved);
+          console.log(`Persistent data loaded for ${target}:`, MockData[target].length, 'records');
+        } catch (e) { console.error(`Error loading ${key}:`, e); }
       }
-    }
+    };
+
+    loadPersistence('db_kerja_sama_persistent', 'databaseKerjaSama');
+    loadPersistence('kp_prioritas_persistent', 'kebijakanPrioritas');
+    loadPersistence('progress_dokumen_persistent', 'progressDokumen');
 
     // Restore user session from localStorage
     if (this.isLoggedIn) {
@@ -286,10 +290,6 @@ const App = {
       <header class="header">
         <div class="header-left">
           <button class="header-hamburger" onclick="App.toggleSidebar()" aria-label="Menu">☰</button>
-          <div class="global-search-wrapper">
-             <span class="search-icon">🔍</span>
-             <input type="text" class="global-search-input" placeholder="Cari nomor dokumen, mitra, atau menu..." oninput="App.handleGlobalSearch(this.value)">
-          </div>
         </div>
         <div class="header-right" style="display: flex; align-items: center; gap: 16px;">
           <div class="user-profile-wrapper">
@@ -314,8 +314,30 @@ const App = {
 
   /* ── Header Actions ────────────────────────── */
   handleGlobalSearch(query) {
-    if (!query) return;
     console.log('Global search for:', query);
+    
+    if (this.currentPage === 'database_kerja_sama' && typeof DatabasePage !== 'undefined') {
+      DatabasePage.handleFilter('searchQuery', query);
+      // Sync local search input if it exists
+      const localSearch = document.getElementById('db-search');
+      if (localSearch) localSearch.value = query;
+    } else if (this.currentPage === 'kebijakan_prioritas' && typeof KebijakanPrioritasPage !== 'undefined') {
+      KebijakanPrioritasPage.handleSearch(query);
+      const localSearch = document.getElementById('kp-search');
+      if (localSearch) localSearch.value = query;
+    } else {
+      // If on other pages, take them to database_kerja_sama with that search query
+      if (typeof DatabasePage !== 'undefined') {
+        DatabasePage.state.searchQuery = query;
+        this.navigate('database_kerja_sama');
+        
+        // After navigation, ensure the local search bar reflects the query
+        setTimeout(() => {
+          const localSearch = document.getElementById('db-search');
+          if (localSearch) localSearch.value = query;
+        }, 100);
+      }
+    }
   },
 
   toggleProfile() {
