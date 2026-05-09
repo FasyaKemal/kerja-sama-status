@@ -4079,3 +4079,28 @@ table tbody tr:hover {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Skeleton Loading */
+.skeleton-box {
+  background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-200) 50%, var(--neutral-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Inline Validation */
+.form-input.is-invalid {
+  border-color: var(--danger-500) !important;
+  background: #fff5f5 !important;
+}
+.invalid-feedback {
+  display: block;
+  color: var(--danger-600);
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}

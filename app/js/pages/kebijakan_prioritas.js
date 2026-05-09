@@ -3415,7 +3415,7 @@ const KebijakanPrioritasPage = {
             <button class="btn btn-ghost btn-sm" onclick="KebijakanPrioritasPage.closeForm()">✕ Tutup</button>
           </div>
           
-          <form id="kpForm" onsubmit="event.preventDefault(); KebijakanPrioritasPage.saveForm(${index});" style="padding:24px;display:flex;flex-direction:column;">
+          <form id="kpForm" novalidate onsubmit="event.preventDefault(); KebijakanPrioritasPage.saveForm(${index});" style="padding:24px;display:flex;flex-direction:column;">
             
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div class="form-group">
@@ -3538,13 +3538,40 @@ const KebijakanPrioritasPage = {
   },
 
   saveForm(index) {
+    // Inline Validation
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+    const requiredFields = [
+      { id: 'inpKategori', msg: 'Kategori mitra wajib dipilih' },
+      { id: 'inpMitra', msg: 'Nama mitra wajib diisi' },
+      { id: 'inpJenis', msg: 'Jenis kerja sama wajib dipilih' },
+      { id: 'inpUnitSign', msg: 'Pihak 1 wajib diisi' },
+      { id: 'inpNo1', msg: 'Nomor Pihak 1 wajib diisi' },
+      { id: 'inpJabatanSign', msg: 'Pihak 2 wajib diisi' },
+      { id: 'inpNo2', msg: 'Nomor Pihak 2 wajib diisi' },
+      { id: 'inpMulai', msg: 'Tanggal mulai wajib diisi' },
+      { id: 'inpHingga', msg: 'Tanggal selesai wajib diisi' },
+      { id: 'inpStatus', msg: 'Status wajib dipilih' }
+    ];
+
+    let isValid = true;
+    requiredFields.forEach(field => {
+      const el = document.getElementById(field.id);
+      if (el && !el.value.trim()) {
+        el.classList.add('is-invalid');
+        const err = document.createElement('div');
+        err.className = 'invalid-feedback';
+        err.innerText = field.msg;
+        el.parentNode.appendChild(err);
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
+
     const mitra = document.getElementById('inpMitra').value;
     const kategori = document.getElementById('inpKategori').value;
-
-    if (!mitra || !kategori) {
-      App.showToast('Mohon lengkapi Nama Mitra dan Kategori!', 'error');
-      return;
-    }
 
     let finalLinkDokumen = document.getElementById('inpDokumen').value;
     const fileInput = document.getElementById('fileUpload');
@@ -3694,7 +3721,7 @@ const KebijakanPrioritasPage = {
     return `
       <div class="page-header" style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <h1 class="page-title">Monitoring Kampung Nelayan Merah Putih</h1>
+          <h1 class="page-title">Database Dukungan Kebijakan Prioritas</h1>
           <p class="text-muted" style="margin-top:4px">Database dukungan kebijakan prioritas nasional</p>
         </div>
         <div style="display:flex;gap:12px">
@@ -3754,11 +3781,15 @@ const KebijakanPrioritasPage = {
     const tableContainer = document.getElementById('kp-table-container');
     if (!statsContainer || !tableContainer) return;
 
-    const filteredData = this.getFilteredData();
-    const totalData = filteredData.length;
-    const totalPages = Math.ceil(totalData / this.state.perPage);
-    const startIndex = (this.state.page - 1) * this.state.perPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + this.state.perPage);
+    if (this.renderTimeout) clearTimeout(this.renderTimeout);
+    tableContainer.innerHTML = this.renderSkeleton();
+
+    this.renderTimeout = setTimeout(() => {
+      const filteredData = this.getFilteredData();
+      const totalData = filteredData.length;
+      const totalPages = Math.max(1, Math.ceil(totalData / this.state.perPage));
+      const startIndex = (this.state.page - 1) * this.state.perPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + this.state.perPage);
 
     const aktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('berlaku') && !String(r.status || '').toLowerCase().includes('tidak')).length;
     const tidakAktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('tidak')).length;
@@ -3816,9 +3847,9 @@ const KebijakanPrioritasPage = {
             </tr>
           </thead>
           <tbody>
-            ${paginatedData.length === 0 ? '<tr><td colspan="12" style="text-align:center;padding:48px;color:var(--neutral-400)">Tidak ada data ditemukan</td></tr>' :
+            ${paginatedData.length === 0 ? this.renderEmptyState() :
         paginatedData.map((r, i) => `
-              <tr class="fade-in" style="background: #fff; transition: all 0.2s; border-bottom: 1px solid var(--neutral-100);" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
+              <tr style="background: #fff; transition: all 0.2s; border-bottom: 1px solid var(--neutral-100);" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
                 <td style="padding: 16px; color:var(--neutral-500); font-weight:600;">${startIndex + i + 1}</td>
                 <td style="padding: 16px;">${r.tahun || '-'}</td>
                 <td style="padding: 16px;"><span class="badge badge-info">${r.kategoriMitra || '-'}</span></td>
@@ -3855,6 +3886,46 @@ const KebijakanPrioritasPage = {
           </div>
         </div>
       </div>
+    `;
+    }, 400); // Skeleton timeout
+  },
+
+  renderSkeleton() {
+    const rows = Array(5).fill(`
+      <tr style="border-bottom: 1px solid var(--neutral-100);">
+        ${Array(12).fill('<td style="padding: 16px;"><div class="skeleton-box" style="height:20px; width:100%; border-radius:4px;"></div></td>').join('')}
+      </tr>
+    `).join('');
+    return `
+      <div class="card" style="overflow-x:auto; width: 100%; border-radius: var(--radius-md);">
+        <table class="table" style="font-size:13px; min-width: 1400px; width: 100%;">
+          <thead>
+            <tr style="background: var(--neutral-50);">
+              ${Array(12).fill('<th style="padding: 12px 16px;"><div class="skeleton-box" style="height:16px; width:80%; border-radius:4px;"></div></th>').join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  renderEmptyState() {
+    return `
+      <tr>
+        <td colspan="12" style="text-align:center; padding: 64px 24px; background: #fff;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap: 16px;">
+            <div style="font-size: 48px; opacity: 0.5;">🔍</div>
+            <div>
+              <h3 style="margin:0 0 8px 0; color:var(--neutral-800); font-weight:700;">Data Tidak Ditemukan</h3>
+              <p style="margin:0; color:var(--neutral-500); font-size:14px; max-width:400px;">Kami tidak dapat menemukan data dengan kata kunci atau filter tersebut. Silakan gunakan kata kunci lain.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="KebijakanPrioritasPage.state.searchQuery=''; KebijakanPrioritasPage.state.filterYear='all'; KebijakanPrioritasPage.state.filterMitra='all'; KebijakanPrioritasPage.state.filterStatus='all'; document.getElementById('kp-search').value=''; document.getElementById('kp-filter-year').value='all'; document.getElementById('kp-filter-mitra').value='all'; document.getElementById('kp-filter-status').value='all'; KebijakanPrioritasPage.updateUI();" style="margin-top: 8px;">Reset Filter</button>
+          </div>
+        </td>
+      </tr>
     `;
   }
 };

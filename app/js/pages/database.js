@@ -107,11 +107,17 @@ const DatabasePage = {
     const tableContainer = document.getElementById('db-table-container');
     if (!statsContainer || !tableContainer) return;
 
-    const filteredData = this.getFilteredData();
-    const totalData = filteredData.length;
-    const totalPages = Math.max(1, Math.ceil(totalData / this.state.perPage));
-    const startIndex = (this.state.page - 1) * this.state.perPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + this.state.perPage);
+    if (this.renderTimeout) clearTimeout(this.renderTimeout);
+
+    // Show Skeleton Loader
+    tableContainer.innerHTML = this.renderSkeleton();
+
+    this.renderTimeout = setTimeout(() => {
+      const filteredData = this.getFilteredData();
+      const totalData = filteredData.length;
+      const totalPages = Math.max(1, Math.ceil(totalData / this.state.perPage));
+      const startIndex = (this.state.page - 1) * this.state.perPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + this.state.perPage);
 
     const aktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('berlaku') && !String(r.status || '').toLowerCase().includes('tidak')).length;
     const tidakAktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('tidak')).length;
@@ -168,9 +174,9 @@ const DatabasePage = {
               </tr>
             </thead>
             <tbody>
-              ${paginatedData.length === 0 ? '<tr><td colspan="12" style="text-align:center;padding:48px;color:var(--neutral-400)">Tidak ada data ditemukan</td></tr>' :
+              ${paginatedData.length === 0 ? this.renderEmptyState() :
         paginatedData.map((r, i) => `
-                <tr class="fade-in" style="background: #fff; transition: all 0.2s; border-bottom: 1px solid var(--neutral-100);" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
+                <tr style="background: #fff; transition: all 0.2s; border-bottom: 1px solid var(--neutral-100);" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
                   <td style="padding: 16px; color:var(--neutral-500); font-weight:600; text-align:center;">${startIndex + i + 1}</td>
                   <td style="padding: 16px;">${r.tahun || '-'}</td>
                   <td style="padding: 16px;"><span class="badge badge-info">${r.kategoriMitra || '-'}</span></td>
@@ -211,6 +217,46 @@ const DatabasePage = {
             </div>
           </div>
         </div>
+    `;
+    }, 400); // Premium Loading Delay
+  },
+
+  renderSkeleton() {
+    const rows = Array(5).fill(`
+      <tr style="border-bottom: 1px solid var(--neutral-100);">
+        ${Array(12).fill('<td style="padding: 16px;"><div class="skeleton-box" style="height:20px; width:100%; border-radius:4px;"></div></td>').join('')}
+      </tr>
+    `).join('');
+    return `
+      <div class="card" style="overflow-x:auto; width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-md); background:#fff;">
+        <table class="table" style="font-size:13px; min-width: 1400px; width: 100%;">
+          <thead>
+            <tr style="background: var(--neutral-50);">
+              ${Array(12).fill('<th style="padding: 12px 16px;"><div class="skeleton-box" style="height:16px; width:80%; border-radius:4px;"></div></th>').join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  renderEmptyState() {
+    return `
+      <tr>
+        <td colspan="12" style="text-align:center; padding: 64px 24px; background: #fff;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap: 16px;">
+            <div style="font-size: 48px; opacity: 0.5;">🔍</div>
+            <div>
+              <h3 style="margin:0 0 8px 0; color:var(--neutral-800); font-weight:700;">Data Tidak Ditemukan</h3>
+              <p style="margin:0; color:var(--neutral-500); font-size:14px; max-width:400px;">Kami tidak dapat menemukan data dengan kata kunci atau filter tersebut. Silakan gunakan kata kunci lain.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="DatabasePage.state.searchQuery=''; DatabasePage.state.filterYear='all'; DatabasePage.state.filterMitra='all'; DatabasePage.state.filterStatus='all'; document.getElementById('db-search').value=''; document.getElementById('db-filter-year').value='all'; document.getElementById('db-filter-mitra').value='all'; document.getElementById('db-filter-status').value='all'; DatabasePage.updateUI();" style="margin-top: 8px;">Reset Filter</button>
+          </div>
+        </td>
+      </tr>
     `;
   },
 
@@ -293,7 +339,7 @@ const DatabasePage = {
             <button onclick="DatabasePage.closeModal()" style="background:none; border:none; cursor:pointer; font-size:13px; font-weight:600; color:var(--neutral-500); padding:0; margin-top:12px; display:flex; align-items:center; gap:4px;">✕ Tutup</button>
           </div>
 
-          <form id="dbForm" onsubmit="DatabasePage.saveForm(event)" style="padding:24px 32px;">
+          <form id="dbForm" novalidate onsubmit="DatabasePage.saveForm(event)" style="padding:24px 32px;">
             <input type="hidden" id="dbFormId" />
             
             <div style="display:flex; flex-direction:column; gap:20px;">
@@ -377,11 +423,13 @@ const DatabasePage = {
 
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--neutral-700);">Import File Dokumen Pendukung (Opsional)</label>
-                <div style="border:2px dashed var(--neutral-200); border-radius:8px; padding:24px; text-align:center; cursor:pointer;" onclick="document.getElementById('dbFileInput').click()">
-                  <div style="font-size:24px; margin-bottom:8px; color:var(--neutral-400);">📄</div>
-                  <div style="font-size:13px; font-weight:600; color:var(--primary-700); margin-bottom:4px;">Klik untuk memilih file</div>
-                  <div style="font-size:11px; color:var(--neutral-400);">Mendukung file Excel, PDF, dan Word (Maksimal 10MB)</div>
-                  <input type="file" id="dbFileInput" style="display:none;" />
+                <div id="dbFileWrapper" style="border:2px dashed var(--neutral-300); border-radius:8px; padding:24px; text-align:center; cursor:pointer; transition: all 0.2s; background:var(--neutral-50);" onclick="document.getElementById('dbFileInput').click()">
+                  <div id="dbFileContent">
+                    <div style="font-size:24px; margin-bottom:8px; color:var(--neutral-400);">📄</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--primary-700); margin-bottom:4px;">Klik untuk memilih file</div>
+                    <div style="font-size:11px; color:var(--neutral-400);">Mendukung file Excel, PDF, dan Word (Maksimal 10MB)</div>
+                  </div>
+                  <input type="file" id="dbFileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="DatabasePage.handleFileUpload(this)" />
                 </div>
               </div>
 
@@ -452,6 +500,35 @@ const DatabasePage = {
 
   saveForm(e) {
     e.preventDefault();
+
+    // Inline Validation
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+    const requiredFields = [
+      { id: 'dbMitra', msg: 'Nama mitra wajib diisi' },
+      { id: 'dbKategori', msg: 'Kategori mitra wajib dipilih' },
+      { id: 'dbJenis', msg: 'Jenis kerja sama wajib diisi' },
+      { id: 'dbTglMulai', msg: 'Tanggal mulai wajib diisi' },
+      { id: 'dbTglSelesai', msg: 'Tanggal selesai wajib diisi' },
+      { id: 'dbStatus', msg: 'Status wajib dipilih' }
+    ];
+
+    let isValid = true;
+    requiredFields.forEach(field => {
+      const el = document.getElementById(field.id);
+      if (el && !el.value.trim()) {
+        el.classList.add('is-invalid');
+        const err = document.createElement('div');
+        err.className = 'invalid-feedback';
+        err.innerText = field.msg;
+        el.parentNode.appendChild(err);
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
+
     const id = document.getElementById('dbFormId').value;
     const tglMulai = document.getElementById('dbTglMulai').value;
     const autoTahun = tglMulai ? tglMulai.split('-')[0] : new Date().getFullYear().toString();
@@ -486,6 +563,38 @@ const DatabasePage = {
     this.closeModal();
     App.showToast(id ? 'Data diperbarui!' : 'Data ditambahkan!', 'success');
     App.renderPage();
+  },
+
+  handleFileUpload(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran file maksimal 10MB");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.currentUploadedFile = {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: e.target.result
+        };
+        const content = document.getElementById('dbFileContent');
+        const wrapper = document.getElementById('dbFileWrapper');
+        if (content && wrapper) {
+            content.innerHTML = `
+              <div style="font-size: 32px; margin-bottom: 12px;">✅</div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--success-600); margin-bottom: 4px;">${file.name}</div>
+              <div style="font-size: 12px; color: var(--neutral-500);">Data telah dikonversi ke Base64 dan siap disimpan lokal.</div>
+            `;
+            wrapper.style.borderColor = 'var(--success-500)';
+            wrapper.style.background = 'var(--success-50)';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   },
 
   deleteItem(id) {

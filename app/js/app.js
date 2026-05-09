@@ -95,24 +95,38 @@ const App = {
       if (savedUser) {
         Object.assign(MockData.currentUser, JSON.parse(savedUser));
       }
-      this.currentPage = localStorage.getItem('kinerjaku_page') || 'dashboard';
+      
+      // Setup Hash Routing
+      window.addEventListener('hashchange', () => this.handleHashChange());
+      this.handleHashChange(true);
+    } else {
+      this.renderPage();
     }
-    this.renderPage();
   },
 
-  navigate(pageId) {
-    this.currentPage = pageId;
-    localStorage.setItem('kinerjaku_page', pageId);
+  handleHashChange(initial = false) {
+    let hash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+    if (!this.pages[hash]) hash = 'dashboard';
+    
+    this.currentPage = hash;
+    localStorage.setItem('kinerjaku_page', hash);
     this.showNotifPanel = false;
     this.mobileMenuOpen = false;
-    const parentId = this.getParentId(pageId);
+    
+    const parentId = this.getParentId(hash);
     if (parentId) {
       this.expandedMenus[parentId] = true;
     }
-    // Show progress bar
-    this.showProgressBar();
+    
+    if (!initial) this.showProgressBar();
     this.renderPage();
-    window.scrollTo(0, 0);
+    if (!initial) window.scrollTo(0, 0);
+  },
+
+  navigate(pageId) {
+    const newHash = '#/' + pageId;
+    if (window.location.hash === newHash) return;
+    window.location.hash = newHash;
   },
 
   showProgressBar() {
@@ -269,6 +283,7 @@ const App = {
         dashboard: typeof DashboardPage !== 'undefined' ? DashboardPage : null,
         database_kerja_sama: typeof DatabasePage !== 'undefined' ? DatabasePage : null,
         kebijakan_prioritas: typeof KebijakanPrioritasPage !== 'undefined' ? KebijakanPrioritasPage : null,
+        progress_dokumen: typeof ProgressDokumenPage !== 'undefined' ? ProgressDokumenPage : null,
       };
       const activePageObj = pageMap[this.currentPage];
       if (activePageObj && typeof activePageObj.afterRender === 'function') {

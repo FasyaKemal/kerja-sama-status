@@ -76,7 +76,7 @@ const DashboardPage = {
                 : '<span class="badge badge-warning">● Akan Berakhir</span>';
               
               return `
-                <tr class="fade-in" style="border-bottom: 1px solid var(--neutral-100); transition: background 0.2s;" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
+                <tr style="border-bottom: 1px solid var(--neutral-100); transition: background 0.2s;" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
                   <td style="padding:16px"><strong>${r.mitra}</strong></td>
                   <td style="padding:16px">${r.jenisKerjasama || '-'}</td>
                   <td style="padding:16px;white-space:nowrap">${r.tanggalSelesai}</td>
@@ -103,7 +103,7 @@ const DashboardPage = {
       <div class="page-header" style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
         <div>
           <h1 class="page-title">Monev Dashboard</h1>
-          <p class="text-muted" style="margin-top:4px">Monitoring dan Evaluasi Kampung Nelayan Merah Putih</p>
+          <p class="text-muted" style="margin-top:4px">Monitoring Database Kerja Sama</p>
         </div>
         <div style="display:flex;gap:12px;align-items:center">
           <button class="btn btn-ghost" style="border:1px solid var(--neutral-300)" onclick="DashboardPage.exportReport()">📄 Ekspor Laporan</button>

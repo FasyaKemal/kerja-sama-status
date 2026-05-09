@@ -6,7 +6,14 @@ const ProgressDokumenPage = {
   searchQuery: '',
   filterYear: '2026',
 
-  render() {
+  afterRender() {
+    this.updateUI();
+  },
+
+  updateUI() {
+    const container = document.getElementById('progress-table-container');
+    if (!container) return;
+
     const timelineSteps = MockData.timelineSteps;
     let data = MockData.progressDokumen;
 
@@ -14,15 +21,131 @@ const ProgressDokumenPage = {
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
       data = data.filter(r => 
-        r.mitra.toLowerCase().includes(q) || 
-        r.judul.toLowerCase().includes(q) || 
-        r.no.toLowerCase().includes(q)
+        (r.mitra && r.mitra.toLowerCase().includes(q)) || 
+        (r.judul && r.judul.toLowerCase().includes(q)) || 
+        (r.no && r.no.toLowerCase().includes(q))
       );
     }
 
     if (this.filterYear && this.filterYear !== 'Semua') {
       data = data.filter(r => r.tahun === this.filterYear);
     }
+
+    if (this.renderTimeout) clearTimeout(this.renderTimeout);
+    container.innerHTML = this.renderSkeleton();
+
+    this.renderTimeout = setTimeout(() => {
+      container.innerHTML = `
+        <div class="table-responsive" style="overflow-x: auto;">
+          <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <thead>
+              <tr style="background: var(--neutral-50);">
+                <th style="padding: 16px; width: 60px; text-align: center; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">NO</th>
+                <th style="padding: 16px; width: 220px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">NOMOR & JUDUL</th>
+                <th style="padding: 16px; width: 200px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">MITRA</th>
+                <th style="padding: 16px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">TAHAPAN SAAT INI</th>
+                <th style="padding: 16px; width: 140px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">UPDATE TERAKHIR</th>
+                <th style="padding: 16px; width: 140px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">PROGRESS</th>
+                <th style="padding: 16px; width: 160px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">STATUS</th>
+                <th style="padding: 16px; width: 100px; text-align: right; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">AKSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.length === 0 ? this.renderEmptyState() : ''}
+              ${data.map((r, i) => {
+                let color = 'primary';
+                let bgLight = 'var(--primary-50)';
+                if (r.progress === 100) { color = 'green'; bgLight = 'var(--success-50)'; }
+                else if (r.progress < 30) { color = 'orange'; bgLight = 'var(--warning-50)'; }
+
+                return `
+                <tr style="transition: background 0.2s; border-bottom: 1px solid var(--neutral-100);" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
+                  <td style="padding: 20px 16px; text-align: center; vertical-align: middle; color: var(--neutral-500); font-weight: 600;">${i + 1}</td>
+                  <td style="padding: 20px 16px; vertical-align: middle;">
+                    <div style="font-weight:700; color:var(--primary-900); margin-bottom:4px; font-size: 14px;">${r.no}</div>
+                    <div style="font-size:12px; color:var(--neutral-500); line-height: 1.5; font-weight: 500;">${r.judul}</div>
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle;">
+                    <div style="font-weight:700; color: var(--neutral-800); font-size: 14px;">${r.mitra}</div>
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle;">
+                    <div style="color:var(--${color}-700); font-weight:800; font-size: 11px; line-height: 1.5; max-width: 250px; text-transform: uppercase; letter-spacing: 0.05em;">
+                      TAHAP ${r.step}: ${timelineSteps[r.step-1]}
+                    </div>
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle; color:var(--neutral-600); font-size:13px; font-weight: 500;">
+                    ${r.update}
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle;">
+                    <div style="display:flex; align-items:center; gap:12px">
+                      <div style="flex:1; height:10px; background:var(--neutral-100); border-radius:10px; overflow:hidden; border: 1px solid var(--neutral-200);">
+                        <div style="height:100%; width:${r.progress}%; background: var(--${color}-500); box-shadow: 0 0 10px rgba(var(--${color}-rgb), 0.3)"></div>
+                      </div>
+                      <span style="font-size:13px; font-weight:800; color:var(--${color}-700); min-width: 40px;">${r.progress}%</span>
+                    </div>
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle;">
+                    <div style="font-size:12px; font-weight:600; color:var(--neutral-700); line-height: 1.4; max-width: 140px;">
+                      ${r.status}
+                    </div>
+                  </td>
+                  <td style="padding: 20px 16px; vertical-align: middle; text-align: right;">
+                    <div style="display:flex; gap:6px; justify-content: flex-end;">
+                      <button class="btn btn-ghost btn-sm" style="background: var(--neutral-50); border: 1px solid var(--neutral-200);" onclick="ProgressDokumenPage.openForm('${r.id}')" title="Edit Data">✏️</button>
+                      <button class="btn btn-ghost btn-sm" style="background: #fff5f5; border: 1px solid #fed7d7; color:var(--red-500)" onclick="ProgressDokumenPage.deleteItem('${r.id}')" title="Hapus Data">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        </div>
+        </div>
+      `;
+    }, 400); // Premium Loading Delay
+  },
+
+  renderSkeleton() {
+    const rows = Array(5).fill(`
+      <tr style="border-bottom: 1px solid var(--neutral-100);">
+        ${Array(8).fill('<td style="padding: 16px;"><div class="skeleton-box" style="height:20px; width:100%; border-radius:4px;"></div></td>').join('')}
+      </tr>
+    `).join('');
+    return `
+      <div class="table-responsive" style="overflow-x: auto;">
+        <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+          <thead>
+            <tr style="background: var(--neutral-50);">
+              ${Array(8).fill('<th style="padding: 16px;"><div class="skeleton-box" style="height:16px; width:80%; border-radius:4px;"></div></th>').join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  renderEmptyState() {
+    return `
+      <tr>
+        <td colspan="8" style="text-align:center; padding: 64px 24px; background: #fff;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap: 16px;">
+            <div style="font-size: 48px; opacity: 0.5;">🔍</div>
+            <div>
+              <h3 style="margin:0 0 8px 0; color:var(--neutral-800); font-weight:700;">Data Tidak Ditemukan</h3>
+              <p style="margin:0; color:var(--neutral-500); font-size:14px; max-width:400px;">Kami tidak dapat menemukan data dengan kata kunci atau filter tersebut. Silakan gunakan kata kunci lain.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="ProgressDokumenPage.searchQuery=''; ProgressDokumenPage.filterYear='Semua'; document.querySelector('.search-bar input').value=''; document.querySelector('.form-select').value='Semua'; ProgressDokumenPage.updateUI();" style="margin-top: 8px;">Reset Filter</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  },
+
+  render() {
+    const timelineSteps = MockData.timelineSteps;
 
     return `
       <div class="page-header" style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
@@ -71,70 +194,8 @@ const ProgressDokumenPage = {
             </select>
           </div>
         </div>
-        
-        <div class="table-responsive" style="overflow-x: auto;">
-          <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
-            <thead>
-              <tr style="background: var(--neutral-50);">
-                <th style="padding: 16px; width: 60px; text-align: center; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">NO</th>
-                <th style="padding: 16px; width: 220px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">NOMOR & JUDUL</th>
-                <th style="padding: 16px; width: 200px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">MITRA</th>
-                <th style="padding: 16px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">TAHAPAN SAAT INI</th>
-                <th style="padding: 16px; width: 140px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">UPDATE TERAKHIR</th>
-                <th style="padding: 16px; width: 140px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">PROGRESS</th>
-                <th style="padding: 16px; width: 160px; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">STATUS</th>
-                <th style="padding: 16px; width: 100px; text-align: right; color: var(--neutral-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">AKSI</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--neutral-500)">Data tidak ditemukan.</td></tr>` : ''}
-              ${data.map((r, i) => {
-                let color = 'primary';
-                let bgLight = 'var(--primary-50)';
-                if (r.progress === 100) { color = 'green'; bgLight = 'var(--success-50)'; }
-                else if (r.progress < 30) { color = 'orange'; bgLight = 'var(--warning-50)'; }
-
-                return `
-                <tr class="table-row-hover">
-                  <td style="padding: 20px 16px; text-align: center; vertical-align: middle; color: var(--neutral-500); font-weight: 600;">${i + 1}</td>
-                  <td style="padding: 20px 16px; vertical-align: middle;">
-                    <div style="font-weight:700; color:var(--primary-900); margin-bottom:4px; font-size: 14px;">${r.no}</div>
-                    <div style="font-size:12px; color:var(--neutral-500); line-height: 1.5; font-weight: 500;">${r.judul}</div>
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle;">
-                    <div style="font-weight:700; color: var(--neutral-800); font-size: 14px;">${r.mitra}</div>
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle;">
-                    <div class="badge" style="background:${bgLight}; color:var(--${color}-700); padding:8px 12px; font-weight:700; font-size: 11px; border: 1px solid var(--${color}-100); border-radius: 99px; display: inline-block; white-space: normal; line-height: 1.4; max-width: 250px;">
-                      TAHAP ${r.step}: ${timelineSteps[r.step-1]}
-                    </div>
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle; color:var(--neutral-600); font-size:13px; font-weight: 500;">
-                    ${r.update}
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle;">
-                    <div style="display:flex; align-items:center; gap:12px">
-                      <div style="flex:1; height:10px; background:var(--neutral-100); border-radius:10px; overflow:hidden; border: 1px solid var(--neutral-200);">
-                        <div style="height:100%; width:${r.progress}%; background: var(--${color}-500); box-shadow: 0 0 10px rgba(var(--${color}-rgb), 0.3)"></div>
-                      </div>
-                      <span style="font-size:13px; font-weight:800; color:var(--${color}-700); min-width: 40px;">${r.progress}%</span>
-                    </div>
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle;">
-                    <div style="font-size:12px; font-weight:600; color:var(--neutral-700); line-height: 1.4; max-width: 140px;">
-                      ${r.status}
-                    </div>
-                  </td>
-                  <td style="padding: 20px 16px; vertical-align: middle; text-align: right;">
-                    <div style="display:flex; gap:6px; justify-content: flex-end;">
-                      <button class="btn btn-ghost btn-sm" style="background: var(--neutral-50); border: 1px solid var(--neutral-200);" onclick="ProgressDokumenPage.openForm('${r.id}')" title="Edit Data">✏️</button>
-                      <button class="btn btn-ghost btn-sm" style="background: #fff5f5; border: 1px solid #fed7d7; color:var(--red-500)" onclick="ProgressDokumenPage.deleteItem('${r.id}')" title="Hapus Data">🗑️</button>
-                    </div>
-                  </td>
-                </tr>
-              `}).join('')}
-            </tbody>
-          </table>
+        <div id="progress-table-container">
+          <!-- Table will be rendered here by updateUI -->
         </div>
       </div>
     `;
@@ -142,24 +203,29 @@ const ProgressDokumenPage = {
 
   handleSearch(val) {
     this.searchQuery = val;
-    App.renderPage();
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.updateUI();
+    }, 300);
   },
 
   handleYearChange(val) {
     this.filterYear = val;
-    App.renderPage();
+    this.updateUI();
   },
 
   openForm(id = null) {
     const isEdit = !!id;
     const item = isEdit ? MockData.progressDokumen.find(d => d.id === id) : {
-      no: '', judul: '', mitra: '', step: 1, tahun: '2026'
+      no: '', judul: '', mitra: '', step: 1, tahun: '2026', linkDokumen: '', fileDokumen: null
     };
+
+    this.currentUploadedFile = item.fileDokumen || null;
 
     const timelineSteps = MockData.timelineSteps;
 
     const content = `
-      <form id="form-progress" class="form-grid">
+      <form id="form-progress" novalidate class="form-grid">
         <input type="hidden" id="field-id" value="${id || ''}">
         <div class="form-group" style="grid-column: span 2">
           <label class="form-label">Nomor Dokumen</label>
@@ -189,6 +255,27 @@ const ProgressDokumenPage = {
             `).join('')}
           </select>
         </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label class="form-label">Link Dokumen (G-Drive / Cloud)</label>
+          <input type="url" id="field-link" class="form-input" value="${item.linkDokumen || ''}" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label class="form-label">Upload Dokumen Kerja Sama (PDF/Word/Excel)</label>
+          <div class="file-upload-wrapper" id="file-upload-wrapper-prog" style="border: 2px dashed var(--neutral-300); border-radius: var(--radius-md); padding: 32px; text-align: center; background: var(--neutral-50); cursor: pointer; transition: all 0.2s;" onclick="document.getElementById('field-file-prog').click()">
+            <input type="file" id="field-file-prog" class="form-input" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="ProgressDokumenPage.handleFileUpload(this)">
+            <div id="file-upload-content-prog">
+              ${item.fileDokumen ? `
+                <div style="font-size: 32px; margin-bottom: 12px;">✅</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--success-600); margin-bottom: 4px;">${item.fileDokumen.name}</div>
+                <div style="font-size: 12px; color: var(--neutral-500);">Klik untuk mengganti file</div>
+              ` : `
+                <div style="font-size: 32px; margin-bottom: 12px;">📄</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--neutral-700); margin-bottom: 4px;">Klik untuk upload atau drag and drop</div>
+                <div style="font-size: 12px; color: var(--neutral-500);">Maksimal ukuran file 10MB (PDF, Word, Excel)</div>
+              `}
+            </div>
+          </div>
+        </div>
       </form>
     `;
 
@@ -207,11 +294,33 @@ const ProgressDokumenPage = {
     const mitra = document.getElementById('field-mitra').value;
     const step = parseInt(document.getElementById('field-step').value);
     const tahun = document.getElementById('field-tahun').value;
+    const linkDokumen = document.getElementById('field-link').value;
+    const fileDokumen = this.currentUploadedFile;
 
-    if (!no || !judul || !mitra) {
-      alert('Mohon lengkapi data yang wajib diisi.');
-      return;
-    }
+    // Inline Validation
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+    const requiredFields = [
+      { id: 'field-no', msg: 'Nomor dokumen wajib diisi' },
+      { id: 'field-judul', msg: 'Judul dokumen wajib diisi' },
+      { id: 'field-mitra', msg: 'Nama mitra wajib diisi' }
+    ];
+
+    let isValid = true;
+    requiredFields.forEach(field => {
+      const el = document.getElementById(field.id);
+      if (el && !el.value.trim()) {
+        el.classList.add('is-invalid');
+        const err = document.createElement('div');
+        err.className = 'invalid-feedback';
+        err.innerText = field.msg;
+        el.parentNode.appendChild(err);
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
 
     const progress = Math.round((step / MockData.timelineSteps.length) * 100);
     const status = step === MockData.timelineSteps.length ? 'Selesai' : MockData.timelineSteps[step-1];
@@ -222,18 +331,36 @@ const ProgressDokumenPage = {
       // Update
       const index = MockData.progressDokumen.findIndex(d => d.id === id);
       if (index !== -1) {
-        MockData.progressDokumen[index] = { ...MockData.progressDokumen[index], no, judul, mitra, step, progress, status, update, tahun };
+        MockData.progressDokumen[index] = { ...MockData.progressDokumen[index], no, judul, mitra, step, progress, status, update, tahun, linkDokumen, fileDokumen };
       }
     } else {
       // Create
       const newId = (Date.now()).toString();
-      MockData.progressDokumen.unshift({ id: newId, no, judul, mitra, step, progress, status, update, tahun });
+      MockData.progressDokumen.unshift({ id: newId, no, judul, mitra, step, progress, status, update, tahun, linkDokumen, fileDokumen });
     }
 
     App.closeModal();
     this.saveToStorage();
     App.showToast(id ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan');
     App.renderPage();
+  },
+
+  handleFileUpload(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const content = document.getElementById('file-upload-content-prog');
+      const wrapper = document.getElementById('file-upload-wrapper-prog');
+      if (content && wrapper) {
+        content.innerHTML = `
+          <div style="font-size: 32px; margin-bottom: 12px;">✅</div>
+          <div style="font-size: 14px; font-weight: 600; color: var(--success-600); margin-bottom: 4px;">${file.name}</div>
+          <div style="font-size: 12px; color: var(--neutral-500);">Klik untuk mengganti file</div>
+        `;
+        wrapper.style.borderColor = 'var(--success-500)';
+        wrapper.style.background = 'var(--success-50)';
+        this.currentUploadedFile = file;
+      }
+    }
   },
 
   saveToStorage() {
