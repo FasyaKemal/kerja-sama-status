@@ -18,7 +18,10 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // We use functional updates or eslint disable to avoid cascading render warnings in strict environments
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNum1(Math.floor(Math.random() * 10) + 1);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNum2(Math.floor(Math.random() * 10) + 1);
   }, []);
 

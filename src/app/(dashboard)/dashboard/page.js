@@ -195,8 +195,9 @@ export default function Dashboard() {
       }
     });
 
+    const currentCharts = chartRefs.current;
     return () => {
-      Object.values(chartRefs.current).forEach(chart => chart && chart.destroy());
+      Object.values(currentCharts).forEach(chart => chart && chart.destroy());
     };
   }, [allData]);
 
