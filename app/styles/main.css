@@ -2363,12 +2363,7 @@ tbody tr:last-child td {
     grid-template-columns: 1fr 1fr !important;
   }
 
-  /* Form and generic 2-column inline grids */
-  .form-grid,
-  div[style*="grid-template-columns:1fr 1fr"],
-  div[style*="grid-template-columns: 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
+
 
   /* Page header */
   .page-title {
@@ -3976,6 +3971,13 @@ table tbody tr:hover {
 
   .header {
     padding: 0 var(--space-md);
+  }
+
+  /* Form and generic 2-column inline grids for tablets and below */
+  .form-grid,
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 
   .header-hamburger {

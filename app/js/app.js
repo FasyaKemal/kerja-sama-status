@@ -187,7 +187,8 @@ const App = {
         overlay = document.createElement('div');
         overlay.className = 'sidebar-overlay';
         overlay.onclick = () => App.toggleMobileMenu();
-        document.body.appendChild(overlay);
+        const layoutContainer = document.querySelector('.app-layout') || document.body;
+        layoutContainer.appendChild(overlay);
       }
       overlay.style.display = 'block';
       setTimeout(() => { overlay.style.opacity = '1'; overlay.style.pointerEvents = 'auto'; }, 10);
