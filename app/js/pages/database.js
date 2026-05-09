@@ -284,17 +284,22 @@ const DatabasePage = {
   renderModal() {
     return `
       <div id="dbModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index:1100;">
-        <div class="modal-content" style="width:95%; max-width:800px; max-height:90vh; overflow-y:auto; border-radius:20px; padding:0; box-shadow:var(--shadow-2xl);">
-          <div style="padding:20px 24px; border-bottom:1px solid var(--neutral-100); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#fff; z-index:10;">
-            <h3 id="dbModalTitle" style="margin:0; color:var(--primary-900);">Tambah Data Kerja Sama</h3>
-            <button onclick="DatabasePage.closeModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:var(--neutral-400);">✕</button>
+        <div class="modal-content" style="width:100%; max-width:600px; max-height:90vh; overflow-y:auto; border-radius:12px; padding:0; box-shadow:var(--shadow-2xl); background:#fff; position:relative;">
+          
+          <div style="padding:24px 32px 16px 32px; position:sticky; top:0; background:#fff; z-index:10; border-bottom:1px solid var(--neutral-100);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 id="dbModalTitle" style="margin:0; font-size:18px; font-weight:700; color:var(--neutral-900);">✨ Tambah Kerja Sama</h3>
+            </div>
+            <button onclick="DatabasePage.closeModal()" style="background:none; border:none; cursor:pointer; font-size:13px; font-weight:600; color:var(--neutral-500); padding:0; margin-top:12px; display:flex; align-items:center; gap:4px;">✕ Tutup</button>
           </div>
-          <form id="dbForm" onsubmit="DatabasePage.saveForm(event)" style="padding:24px;">
+
+          <form id="dbForm" onsubmit="DatabasePage.saveForm(event)" style="padding:24px 32px;">
             <input type="hidden" id="dbFormId" />
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
-              <div class="form-group">
-                <label class="form-label">Kategori Mitra <span style="color:var(--danger-500)">*</span></label>
-                <select class="form-select" id="dbKategori" required style="width:100%;">
+            
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Kategori Mitra <span style="color:var(--danger-500)">*</span></label>
+                <select class="form-select" id="dbKategori" required style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;">
                   <option value="">Pilih Kategori...</option>
                   <option>K/L</option>
                   <option>BUMN</option>
@@ -305,13 +310,15 @@ const DatabasePage = {
                   <option>Lainnya</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Nama Mitra <span style="color:var(--danger-500)">*</span></label>
-                <input type="text" class="form-input" id="dbMitra" required placeholder="Contoh: PT. Telekomunikasi Indonesia" style="width:100%;" />
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Nama Mitra <span style="color:var(--danger-500)">*</span></label>
+                <input type="text" class="form-input" id="dbMitra" required placeholder="Contoh: PT Telkom" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
-              <div class="form-group">
-                <label class="form-label">Jenis Kerja Sama <span style="color:var(--danger-500)">*</span></label>
-                <select class="form-select" id="dbJenis" required style="width:100%;">
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Jenis Kerja Sama <span style="color:var(--danger-500)">*</span></label>
+                <select class="form-select" id="dbJenis" required style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;">
                   <option value="">Pilih Jenis...</option>
                   <option>Perjanjian Kerja Sama</option>
                   <option>Nota Kesepahaman</option>
@@ -319,54 +326,76 @@ const DatabasePage = {
                   <option>Memorandum Saling Pengertian</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Nomor Dokumen (Utama)</label>
-                <input type="text" class="form-input" id="dbNoUtama" placeholder="Nomor Dokumen" style="width:100%;" />
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Nomor Dokumen</label>
+                <input type="text" class="form-input" id="dbNoUtama" placeholder="Nomor Dokumen" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
               
-              <div style="grid-column: span 2; background: var(--neutral-50); padding: 16px; border-radius: 12px; display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div class="form-group">
-                  <label class="form-label">Pihak 1 (KKP)</label>
-                  <input type="text" class="form-input" id="dbPihak1" placeholder="Jabatan Pihak 1" style="width:100%;" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Nomor Pihak 1</label>
-                  <input type="text" class="form-input" id="dbNoPihak1" placeholder="Nomor Pihak 1" style="width:100%;" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Pihak 2 (Mitra)</label>
-                  <input type="text" class="form-input" id="dbPihak2" placeholder="Jabatan Pihak 2" style="width:100%;" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Nomor Pihak 2</label>
-                  <input type="text" class="form-input" id="dbNoPihak2" placeholder="Nomor Pihak 2" style="width:100%;" />
-                </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Pihak 1 (KKP) <span style="color:var(--danger-500)">*</span></label>
+                <input type="text" class="form-input" id="dbPihak1" required placeholder="Contoh: Dirjen PRL" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Tanggal Mulai <span style="color:var(--danger-500)">*</span></label>
-                <input type="date" class="form-input" id="dbTglMulai" required style="width:100%;" />
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Nomor Pihak 1 <span style="color:var(--danger-500)">*</span></label>
+                <input type="text" class="form-input" id="dbNoPihak1" required placeholder="Contoh: xx/xxx/xx/xx/2026" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
-              <div class="form-group">
-                <label class="form-label">Tanggal Selesai <span style="color:var(--danger-500)">*</span></label>
-                <input type="date" class="form-input" id="dbTglSelesai" required style="width:100%;" />
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Pihak 2 (Mitra) <span style="color:var(--danger-500)">*</span></label>
+                <input type="text" class="form-input" id="dbPihak2" required placeholder="Contoh: Pemkab Bandung" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
-              <div class="form-group">
-                <label class="form-label">Status</label>
-                <select class="form-select" id="dbStatus" style="width:100%;">
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Nomor Pihak 2 <span style="color:var(--danger-500)">*</span></label>
+                <input type="text" class="form-input" id="dbNoPihak2" required placeholder="Contoh: xx/xxx/xx/xx/2026" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Tanggal Mulai <span style="color:var(--danger-500)">*</span></label>
+                <input type="date" class="form-input" id="dbTglMulai" required style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Berlaku Hingga <span style="color:var(--danger-500)">*</span></label>
+                <input type="date" class="form-input" id="dbTglSelesai" required style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Masa Berlaku</label>
+                <input type="text" class="form-input" id="dbMasaBerlaku" placeholder="Contoh: 5 Tahun" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Status <span style="color:var(--danger-500)">*</span></label>
+                <select class="form-select" id="dbStatus" required style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;">
                   <option>Berlaku</option>
                   <option>Tidak Berlaku</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Link Dokumen (URL)</label>
-                <input type="url" class="form-input" id="dbLink" placeholder="https://drive.google.com/..." style="width:100%;" />
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--neutral-700);">Import File Dokumen Pendukung (Opsional)</label>
+                <div style="border:2px dashed var(--neutral-200); border-radius:8px; padding:24px; text-align:center; cursor:pointer;" onclick="document.getElementById('dbFileInput').click()">
+                  <div style="font-size:24px; margin-bottom:8px; color:var(--neutral-400);">📄</div>
+                  <div style="font-size:13px; font-weight:600; color:var(--primary-700); margin-bottom:4px;">Klik untuk memilih file</div>
+                  <div style="font-size:11px; color:var(--neutral-400);">Mendukung file Excel, PDF, dan Word (Maksimal 10MB)</div>
+                  <input type="file" id="dbFileInput" style="display:none;" />
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" style="font-size:12px; font-weight:700; margin-bottom:8px;">Link Dokumen Web (Jika Ada)</label>
+                <input type="url" class="form-input" id="dbLink" placeholder="https://..." style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--neutral-200); font-size:14px;" />
               </div>
             </div>
             
-            <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--neutral-100); padding-top:24px;">
-              <button type="button" class="btn btn-ghost" onclick="DatabasePage.closeModal()">Batal</button>
-              <button type="submit" class="btn btn-primary" style="padding:12px 32px; font-weight:700;">💾 Simpan Data</button>
+            <div style="display:flex; justify-content:flex-end; gap:16px; border-top:1px solid var(--neutral-100); padding-top:24px; margin-top:24px;">
+              <button type="button" class="btn btn-ghost" onclick="DatabasePage.closeModal()" style="font-size:13px; font-weight:600; padding:10px 20px;">Batal</button>
+              <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-size:13px; font-weight:600; background:#0f172a; border:none; border-radius:8px; color:#fff; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:14px;">💾</span> Simpan Data
+              </button>
             </div>
           </form>
         </div>
@@ -377,7 +406,7 @@ const DatabasePage = {
   openModal(id) {
     const modal = document.getElementById('dbModal');
     if (!modal) return;
-    document.getElementById('dbModalTitle').textContent = id ? 'Edit Data Kerja Sama' : 'Tambah Data Kerja Sama';
+    document.getElementById('dbModalTitle').innerHTML = id ? '✨ Edit Kerja Sama' : '✨ Tambah Kerja Sama';
     document.getElementById('dbFormId').value = id || '';
     
     if (id) {
@@ -386,12 +415,14 @@ const DatabasePage = {
         document.getElementById('dbKategori').value = r.kategoriMitra || '';
         document.getElementById('dbMitra').value = r.mitra || '';
         document.getElementById('dbJenis').value = r.jenisKerjasama || '';
+        document.getElementById('dbNoUtama').value = r.noUtama || '';
         document.getElementById('dbPihak1').value = r.pihak1 || '';
         document.getElementById('dbNoPihak1').value = r.noPihak1 || '';
         document.getElementById('dbPihak2').value = r.pihak2 || '';
         document.getElementById('dbNoPihak2').value = r.noPihak2 || '';
         document.getElementById('dbTglMulai').value = this.parseDateToISO(r.tanggalMulai);
         document.getElementById('dbTglSelesai').value = this.parseDateToISO(r.tanggalSelesai);
+        document.getElementById('dbMasaBerlaku').value = r.masaBerlaku || '';
         document.getElementById('dbStatus').value = r.status || 'Berlaku';
         document.getElementById('dbLink').value = r.linkDokumen || '';
       }
@@ -431,12 +462,14 @@ const DatabasePage = {
       kategoriMitra: document.getElementById('dbKategori').value,
       mitra: document.getElementById('dbMitra').value,
       jenisKerjasama: document.getElementById('dbJenis').value,
+      noUtama: document.getElementById('dbNoUtama').value,
       pihak1: document.getElementById('dbPihak1').value,
       noPihak1: document.getElementById('dbNoPihak1').value,
       pihak2: document.getElementById('dbPihak2').value,
       noPihak2: document.getElementById('dbNoPihak2').value,
       tanggalMulai: tglMulai,
       tanggalSelesai: document.getElementById('dbTglSelesai').value,
+      masaBerlaku: document.getElementById('dbMasaBerlaku').value,
       status: document.getElementById('dbStatus').value,
       linkDokumen: document.getElementById('dbLink').value,
     };
