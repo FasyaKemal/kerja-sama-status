@@ -57,45 +57,47 @@ const DashboardPage = {
       `;
     } else {
       tableHTML = `
-        <table class="table" style="font-size:13px;width:100%;margin-top:16px;">
-          <thead>
-            <tr style="background:var(--neutral-50)">
-              <th style="padding:12px 16px">Nama Mitra</th>
-              <th style="padding:12px 16px">Jenis Kerja Sama</th>
-              <th style="padding:12px 16px">Masa Berlaku</th>
-              <th style="padding:12px 16px">Sisa Hari</th>
-              <th style="padding:12px 16px">Status</th>
-              <th style="padding:12px 16px;text-align:right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${nearingExpiry.map(r => {
-              const diff = Math.ceil((new Date(r.tanggalSelesai) - new Date()) / (1000 * 60 * 60 * 24));
-              const statusBadge = diff <= 30 
-                ? '<span class="badge badge-danger">● Segera Berakhir</span>'
-                : '<span class="badge badge-warning">● Akan Berakhir</span>';
-              
-              return `
-                <tr style="border-bottom: 1px solid var(--neutral-100); transition: background 0.2s;" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
-                  <td style="padding:16px"><strong>${r.mitra}</strong></td>
-                  <td style="padding:16px">${r.jenisKerjasama || '-'}</td>
-                  <td style="padding:16px;white-space:nowrap">${r.tanggalSelesai}</td>
-                  <td style="padding:16px"><span style="font-weight:700;color:${diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)'}">${diff} Hari</span></td>
-                  <td style="padding:16px">${statusBadge}</td>
-                  <td style="padding:16px;text-align:right">
-                    <button class="btn btn-primary btn-sm" style="font-size:11px;padding:6px 12px; border-radius:var(--radius-md); background:var(--primary-700); border:none;" 
-                      onclick="App.navigate('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kebijakan_prioritas' : 'database_kerja_sama'}'); setTimeout(() => { 
-                        const searchEl = document.getElementById('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kp-search' : 'db-search'}');
-                        if(searchEl) { searchEl.value = '${r.mitra.replace(/'/g, "\\'")}'; searchEl.dispatchEvent(new Event('input')); }
-                      }, 100)">
-                      Perbarui Data
-                    </button>
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
+        <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+          <table class="table" style="font-size:13px;width:100%;min-width:700px;margin-top:16px;">
+            <thead>
+              <tr style="background:var(--neutral-50)">
+                <th style="padding:12px 16px; white-space:nowrap;">Nama Mitra</th>
+                <th style="padding:12px 16px; white-space:nowrap;">Jenis Kerja Sama</th>
+                <th style="padding:12px 16px; white-space:nowrap;">Masa Berlaku</th>
+                <th style="padding:12px 16px; white-space:nowrap;">Sisa Hari</th>
+                <th style="padding:12px 16px; white-space:nowrap;">Status</th>
+                <th style="padding:12px 16px;text-align:right; white-space:nowrap;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${nearingExpiry.map(r => {
+                const diff = Math.ceil((new Date(r.tanggalSelesai) - new Date()) / (1000 * 60 * 60 * 24));
+                const statusBadge = diff <= 30 
+                  ? '<span class="badge badge-danger">● Segera Berakhir</span>'
+                  : '<span class="badge badge-warning">● Akan Berakhir</span>';
+                
+                return `
+                  <tr style="border-bottom: 1px solid var(--neutral-100); transition: background 0.2s;" onmouseover="this.style.background='var(--primary-50)'" onmouseout="this.style.background='#fff'">
+                    <td style="padding:16px"><strong>${r.mitra}</strong></td>
+                    <td style="padding:16px">${r.jenisKerjasama || '-'}</td>
+                    <td style="padding:16px;white-space:nowrap">${r.tanggalSelesai}</td>
+                    <td style="padding:16px"><span style="font-weight:700;color:${diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)'}">${diff} Hari</span></td>
+                    <td style="padding:16px;white-space:nowrap">${statusBadge}</td>
+                    <td style="padding:16px;text-align:right">
+                      <button class="btn btn-primary btn-sm" style="font-size:11px;padding:6px 12px; border-radius:var(--radius-md); background:var(--primary-700); border:none; white-space:nowrap;" 
+                        onclick="App.navigate('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kebijakan_prioritas' : 'database_kerja_sama'}'); setTimeout(() => { 
+                          const searchEl = document.getElementById('${r.pihak1 && r.pihak1.includes('DJPB') ? 'kp-search' : 'db-search'}');
+                          if(searchEl) { searchEl.value = '${r.mitra.replace(/'/g, "\\'")}'; searchEl.dispatchEvent(new Event('input')); }
+                        }, 100)">
+                        Perbarui Data
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
     }
 
@@ -118,7 +120,7 @@ const DashboardPage = {
       </div>
 
       <!-- SUMMARY CARDS -->
-      <div class="dashboard-stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:32px">
+      <div class="dashboard-stats-grid" style="margin-bottom:32px">
         <div class="card fade-in" style="padding:24px;background:linear-gradient(135deg, var(--primary-900) 0%, #082235 100%);color:#fff;border:none;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.1;">🏢</div>
           <div style="font-size:13px;font-weight:600;opacity:0.7;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em">Total Mitra</div>
@@ -146,7 +148,7 @@ const DashboardPage = {
       </div>
 
       <!-- TREND & DISTRIBUTION -->
-      <div class="dashboard-charts-grid" style="display:grid;grid-template-columns:3fr 2fr;gap:24px;margin-bottom:32px">
+      <div class="dashboard-charts-grid" style="margin-bottom:32px">
         <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.4s;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
             <h3 style="margin:0;font-size:16px;font-weight:700;color:var(--primary-900)">📈 Tren Pertumbuhan Kerja Sama</h3>
@@ -166,7 +168,7 @@ const DashboardPage = {
       </div>
 
       <!-- ADDITIONAL ANALYTICS -->
-      <div class="dashboard-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <div class="dashboard-charts-grid-equal" style="margin-bottom:32px">
         <div class="card fade-in" style="padding:24px; border:none; box-shadow:var(--shadow-md); animation-delay:0.55s;">
           <h3 style="margin:0 0 24px 0;font-size:16px;font-weight:700;color:var(--primary-900)">📊 Status & Jenis Kerja Sama</h3>
           <div style="position:relative;height:300px;width:100%">
@@ -182,7 +184,7 @@ const DashboardPage = {
       </div>
 
       <!-- EXPIRY ALERTS & PROGRESS SUMMARY -->
-      <div class="dashboard-charts-grid" style="display:grid;grid-template-columns:3fr 2fr;gap:24px;margin-bottom:32px">
+      <div class="dashboard-charts-grid" style="margin-bottom:32px">
         <!-- Expiry Alerts -->
         <div class="card fade-in" style="padding:24px;overflow-x:auto; animation-delay:0.6s;">
           <div style="display:flex;justify-content:space-between;align-items:center;min-width:400px;margin-bottom:16px">

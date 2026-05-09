@@ -3797,7 +3797,7 @@ const KebijakanPrioritasPage = {
 
     statsContainer.innerHTML = `
       <!-- CARD STATISTIK -->
-      <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:24px;margin-bottom:32px">
+      <div class="stats-grid" style="margin-bottom:32px">
         <div class="card" style="padding:24px; border:none; box-shadow:var(--shadow-md); background: linear-gradient(135deg, #fff 0%, var(--primary-50) 100%); position:relative; overflow:hidden;">
           <div style="position:absolute; top:-10px; right:-10px; font-size:60px; opacity:0.05;">📊</div>
           <div style="font-size:13px;font-weight:700;color:var(--primary-700);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.1em">Total Kerja Sama</div>

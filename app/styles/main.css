@@ -3560,7 +3560,7 @@ table tbody tr:hover {
 }
 
 /* --- Dashboard Responsive Grids --- */
-.dashboard-stats-grid {
+.dashboard-stats-grid, .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
@@ -3572,17 +3572,23 @@ table tbody tr:hover {
   gap: 24px;
 }
 
+.dashboard-charts-grid-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
 @media (max-width: 1024px) {
-  .dashboard-stats-grid {
+  .dashboard-stats-grid, .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .dashboard-charts-grid {
+  .dashboard-charts-grid, .dashboard-charts-grid-equal {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .dashboard-stats-grid {
+  .dashboard-stats-grid, .stats-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -3973,10 +3979,12 @@ table tbody tr:hover {
     padding: 0 var(--space-md);
   }
 
-  /* Form and generic 2-column inline grids for tablets and below */
+  /* Form and generic inline grids for tablets and below */
   .form-grid,
   div[style*="grid-template-columns:1fr 1fr"],
-  div[style*="grid-template-columns: 1fr 1fr"] {
+  div[style*="grid-template-columns: 1fr 1fr"],
+  div[style*="grid-template-columns:1fr 1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
 
