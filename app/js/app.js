@@ -95,9 +95,12 @@ const App = {
       if (savedUser) {
         Object.assign(MockData.currentUser, JSON.parse(savedUser));
       }
+    }
       
-      // Setup Hash Routing
-      window.addEventListener('hashchange', () => this.handleHashChange());
+    // Setup Hash Routing
+    window.addEventListener('hashchange', () => this.handleHashChange());
+    
+    if (this.isLoggedIn) {
       this.handleHashChange(true);
     } else {
       this.renderPage();
@@ -125,7 +128,10 @@ const App = {
 
   navigate(pageId) {
     const newHash = '#/' + pageId;
-    if (window.location.hash === newHash) return;
+    if (window.location.hash === newHash) {
+      this.handleHashChange();
+      return;
+    }
     window.location.hash = newHash;
   },
 
