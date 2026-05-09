@@ -4029,6 +4029,15 @@ table tbody tr:hover {
 
   .main-content {
     padding: var(--space-md);
+    margin-left: 0 !important;
+  }
+
+  .sidebar-brand-text {
+    font-size: 14px !important;
+  }
+
+  .sidebar-brand-sub {
+    font-size: 10px !important;
   }
 }
 
@@ -4075,6 +4084,16 @@ table tbody tr:hover {
   .form-group[style*="grid-column: 1/-1"] {
     grid-column: 1 !important;
   }
+
+  .page-filter-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .page-filter-bar > div {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -4083,8 +4102,12 @@ table tbody tr:hover {
     grid-template-columns: 1fr !important;
   }
 
-  .header-profile-name {
+  .header-profile-name, .user-role {
     display: none;
+  }
+
+  .user-info-text {
+    margin-right: 0;
   }
 
   .tab {
@@ -4100,6 +4123,40 @@ table tbody tr:hover {
     padding: 16px !important;
     gap: 12px;
   }
+
+  .page-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Specific component responsiveness */
+@media (max-width: 1024px) {
+  .modal-content {
+    width: 95% !important;
+    padding: 20px !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Ensure images and logos are responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Table Card View on Mobile (Optional but often requested) */
+/* For now, we'll keep the horizontal scroll as it's more stable for these specific tables, 
+   but we'll make the scrollbar more visible on mobile. */
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--neutral-300);
+  border-radius: 3px;
 }
 
 .table-container, .table-responsive {

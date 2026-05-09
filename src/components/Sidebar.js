@@ -34,7 +34,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
       <div className="sidebar-header">
         <div className="sidebar-brand">
           <div className="sidebar-brand-icon">
-             <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '40px', height: 'auto', marginRight: '8px' }} />
+            <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '40px', height: 'auto', marginRight: '8px' }} />
           </div>
           <div>
             <div className="sidebar-brand-text">Database Kerja Sama</div>

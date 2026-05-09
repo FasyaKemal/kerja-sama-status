@@ -95,6 +95,8 @@ export default function Dashboard() {
       const catLabels = Object.keys(catCounts);
       const catData = catLabels.map(c => catCounts[c]);
       
+      const isMobile = window.innerWidth < 768;
+      
       const donutCtx = document.getElementById('donutChart');
       if (donutCtx) {
         chartRefs.current.donut = new Chart(donutCtx, {
@@ -113,7 +115,16 @@ export default function Dashboard() {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '65%',
-            plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } }
+            plugins: { 
+              legend: { 
+                position: isMobile ? 'bottom' : 'right', 
+                labels: { 
+                  usePointStyle: true, 
+                  padding: isMobile ? 10 : 16, 
+                  font: { size: 10 } 
+                } 
+              } 
+            }
           }
         });
       }
@@ -143,7 +154,12 @@ export default function Dashboard() {
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 11 } } } },
+            plugins: { 
+              legend: { 
+                position: isMobile ? 'bottom' : 'right', 
+                labels: { usePointStyle: true, font: { size: 10 } } 
+              } 
+            },
             scales: { r: { ticks: { display: false } } }
           }
         });
