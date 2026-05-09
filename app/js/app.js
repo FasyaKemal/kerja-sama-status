@@ -156,17 +156,47 @@ const App = {
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
-    this.renderPage();
+    this.syncShellState();
   },
 
   toggleSidebar() {
     if (window.innerWidth <= 1024) {
       this.mobileMenuOpen = !this.mobileMenuOpen;
-      this.renderPage();
+      this.syncShellState();
     } else {
       this.sidebarCollapsed = !this.sidebarCollapsed;
-      const layout = document.querySelector('.app-layout');
-      if (layout) layout.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
+      this.syncShellState();
+    }
+  },
+
+  syncShellState() {
+    const layout = document.querySelector('.app-layout');
+    if (layout) {
+      layout.classList.toggle('mobile-menu-open', this.mobileMenuOpen);
+      layout.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
+      
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('mobile-open', this.mobileMenuOpen);
+      }
+    }
+    
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (this.mobileMenuOpen) {
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.onclick = () => App.toggleMobileMenu();
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'block';
+      setTimeout(() => { overlay.style.opacity = '1'; overlay.style.pointerEvents = 'auto'; }, 10);
+    } else {
+      if (overlay) {
+        overlay.style.opacity = '0'; 
+        overlay.style.pointerEvents = 'none';
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+      }
     }
   },
 
@@ -206,14 +236,13 @@ const App = {
           <div class="sidebar-hover-zone" id="sidebar-hover-zone"></div>
           ${this.renderSidebar()}
           ${this.renderHeader()}
-          <div class="main-content page-fade-in is-loading" id="main-content" onclick="if(App.mobileMenuOpen){App.mobileMenuOpen=false;App.renderPage();}">
+          <div class="main-content page-fade-in is-loading" id="main-content" onclick="if(App.mobileMenuOpen){App.toggleMobileMenu();}">
             ${page.renderer()}
           </div>
         </div>
         <div id="modal-container"></div>
 
         ${this.showNotifPanel ? this.renderNotifPanel() : ''}
-        ${this.mobileMenuOpen ? '<div class="sidebar-overlay" onclick="App.toggleMobileMenu()"></div>' : ''}
       `;
     }
 

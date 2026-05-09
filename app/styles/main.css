@@ -2249,7 +2249,6 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
     grid-template-areas:
       "header"
-      "topbar"
       "main";
   }
 
@@ -2352,20 +2351,23 @@ tbody tr:last-child td {
   }
 
   /* Inline grid overrides for dashboard */
-  div[style*="grid-template-columns:repeat(3"] {
+  div[style*="grid-template-columns:repeat(3"],
+  div[style*="grid-template-columns: repeat(3"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"],
+  div[style*="grid-template-columns:1fr 1fr 1fr"] {
     grid-template-columns: 1fr 1fr !important;
   }
 
-  div[style*="grid-template-columns:repeat(4"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  div[style*="grid-template-columns: repeat(3"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
+  div[style*="grid-template-columns:repeat(4"],
   div[style*="grid-template-columns: repeat(4"] {
     grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Form and generic 2-column inline grids */
+  .form-grid,
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
   }
 
   /* Page header */
@@ -2496,7 +2498,9 @@ tbody tr:last-child td {
 
   /* 3-col grids → 1 col */
   div[style*="grid-template-columns:repeat(3"],
-  div[style*="grid-template-columns: repeat(3"] {
+  div[style*="grid-template-columns: repeat(3"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"],
+  div[style*="grid-template-columns:1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
 
