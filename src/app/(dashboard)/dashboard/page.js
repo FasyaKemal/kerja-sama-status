@@ -216,20 +216,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div id="main-content" style={{ padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
-      <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--neutral-900)' }}>Monev Dashboard</h1>
-          <p style={{ margin: '4px 0 0 0', color: 'var(--neutral-500)', fontSize: '14px' }}>Monitoring Database Kerja Sama</p>
+    <div id="main-content" style={{ padding: 'clamp(12px, 3vw, 24px)', animation: 'fadeIn 0.3s ease-out' }}>
+      <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, color: 'var(--neutral-900)' }}>Monev Dashboard</h1>
+          <p style={{ margin: '4px 0 0 0', color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={exportReport}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
+          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto', minHeight: '40px' }} onClick={exportReport}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-            Ekspor Laporan
+            <span style={{ whiteSpace: 'nowrap' }}>Ekspor Laporan</span>
           </button>
-          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-700)' }}>Filter Tahun:</span>
-            <select className="form-select" style={{ minWidth: '140px', padding: '8px 12px', fontSize: '13px' }} onChange={(e) => setFilterTahun(e.target.value)} value={filterTahun}>
+          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto' }}>
+            <span style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-700)', whiteSpace: 'nowrap' }}>Filter Tahun:</span>
+            <select className="form-select" style={{ padding: '8px 12px', fontSize: 'clamp(11px, 2vw, 13px)', minWidth: '120px' }} onChange={(e) => setFilterTahun(e.target.value)} value={filterTahun}>
               <option value="all">Semua Tahun</option>
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -237,117 +237,117 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="dashboard-stats-grid" style={{ marginBottom: '32px' }}>
-        <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, var(--primary-900) 0%, #082235 100%)', color: '#fff', border: 'none', boxShadow: 'var(--shadow-lg)', position: 'relative', overflow: 'hidden' }}>
+      <div className="dashboard-stats-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, var(--primary-900) 0%, #082235 100%)', color: '#fff', border: 'none', boxShadow: 'var(--shadow-lg)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
             <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Mitra</div>
-          <div style={{ fontSize: '32px', fontWeight: 800 }}>{totalMitra}</div>
-          <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '8px' }}>Entitas unik terdaftar</div>
+          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Mitra</div>
+          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800 }}>{totalMitra}</div>
+          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', opacity: 0.6, marginTop: '8px' }}>Entitas unik terdaftar</div>
         </div>
-        <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, #fff 0%, var(--primary-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, #fff 0%, var(--primary-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--primary-600)' }}>
             <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Dokumen</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary-900)' }}>{totalDokumen}</div>
-          <div style={{ fontSize: '11px', color: 'var(--neutral-400)', marginTop: '8px' }}>NK, PKS, dan MSP</div>
+          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Dokumen</div>
+          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--primary-900)' }}>{totalDokumen}</div>
+          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--neutral-400)', marginTop: '8px' }}>NK, PKS, dan MSP</div>
         </div>
-        <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, #fff 0%, var(--success-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, #fff 0%, var(--success-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--success-600)' }}>
             <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Aktif</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)' }}>{aktifCount}</div>
-          <div style={{ fontSize: '11px', color: 'var(--success-500)', marginTop: '8px' }}>Sedang berjalan</div>
+          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Aktif</div>
+          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--success-600)' }}>{aktifCount}</div>
+          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--success-500)', marginTop: '8px' }}>Sedang berjalan</div>
         </div>
-        <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--warning-100) 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--warning-100) 100%)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--warning-600)' }}>
             <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Akan Berakhir</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--warning-600)' }}>{akanBerakhirCount}</div>
-          <div style={{ fontSize: '11px', color: 'var(--warning-500)', marginTop: '8px' }}>Dalam 90 hari ke depan</div>
+          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Akan Berakhir</div>
+          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--warning-600)' }}>{akanBerakhirCount}</div>
+          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--warning-500)', marginTop: '8px' }}>Dalam 90 hari ke depan</div>
         </div>
       </div>
 
-      <div className="dashboard-charts-grid" style={{ marginBottom: '32px' }}>
-        <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="dashboard-charts-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(16px, 4vw, 24px)', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
               Tren Pertumbuhan Kerja Sama
             </h3>
-            <span style={{ fontSize: '11px', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>Data Historis</span>
+            <span style={{ fontSize: '11px', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '20px', fontWeight: 700, whiteSpace: 'nowrap' }}>Data Historis</span>
           </div>
-          <div style={{ position: 'relative', height: '320px', width: '100%' }}>
-            <canvas id="trendChart"></canvas>
+          <div style={{ position: 'relative', minHeight: '250px', width: '100%', height: 'auto' }}>
+            <canvas id="trendChart" style={{ maxHeight: '320px' }}></canvas>
           </div>
         </div>
-        <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)' }}>
+          <h3 style={{ margin: '0 0 clamp(16px, 4vw, 24px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
             Distribusi Kategori Mitra
           </h3>
-          <div style={{ position: 'relative', height: '320px', width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <canvas id="donutChart"></canvas>
+          <div style={{ position: 'relative', minHeight: '250px', width: '100%', display: 'flex', justifyContent: 'center', height: 'auto' }}>
+            <canvas id="donutChart" style={{ maxHeight: '320px' }}></canvas>
           </div>
         </div>
       </div>
 
-      <div className="dashboard-charts-grid-equal" style={{ marginBottom: '32px' }}>
-        <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="dashboard-charts-grid-equal" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)' }}>
+          <h3 style={{ margin: '0 0 clamp(16px, 4vw, 24px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
             Status & Jenis Kerja Sama
           </h3>
-          <div style={{ position: 'relative', height: '300px', width: '100%' }}>
-            <canvas id="statusPolarChart"></canvas>
+          <div style={{ position: 'relative', minHeight: '240px', width: '100%', height: 'auto' }}>
+            <canvas id="statusPolarChart" style={{ maxHeight: '300px' }}></canvas>
           </div>
         </div>
-        <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)' }}>
+          <h3 style={{ margin: '0 0 clamp(16px, 4vw, 24px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55-.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
             Top 5 Mitra Teraktif
           </h3>
-          <div style={{ position: 'relative', height: '300px', width: '100%' }}>
-            <canvas id="topMitraChart"></canvas>
+          <div style={{ position: 'relative', minHeight: '240px', width: '100%', height: 'auto' }}>
+            <canvas id="topMitraChart" style={{ maxHeight: '300px' }}></canvas>
           </div>
         </div>
       </div>
 
-      <div className="dashboard-charts-grid" style={{ marginBottom: '32px' }}>
-        <div className="card fade-in" style={{ padding: '24px', overflowX: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minWidth: '400px', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="dashboard-charts-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(12px, 3vw, 16px)', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
               Dokumen Mendekati Akhir
             </h3>
-            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => router.push('/kebijakan-prioritas')}>
+            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }} onClick={() => router.push('/kebijakan-prioritas')}>
               Lihat Semua
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </button>
           </div>
           {nearingExpiry.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--neutral-50)', borderRadius: '12px', marginTop: '16px' }}>
+            <div style={{ textAlign: 'center', padding: 'clamp(24px, 5vw, 40px) 20px', background: 'var(--neutral-50)', borderRadius: '12px', marginTop: '16px' }}>
               <div style={{ opacity: 0.5, marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
               <h4 style={{ margin: '0 0 8px 0', color: 'var(--success-700)', fontWeight: 700 }}>Semua Terkendali!</h4>
-              <p style={{ color: 'var(--neutral-600)', fontSize: '14px', margin: 0 }}>Tidak ada dokumen kerja sama yang mendekati masa kedaluwarsa dalam 4 bulan ke depan.</p>
+              <p style={{ color: 'var(--neutral-600)', fontSize: 'clamp(12px, 2vw, 14px)', margin: 0 }}>Tidak ada dokumen kerja sama yang mendekati masa kedaluwarsa dalam 4 bulan ke depan.</p>
             </div>
           ) : (
-            <div className="table-responsive" style={{ overflowX: 'auto', width: '100%' }}>
-              <table className="table" style={{ fontSize: '13px', width: '100%', minWidth: '700px', marginTop: '16px' }}>
+            <div className="table-responsive" style={{ overflowX: 'auto', width: '100%', marginTop: '16px' }}>
+              <table className="table" style={{ fontSize: 'clamp(11px, 2vw, 13px)', width: '100%', minWidth: '600px' }}>
                 <thead>
                   <tr style={{ background: 'var(--neutral-50)' }}>
-                    <th style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>Nama Mitra</th>
-                    <th style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>Jenis Kerja Sama</th>
-                    <th style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>Masa Berlaku</th>
-                    <th style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>Sisa Hari</th>
-                    <th style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>Aksi</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Nama Mitra</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Jenis Kerja Sama</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Masa Berlaku</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Sisa Hari</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Status</th>
+                    <th style={{ padding: '12px 10px', textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -355,15 +355,15 @@ export default function Dashboard() {
                     const diff = Math.ceil((new Date(r.tanggalSelesai) - new Date()) / (1000 * 60 * 60 * 24));
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--neutral-100)' }}>
-                        <td style={{ padding: '16px' }}><strong>{r.mitra}</strong></td>
-                        <td style={{ padding: '16px' }}>{r.jenisKerjasama || '-'}</td>
-                        <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>{r.tanggalSelesai}</td>
-                        <td style={{ padding: '16px' }}><span style={{ fontWeight: 700, color: diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>{diff} Hari</span></td>
-                        <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
-                          <span className={`badge badge-${diff <= 30 ? 'danger' : 'warning'}`}>● {diff <= 30 ? 'Segera Berakhir' : 'Akan Berakhir'}</span>
+                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><strong>{r.mitra}</strong></td>
+                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>{r.jenisKerjasama || '-'}</td>
+                        <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>{r.tanggalSelesai}</td>
+                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><span style={{ fontWeight: 700, color: diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>{diff} Hari</span></td>
+                        <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
+                          <span className={`badge badge-${diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>● {diff <= 30 ? 'Segera Berakhir' : 'Akan Berakhir'}</span>
                         </td>
-                        <td style={{ padding: '16px', textAlign: 'right' }}>
-                          <button className="btn btn-primary btn-sm" style={{ fontSize: '11px', padding: '6px 12px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>Perbarui Data</button>
+                        <td style={{ padding: '12px 10px', textAlign: 'right' }}>
+                          <button className="btn btn-primary btn-sm" style={{ fontSize: 'clamp(10px, 2vw, 11px)', padding: '6px 10px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>Perbarui Data</button>
                         </td>
                       </tr>
                     );
@@ -373,24 +373,24 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-        <div className="card fade-in" style={{ padding: '24px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
+          <h3 style={{ margin: '0 0 clamp(12px, 3vw, 20px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
             Progress Penyusunan
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
             {(data.progressDokumen || []).slice(0, 4).map((p, i) => {
               let color = p.progress >= 80 ? 'success' : p.progress >= 40 ? 'primary' : 'warning';
               return (
-                <div key={i} style={{ padding: '12px', background: 'var(--neutral-50)', borderRadius: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>{p.mitra}</span>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: `var(--${color}-600)` }}>{p.progress}%</span>
+                <div key={i} style={{ padding: 'clamp(10px, 2vw, 12px)', background: 'var(--neutral-50)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
+                    <span style={{ fontWeight: 700, fontSize: 'clamp(12px, 2vw, 13px)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70%' }}>{p.mitra}</span>
+                    <span style={{ fontSize: 'clamp(11px, 2vw, 12px)', fontWeight: 600, color: `var(--${color}-600)`, whiteSpace: 'nowrap' }}>{p.progress}%</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--neutral-200)', borderRadius: '3px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${p.progress}%`, background: `var(--${color}-500)` }}></div>
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--neutral-500)', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--neutral-500)', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Tahap {p.step}</span>
                     <span>{p.update}</span>
                   </div>

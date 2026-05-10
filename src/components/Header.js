@@ -42,7 +42,7 @@ export default function Header({ toggleMobileMenu, toggleSidebar }) {
       height: '64px',
       borderBottom: '1px solid #e2e8f0',
       position: 'relative',
-      zIndex: 1000,
+      zIndex: 50,
       boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -62,8 +62,11 @@ export default function Header({ toggleMobileMenu, toggleSidebar }) {
             cursor: 'pointer',
             padding: 0,
             margin: 0,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+            outline: 'none'
           }}
+          onFocus={(e) => e.target.style.outline = 'none'}
+          onBlur={(e) => e.target.style.outline = 'none'}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="7" x2="20" y2="7"></line>
