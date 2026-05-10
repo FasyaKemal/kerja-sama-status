@@ -223,7 +223,10 @@ export default function Dashboard() {
           <p style={{ margin: '4px 0 0 0', color: 'var(--neutral-500)', fontSize: '14px' }}>Monitoring Database Kerja Sama</p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)' }} onClick={exportReport}>📄 Ekspor Laporan</button>
+          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={exportReport}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+            Ekspor Laporan
+          </button>
           <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-700)' }}>Filter Tahun:</span>
             <select className="form-select" style={{ minWidth: '140px', padding: '8px 12px', fontSize: '13px' }} onChange={(e) => setFilterTahun(e.target.value)} value={filterTahun}>
@@ -236,25 +239,33 @@ export default function Dashboard() {
 
       <div className="dashboard-stats-grid" style={{ marginBottom: '32px' }}>
         <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, var(--primary-900) 0%, #082235 100%)', color: '#fff', border: 'none', boxShadow: 'var(--shadow-lg)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.1 }}>🏢</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
+          </div>
           <div style={{ fontSize: '13px', fontWeight: 600, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Mitra</div>
           <div style={{ fontSize: '32px', fontWeight: 800 }}>{totalMitra}</div>
           <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '8px' }}>Entitas unik terdaftar</div>
         </div>
         <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, #fff 0%, var(--primary-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.05 }}>📄</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--primary-600)' }}>
+            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          </div>
           <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Dokumen</div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary-900)' }}>{totalDokumen}</div>
           <div style={{ fontSize: '11px', color: 'var(--neutral-400)', marginTop: '8px' }}>NK, PKS, dan MSP</div>
         </div>
         <div className="card fade-in" style={{ padding: '24px', background: 'linear-gradient(135deg, #fff 0%, var(--success-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.05 }}>✅</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--success-600)' }}>
+            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
           <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Aktif</div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)' }}>{aktifCount}</div>
           <div style={{ fontSize: '11px', color: 'var(--success-500)', marginTop: '8px' }}>Sedang berjalan</div>
         </div>
         <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--warning-100) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '60px', opacity: 0.05 }}>🕒</div>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--warning-600)' }}>
+            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
           <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Akan Berakhir</div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--warning-600)' }}>{akanBerakhirCount}</div>
           <div style={{ fontSize: '11px', color: 'var(--warning-500)', marginTop: '8px' }}>Dalam 90 hari ke depan</div>
@@ -264,7 +275,10 @@ export default function Dashboard() {
       <div className="dashboard-charts-grid" style={{ marginBottom: '32px' }}>
         <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)' }}>📈 Tren Pertumbuhan Kerja Sama</h3>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+              Tren Pertumbuhan Kerja Sama
+            </h3>
             <span style={{ fontSize: '11px', color: 'var(--primary-600)', background: 'var(--primary-50)', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>Data Historis</span>
           </div>
           <div style={{ position: 'relative', height: '320px', width: '100%' }}>
@@ -272,7 +286,10 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)' }}>🏢 Distribusi Kategori Mitra</h3>
+          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
+            Distribusi Kategori Mitra
+          </h3>
           <div style={{ position: 'relative', height: '320px', width: '100%', display: 'flex', justifyContent: 'center' }}>
             <canvas id="donutChart"></canvas>
           </div>
@@ -281,13 +298,19 @@ export default function Dashboard() {
 
       <div className="dashboard-charts-grid-equal" style={{ marginBottom: '32px' }}>
         <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)' }}>📊 Status & Jenis Kerja Sama</h3>
+          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Status & Jenis Kerja Sama
+          </h3>
           <div style={{ position: 'relative', height: '300px', width: '100%' }}>
             <canvas id="statusPolarChart"></canvas>
           </div>
         </div>
         <div className="card fade-in" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)' }}>
-          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)' }}>🏆 Top 5 Mitra Teraktif</h3>
+          <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55-.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+            Top 5 Mitra Teraktif
+          </h3>
           <div style={{ position: 'relative', height: '300px', width: '100%' }}>
             <canvas id="topMitraChart"></canvas>
           </div>
@@ -297,12 +320,20 @@ export default function Dashboard() {
       <div className="dashboard-charts-grid" style={{ marginBottom: '32px' }}>
         <div className="card fade-in" style={{ padding: '24px', overflowX: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minWidth: '400px', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>⚠️ Dokumen Mendekati Akhir</h3>
-            <button className="btn btn-ghost btn-sm" onClick={() => router.push('/kebijakan-prioritas')}>Lihat Semua ➔</button>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Dokumen Mendekati Akhir
+            </h3>
+            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => router.push('/kebijakan-prioritas')}>
+              Lihat Semua
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
           </div>
           {nearingExpiry.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--neutral-50)', borderRadius: '12px', marginTop: '16px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>✨</div>
+              <div style={{ opacity: 0.5, marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
               <h4 style={{ margin: '0 0 8px 0', color: 'var(--success-700)', fontWeight: 700 }}>Semua Terkendali!</h4>
               <p style={{ color: 'var(--neutral-600)', fontSize: '14px', margin: 0 }}>Tidak ada dokumen kerja sama yang mendekati masa kedaluwarsa dalam 4 bulan ke depan.</p>
             </div>
@@ -343,7 +374,10 @@ export default function Dashboard() {
           )}
         </div>
         <div className="card fade-in" style={{ padding: '24px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)' }}>📈 Progress Penyusunan</h3>
+          <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            Progress Penyusunan
+          </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {(data.progressDokumen || []).slice(0, 4).map((p, i) => {
               let color = p.progress >= 80 ? 'success' : p.progress >= 40 ? 'primary' : 'warning';
@@ -363,7 +397,10 @@ export default function Dashboard() {
                 </div>
               );
             })}
-            <button className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: '8px' }} onClick={() => router.push('/progress-dokumen')}>Lihat Semua Progress ➔</button>
+            <button className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }} onClick={() => router.push('/progress-dokumen')}>
+              Lihat Semua Progress
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
+export function proxy(request) {
   // Get the auth token from cookies
   const authToken = request.cookies.get('auth_token')?.value;
 

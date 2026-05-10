@@ -1,65 +1,84 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-export default function Header({ toggleMobileMenu }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const router = useRouter();
+export default function Header({ toggleMobileMenu, toggleSidebar }) {
+  const [currentDate, setCurrentDate] = useState('');
 
-  const handleLogoutClick = (e) => {
-    if (e) e.preventDefault();
-    setDropdownOpen(false); // Close dropdown
-    setShowLogoutModal(true);
-  };
+  useEffect(() => {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-  const executeLogout = () => {
-    document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    localStorage.removeItem('kinerjaku_loggedIn');
-    localStorage.removeItem('kinerjaku_user');
-    router.push('/login');
+    const now = new Date();
+    const day = days[now.getDay()];
+    const date = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+
+    setCurrentDate(`${day}, ${date} ${month} ${year}`);
+  }, []);
+
+  const handleHamburgerClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Only toggle sidebar for desktop (wide screens)
+    // Mobile menu toggle is handled separately or by screen width
+    if (window.innerWidth > 992) {
+      if (toggleSidebar) toggleSidebar();
+    } else {
+      if (toggleMobileMenu) toggleMobileMenu();
+    }
   };
 
   return (
-    <header className="header">
-      <div className="header-left">
-        <button className="header-hamburger" onClick={toggleMobileMenu} aria-label="Menu">☰</button>
+    <div style={{
+      gridArea: 'header',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 24px',
+      background: '#ffffff',
+      height: '64px',
+      borderBottom: '1px solid #e2e8f0',
+      position: 'relative',
+      zIndex: 1000,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <button
+          onClick={handleHamburgerClick}
+          aria-label="Menu"
+          style={{
+            background: '#f1f5f9',
+            border: 'none',
+            borderRadius: '12px',
+            width: '46px',
+            height: '46px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#334155',
+            cursor: 'pointer',
+            padding: 0,
+            margin: 0,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="10.5" x2="20" y2="10.5"></line>
+            <line x1="4" y1="14" x2="20" y2="14"></line>
+            <line x1="4" y1="17.5" x2="20" y2="17.5"></line>
+          </svg>
+        </button>
       </div>
-      <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div className="user-profile-wrapper">
-          <div className="user-profile-btn" onClick={() => setDropdownOpen(!dropdownOpen)}>
-            <div className="user-avatar">A</div>
-            <div className="user-info-text">
-              <div className="user-name">Admin</div>
-              <div className="user-role">Super Admin</div>
-            </div>
-            <span className="chevron-down">▾</span>
-          </div>
-          <div id="profile-dropdown" className={`header-dropdown ${dropdownOpen ? 'show' : ''}`}>
-            <a href="#"><span className="icon">👤</span> Profil Saya</a>
-            <a href="#"><span className="icon">⚙️</span> Pengaturan</a>
-            <hr />
-            <button onClick={handleLogoutClick} className="w-full text-left" style={{ color: 'var(--red-500)', background: 'none', border: 'none', padding: '10px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="icon">🚪</span> Keluar
-            </button>
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '14px', fontWeight: 500 }}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          {currentDate}
         </div>
       </div>
-
-      {showLogoutModal && (
-        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-content" style={{ width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '32px 24px', background: '#fff', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚪</div>
-            <h3 style={{ margin: '0 0 12px 0', fontSize: '20px', fontWeight: 800, color: 'var(--neutral-900)' }}>Konfirmasi Keluar</h3>
-            <p style={{ margin: '0 0 32px 0', fontSize: '15px', color: 'var(--neutral-600)', lineHeight: '1.5' }}>Apakah Anda yakin ingin keluar dari aplikasi?</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-              <button className="btn btn-ghost" onClick={() => setShowLogoutModal(false)} style={{ padding: '12px 24px', fontWeight: 600, fontSize: '14px', borderRadius: '10px' }}>Batal</button>
-              <button className="btn btn-primary" onClick={executeLogout} style={{ padding: '12px 24px', background: 'var(--danger-600)', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 600, fontSize: '14px' }}>Ya, Keluar</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
+    </div>
   );
 }

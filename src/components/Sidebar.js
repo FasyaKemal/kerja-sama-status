@@ -1,17 +1,42 @@
-"use client";
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
+export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarCollapsed }) {
   const pathname = usePathname();
   const router = useRouter();
   const [expandedMenus, setExpandedMenus] = useState({});
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [userData, setUserData] = useState({
+    fullName: 'admin',
+    role: 'Administrator'
+  });
+
+  const loadUserData = () => {
+    const savedUser = localStorage.getItem('kinerjaku_user');
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        setUserData({
+          fullName: parsed.fullName || 'admin',
+          role: parsed.role || 'Administrator'
+        });
+      } catch (e) {
+        console.error("Gagal memuat profil");
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadUserData();
+    window.addEventListener('profileUpdated', loadUserData);
+    return () => window.removeEventListener('profileUpdated', loadUserData);
+  }, []);
 
   const handleLogoutClick = (e) => {
     if (e) e.preventDefault();
+    setProfileDropdownOpen(false);
     setShowLogoutModal(true);
   };
 
@@ -30,42 +55,70 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   ];
 
   return (
-    <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+    <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <div className="sidebar-brand-icon">
-            <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '40px', height: 'auto', marginRight: '8px' }} />
+        {!sidebarCollapsed && (
+          <div className="sidebar-brand">
+            <div className="sidebar-brand-icon">
+              <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '40px', height: 'auto', marginRight: '8px' }} />
+            </div>
+            <div>
+              <div className="sidebar-brand-text">Database Kerja Sama</div>
+              <div className="sidebar-brand-sub">Biro Perencanaan KKP</div>
+            </div>
           </div>
-          <div>
-            <div className="sidebar-brand-text">Database Kerja Sama</div>
-            <div className="sidebar-brand-sub">Biro Perencanaan KKP</div>
+        )}
+        {sidebarCollapsed && (
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '32px', height: 'auto' }} />
           </div>
-        </div>
+        )}
       </div>
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">Menu Utama</div>
+        {!sidebarCollapsed && <div className="sidebar-section-label">Menu Utama</div>}
         {menuItems.map(item => {
           const isActive = pathname === item.id || (pathname === '/' && item.id === '/dashboard');
           return (
             <Link key={item.id} href={item.id} className={`sidebar-item ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
               <span className="sidebar-item-icon">{item.icon}</span>
-              <span className="sidebar-item-label">{item.label}</span>
+              {!sidebarCollapsed && <span className="sidebar-item-label">{item.label}</span>}
             </Link>
           );
         })}
       </nav>
-      <div className="sidebar-footer">
-        <button onClick={handleLogoutClick} className="sidebar-item w-full text-left bg-transparent border-none cursor-pointer">
-          <span className="sidebar-item-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span>
-          <span className="sidebar-item-label">Keluar</span>
-        </button>
+      
+      <div className="sidebar-footer" style={{ padding: '16px', position: 'relative', marginTop: 'auto' }}>
+        {profileDropdownOpen && (
+          <div style={{ position: 'absolute', bottom: '100%', left: '0', right: '0', marginBottom: '8px', background: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 100 }}>
+            <button onClick={() => { setProfileDropdownOpen(false); router.push('/profil'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span style={{ fontSize: '14px', fontWeight: 500 }}>Profile</span>
+            </button>
+            <button onClick={handleLogoutClick} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span style={{ fontSize: '14px', fontWeight: 500 }}>Logout</span>
+            </button>
+          </div>
+        )}
+        <div onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', background: 'transparent', borderRadius: '0', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#00bcd4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '16px' }}>{userData.fullName.substring(0, 1).toUpperCase()}</div>
+          {!sidebarCollapsed && (
+            <>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={{ color: 'white', fontWeight: 600, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userData.fullName}</div>
+                <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userData.role}</div>
+              </div>
+              <div style={{ color: 'rgba(255, 255, 255, 0.5)', display: 'flex', alignItems: 'center' }}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: profileDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <div className="sidebar-wave"></div>
 
       {showLogoutModal && (
         <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-content" style={{ width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '32px 24px', background: '#fff', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚪</div>
             <h3 style={{ margin: '0 0 12px 0', fontSize: '20px', fontWeight: 800, color: 'var(--neutral-900)' }}>Konfirmasi Keluar</h3>
             <p style={{ margin: '0 0 32px 0', fontSize: '15px', color: 'var(--neutral-600)', lineHeight: '1.5' }}>Apakah Anda yakin ingin keluar dari aplikasi?</p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>

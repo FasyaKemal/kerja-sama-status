@@ -98,8 +98,12 @@ export default function Login() {
               <label className="label-v2">Password</label>
               <div className="password-wrapper">
                 <input className="input-v2" type={showPassword ? "text" : "password"} placeholder="Masukan password anda" required value={password} onChange={e => setPassword(e.target.value)} />
-                <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
-                  <span>{showPassword ? '🔒' : '👁️'}</span>
+                <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  )}
                 </button>
               </div>
             </div>
@@ -112,7 +116,14 @@ export default function Login() {
             )}
 
             <button type="submit" className="btn-login-v2" disabled={isLoading}>
-              <span>{isLoading ? 'Memproses...' : '➔ Masuk'}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {isLoading ? 'Memproses...' : (
+                  <>
+                    Masuk
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </>
+                )}
+              </span>
             </button>
           </form>
         </div>
