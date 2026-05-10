@@ -113,7 +113,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
               </div>
             </>
           )}
-        </div>
+        </button>
       </div>
 
       {showLogoutModal && (
