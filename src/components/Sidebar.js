@@ -89,19 +89,19 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
       
       <div className="sidebar-footer" style={{ padding: '16px', position: 'relative', marginTop: 'auto' }}>
         {profileDropdownOpen && (
-          <div style={{ position: 'absolute', bottom: '100%', left: '0', right: '0', marginBottom: '8px', background: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 100 }}>
-            <button onClick={() => { setProfileDropdownOpen(false); router.push('/profil'); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <div role="menu" style={{ position: 'absolute', bottom: '100%', left: '0', right: '0', marginBottom: '8px', background: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 100 }}>
+            <button role="menuitem" onClick={() => { setProfileDropdownOpen(false); router.push('/profil'); }} aria-label="Buka halaman profil pengguna" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.15s ease' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               <span style={{ fontSize: '14px', fontWeight: 500 }}>Profile</span>
             </button>
-            <button onClick={handleLogoutClick} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left' }}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <button role="menuitem" onClick={handleLogoutClick} aria-label="Keluar dari aplikasi" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s ease' }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
               <span style={{ fontSize: '14px', fontWeight: 500 }}>Logout</span>
             </button>
           </div>
         )}
-        <div onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', background: 'transparent', borderRadius: '0', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#00bcd4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '16px' }}>{userData.fullName.substring(0, 1).toUpperCase()}</div>
+        <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} aria-label={profileDropdownOpen ? 'Tutup menu profil' : 'Buka menu profil'} aria-expanded={profileDropdownOpen} aria-haspopup="true" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', background: 'transparent', borderRadius: '0', cursor: 'pointer', border: 'none', transition: 'background 0.2s', width: '100%', textAlign: 'left' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#00bcd4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '16px' }} aria-label={`Avatar ${userData.fullName}`}>{userData.fullName.substring(0, 1).toUpperCase()}</div>
           {!sidebarCollapsed && (
             <>
               <div style={{ flex: 1, overflow: 'hidden' }}>
