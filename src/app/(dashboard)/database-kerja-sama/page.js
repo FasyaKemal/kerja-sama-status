@@ -29,7 +29,7 @@ export default function DatabaseKerjaSama() {
     noPihak2: '',
     tanggalMulai: '',
     tanggalSelesai: '',
-    status: 'Aktif',
+    status: 'Berlaku',
     fileDokumen: '',
     linkDokumen: ''
   });
@@ -169,6 +169,13 @@ export default function DatabaseKerjaSama() {
           <select className="form-select" style={{ minWidth: '180px', height: '48px', borderRadius: '12px' }} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Semua Kategori</option>
             {[...new Set(dbData.map(d => d.kategoriMitra))].map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select className="form-select" style={{ minWidth: '150px', height: '48px', borderRadius: '12px' }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+            <option value="all">Semua Status</option>
+            <option value="Berlaku">Berlaku</option>
+            <option value="Tidak Berlaku">Tidak Berlaku</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Berakhir">Berakhir</option>
           </select>
         </div>
 
@@ -332,8 +339,8 @@ export default function DatabaseKerjaSama() {
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Status <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                     <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                      <option>Aktif</option>
-                      <option>Berakhir</option>
+                      <option>Berlaku</option>
+                      <option>Tidak Berlaku</option>
                       <option>Lainnya</option>
                     </select>
                   </div>
