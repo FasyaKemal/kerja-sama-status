@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import * as XLSX from 'xlsx';
 import Portal from '@/components/Portal';
+import SuccessPopup from '@/components/SuccessPopup';
 
 export default function KebijakanPrioritas() {
   const { data, updateKebijakan } = useData();
@@ -18,6 +19,8 @@ export default function KebijakanPrioritas() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
     kategoriMitra: '',
@@ -29,7 +32,7 @@ export default function KebijakanPrioritas() {
     noPihak2: '',
     tanggalMulai: '',
     tanggalSelesai: '',
-    status: 'Berlaku',
+    status: '', // Automatically calculated
     fileDokumen: '',
     linkDokumen: ''
   });
@@ -39,7 +42,25 @@ export default function KebijakanPrioritas() {
       Object.values(item).some(val => val?.toString().toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesYear = filterYear === 'all' || item.tahun === filterYear;
     const matchesCategory = filterCategory === 'all' || item.kategoriMitra === filterCategory;
-    const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
+    const itemStatus = (() => {
+      if (!item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
+      const end = new Date(item.tanggalSelesai);
+      const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
+      if (diff <= 0) return 'Tidak Berlaku';
+      if (diff <= 90) return 'Akan Berakhir';
+      return 'Berlaku';
+    })();
+
+    let matchesStatus = filterStatus === 'all' || itemStatus === filterStatus;
+    
+    if (filterStatus === 'Tidak Berlaku') {
+      matchesStatus = itemStatus === 'Tidak Berlaku';
+    } else if (filterStatus === 'Akan Berakhir') {
+      matchesStatus = itemStatus === 'Akan Berakhir';
+    } else if (filterStatus === 'Berlaku') {
+      matchesStatus = itemStatus === 'Berlaku';
+    }
+    
     return matchesSearch && matchesYear && matchesCategory && matchesStatus;
   });
 
@@ -86,12 +107,15 @@ export default function KebijakanPrioritas() {
 
   const saveForm = (e) => {
     e.preventDefault();
-    const newData = editData 
+    const isEdit = !!editData;
+    const newData = isEdit
       ? dbData.map(d => d.id === editData.id ? { ...formData } : d)
       : [...dbData, { ...formData, id: Date.now() }];
     
     updateKebijakan(newData);
     closeModal();
+    setSuccessMessage(isEdit ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!');
+    setShowSuccess(true);
   };
 
   const deleteItem = (id) => {
@@ -107,12 +131,27 @@ export default function KebijakanPrioritas() {
     XLSX.writeFile(wb, "Kebijakan_Prioritas.xlsx");
   };
 
-  const renderStatusBadge = (status) => {
-    const isAktif = status?.toLowerCase() === 'aktif' || status?.toLowerCase() === 'berlaku';
+  const renderStatusBadge = (item) => {
+    let displayStatus = 'Berlaku';
+    let badgeClass = 'badge-success';
+
+    if (item.tanggalSelesai && item.tanggalSelesai !== '-') {
+      const end = new Date(item.tanggalSelesai);
+      const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
+      
+      if (diff <= 0) {
+        displayStatus = 'Berakhir';
+        badgeClass = 'badge-danger';
+      } else if (diff <= 90) {
+        displayStatus = 'Akan Berakhir';
+        badgeClass = 'badge-warning';
+      }
+    }
+
     return (
-      <span className={`badge ${isAktif ? 'badge-success' : 'badge-danger'}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}>
+      <span className={`badge ${badgeClass}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content', textTransform: 'uppercase', fontSize: '10px', fontWeight: 700 }}>
         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }}></span>
-        {status}
+        {displayStatus}
       </span>
     );
   };
@@ -143,15 +182,25 @@ export default function KebijakanPrioritas() {
           <div style={{ fontSize: '12px', color: 'var(--neutral-400)' }}>Semua kategori</div>
         </div>
         <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.1s' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--success-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Aktif / Berlaku</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px' }}>{dbData.filter(d => d.status?.toLowerCase() === 'aktif' || d.status?.toLowerCase() === 'berlaku').length}</div>
-          <div style={{ fontSize: '12px', color: 'var(--success-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }}></span> Status Aktif
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--success-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Berlaku</div>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px' }}>
+            {dbData.filter(item => {
+              if (!item.tanggalSelesai || item.tanggalSelesai === '-') return true;
+              const end = new Date(item.tanggalSelesai);
+              return (end - new Date()) > 0;
+            }).length}
           </div>
+          <div style={{ fontSize: '12px', color: 'var(--success-500)' }}>Sedang berjalan</div>
         </div>
         <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.2s' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Berakhir</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--danger-600)', marginBottom: '4px' }}>{dbData.filter(d => d.status?.toLowerCase() === 'berakhir' || d.status?.toLowerCase() === 'tidak berlaku').length}</div>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Berakhir / Tidak Berlaku</div>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--danger-600)', marginBottom: '4px' }}>
+            {dbData.filter(item => {
+              if (!item.tanggalSelesai || item.tanggalSelesai === '-') return false;
+              const end = new Date(item.tanggalSelesai);
+              return (end - new Date()) <= 0;
+            }).length}
+          </div>
           <div style={{ fontSize: '12px', color: 'var(--danger-500)' }}>Perlu tindak lanjut</div>
         </div>
       </div>
@@ -174,8 +223,7 @@ export default function KebijakanPrioritas() {
             <option value="all">Semua Status</option>
             <option value="Berlaku">Berlaku</option>
             <option value="Tidak Berlaku">Tidak Berlaku</option>
-            <option value="Aktif">Aktif</option>
-            <option value="Berakhir">Berakhir</option>
+            <option value="Akan Berakhir">Akan Berakhir</option>
           </select>
         </div>
 
@@ -229,7 +277,7 @@ export default function KebijakanPrioritas() {
                   </td>
                   <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalMulai || '-'}</td>
                   <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalSelesai || '-'}</td>
-                  <td style={{ padding: '16px' }}>{renderStatusBadge(r.status)}</td>
+                  <td style={{ padding: '16px' }}>{renderStatusBadge(r)}</td>
                   <td style={{ padding: '16px', textAlign: 'center' }}>
                     {r.linkDokumen ? <a href={r.linkDokumen} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '6px 12px', background: 'var(--primary-50)', color: 'var(--primary-700)', borderRadius: '8px', fontWeight: 600 }}>Lihat</a> : '-'}
                   </td>
@@ -336,14 +384,7 @@ export default function KebijakanPrioritas() {
                       <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalSelesai} onChange={e => setFormData({ ...formData, tanggalSelesai: e.target.value })} />
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Status <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                    <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                      <option>Berlaku</option>
-                      <option>Tidak Berlaku</option>
-                      <option>Lainnya</option>
-                    </select>
-                  </div>
+
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Link Dokumen</label>
                     <input type="url" className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
@@ -360,6 +401,7 @@ export default function KebijakanPrioritas() {
           </div>
         </Portal>
       )}
+      <SuccessPopup show={showSuccess} message={successMessage} onClose={() => setShowSuccess(false)} />
     </div>
   );
 }

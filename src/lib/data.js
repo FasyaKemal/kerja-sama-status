@@ -4,23 +4,23 @@
 
 const MockData = {
   timelineSteps: [
-    'Surat Usulan Penyusunan/Perpanjangan Kerja Sama',
-    'Disposisi Pimpinan',
-    'Pembahasan Penyusunan Naskah Kerja Sama (3 hari)',
-    'Surat ke Mitra terkait hasil pembahasan (1 hari)',
-    'Menerima Masukan Kerja Sama dari Mitra',
-    'Memo Roren Rokum hasil masukan dari mitra (1 hari)',
-    'Memo Rokum Roren finalisasi',
-    'Memo Roren Sekjen persetujuan paraf (2 hari)',
-    'Memo Sekjen MKP penandatanganan (1 hari)',
-    'Penandatanganan'
+    "Surat Penyusunan/Perpanjangan Kerja Sama",
+    "Disposisi",
+    "Pembahasan Penyusunan Naskah Kerja Sama (3 Hari)",
+    "Surat ke Mitra terkait Hasil Pembahasan (1 Hari)",
+    "Menerima Masukkan Kerja Sama dari Mitra (3 Hari)",
+    "Memo Rokum Roren (Hasil Masukkan dari Mitra) (1 Hari)",
+    "Memo Rokum Roren (Finalisasi) (3 Hari)",
+    "Memo Roren Sekjen (Persetujuan Paraf) (2 Hari)",
+    "Memo Sekjen MKP (Penandatanganan) (1 Hari)",
+    "Penandatanganan Final"
   ],
 
   progressDokumen: [
-    { id: '1', no: '01/PKS/2026', judul: 'Kerja Sama Pengawasan Laut', mitra: 'Kementerian Pertahanan', step: 8, update: '12 Mei 2026', progress: 80, status: 'Memo Roren Sekjen', tahun: '2026' },
-    { id: '2', no: '02/NK/2026', judul: 'Pengembangan SDM Kelautan', mitra: 'Universitas Indonesia', step: 4, update: '10 Mei 2026', progress: 40, status: 'Surat ke Mitra', tahun: '2026' },
+    { id: '1', no: '01/PKS/2026', judul: 'Kerja Sama Pengawasan Laut', mitra: 'Kementerian Pertahanan', step: 8, update: '12 Mei 2026', progress: 80, status: 'Memo Roren Sekjen (Persetujuan Paraf) (2 Hari)', tahun: '2026' },
+    { id: '2', no: '02/NK/2026', judul: 'Pengembangan SDM Kelautan', mitra: 'Universitas Indonesia', step: 4, update: '10 Mei 2026', progress: 40, status: 'Surat ke Mitra terkait Hasil Pembahasan (1 Hari)', tahun: '2026' },
     { id: '3', no: '03/MoU/2026', judul: 'Riset Biodiversitas Maritim', mitra: 'BRIN', step: 10, update: '05 Mei 2026', progress: 100, status: 'Selesai', tahun: '2026' },
-    { id: '4', no: '04/KB/2026', judul: 'Pemberdayaan Nelayan Lokal', mitra: 'Pemda Maluku', step: 2, update: '15 Mei 2026', progress: 20, status: 'Disposisi Pimpinan', tahun: '2026' }
+    { id: '4', no: '04/KB/2026', judul: 'Pemberdayaan Nelayan Lokal', mitra: 'Pemda Maluku', step: 2, update: '15 Mei 2026', progress: 20, status: 'Disposisi', tahun: '2026' }
   ],
 
   databaseKerjaSama: [

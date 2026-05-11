@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useData } from '@/context/DataContext';
+import SuccessPopup from '@/components/SuccessPopup';
 
 export default function ProgressDokumen() {
   const { data, updateProgress } = useData();
@@ -12,20 +13,24 @@ export default function ProgressDokumen() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   const [formData, setFormData] = useState({
     no: '', judul: '', mitra: '', step: 1, tahun: '2026', linkDokumen: '', fileDokumen: null
   });
 
   const timelineSteps = [
-    "Identifikasi & Inisiasi",
-    "Penyusunan Draft (Naskah)",
-    "Pembahasan Internal KKP",
-    "Pembahasan dengan Mitra",
-    "Finalisasi Draft",
-    "Harmonisasi & Clearance",
-    "Proses Paraf",
-    "Penandatanganan Dokumen"
+    "Surat Penyusunan/Perpanjangan Kerja Sama",
+    "Disposisi",
+    "Pembahasan Penyusunan Naskah Kerja Sama (3 Hari)",
+    "Surat ke Mitra terkait Hasil Pembahasan (1 Hari)",
+    "Menerima Masukkan Kerja Sama dari Mitra (3 Hari)",
+    "Memo Rokum Roren (Hasil Masukkan dari Mitra) (1 Hari)",
+    "Memo Rokum Roren (Finalisasi) (3 Hari)",
+    "Memo Roren Sekjen (Persetujuan Paraf) (2 Hari)",
+    "Memo Sekjen MKP (Penandatanganan) (1 Hari)",
+    "Penandatanganan Final"
   ];
 
   const getFilteredData = () => {
@@ -97,14 +102,14 @@ export default function ProgressDokumen() {
 
     updateProgress(newData);
     closeModal();
-    alert(editData ? 'Data berhasil diperbarui!' : 'Data berhasil ditambahkan!');
+    setSuccessMessage(editData ? 'Berhasil Diperbarui!' : 'Berhasil Ditambahkan!');
+    setShowSuccess(true);
   };
 
   const deleteItem = (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus data monitoring ini?')) {
       const newData = progressData.filter(x => x.id !== id);
       updateProgress(newData);
-      alert('Data berhasil dihapus');
     }
   };
 
@@ -139,17 +144,49 @@ export default function ProgressDokumen() {
         </h3></div>
         <div className="card-body" style={{ padding: '24px', overflowX: 'auto' }}>
           <div style={{ display: 'flex', gap: '16px', position: 'relative', minWidth: '1000px' }}>
-            {timelineSteps.map((step, index) => (
-              <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-500)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginBottom: '12px', fontSize: '14px', boxShadow: '0 4px 10px rgba(var(--primary-rgb), 0.3)' }}>
-                  {index + 1}
+            {timelineSteps.map((step, index) => {
+              const stepNumber = index + 1;
+              const count = progressData.filter(r => parseInt(r.step) === stepNumber).length;
+              return (
+                <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                  {/* Badge notif */}
+                  <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-500)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', boxShadow: '0 4px 10px rgba(var(--primary-rgb), 0.3)' }}>
+                      {stepNumber}
+                    </div>
+                    {count > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-10px',
+                        background: '#ef4444',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        minWidth: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        padding: '0 4px',
+                        border: '2px solid #fff',
+                        boxShadow: '0 2px 6px rgba(239,68,68,0.4)',
+                        lineHeight: 1,
+                        zIndex: 2
+                      }}>
+                        {count}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--neutral-700)', lineHeight: 1.4 }}>{step}</div>
                 </div>
-                <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--neutral-700)', lineHeight: 1.4 }}>{step}</div>
-              </div>
-            ))}
+              );
+            })}
             <div style={{ position: 'absolute', top: '18px', left: '40px', right: '40px', height: '2px', background: 'var(--neutral-200)', zIndex: 0 }}></div>
           </div>
         </div>
+
       </div>
 
       <div className="card glass-morphism animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -339,6 +376,7 @@ export default function ProgressDokumen() {
           </div>
         </div>
       )}
+      <SuccessPopup show={showSuccess} message={successMessage} onClose={() => setShowSuccess(false)} />
     </div>
   );
 }

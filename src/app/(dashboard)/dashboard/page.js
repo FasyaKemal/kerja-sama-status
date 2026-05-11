@@ -8,6 +8,8 @@ export default function Dashboard() {
   const router = useRouter();
   const { data, isLoading } = useData();
   const [filterTahun, setFilterTahun] = useState('all');
+  const [filterKategori, setFilterKategori] = useState('all');
+  const [dismissAlert, setDismissAlert] = useState(false);
   const chartRefs = useRef({});
 
   const db = data.databaseKerjaSama || [];
@@ -15,20 +17,43 @@ export default function Dashboard() {
   let allData = [...db, ...kp];
 
   const availableYears = [...new Set(allData.map(r => String(r.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))].sort().reverse();
+  const availableKategoris = [...new Set(allData.map(r => r.kategoriMitra).filter(Boolean))].sort();
 
   if (filterTahun !== 'all') {
     allData = allData.filter(r => String(r.tahun || '').trim() === filterTahun);
   }
+  if (filterKategori !== 'all') {
+    allData = allData.filter(r => r.kategoriMitra === filterKategori);
+  }
+
+  const calculateItemStatus = (item) => {
+    if (!item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
+    const end = new Date(item.tanggalSelesai);
+    const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
+    if (diff <= 0) return 'Tidak Berlaku';
+    if (diff <= 90) return 'Akan Berakhir';
+    return 'Berlaku';
+  };
 
   const totalMitra = new Set(allData.map(r => r.mitra)).size;
   const totalDokumen = allData.length;
-  const aktifCount = allData.filter(r => r.status && r.status.toLowerCase().includes('berlaku') && !r.status.toLowerCase().includes('tidak')).length;
-  const akanBerakhirCount = allData.filter(r => {
+  
+  const statusCounts = allData.reduce((acc, item) => {
+    const s = calculateItemStatus(item);
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, { 'Berlaku': 0, 'Tidak Berlaku': 0, 'Akan Berakhir': 0 });
+
+  const berlakuCount = statusCounts['Berlaku'] + statusCounts['Akan Berakhir']; // Still active
+  const pureBerlakuCount = statusCounts['Berlaku'];
+  const akanBerakhirCount = statusCounts['Akan Berakhir'];
+  const tidakBerlakuCount = statusCounts['Tidak Berlaku'];
+
+  const urgentCount = allData.filter(r => {
     if (!r.tanggalSelesai || r.tanggalSelesai === '-') return false;
     const end = new Date(r.tanggalSelesai);
-    if (isNaN(end)) return false;
     const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-    return diff > 0 && diff <= 90;
+    return diff > 0 && diff <= 30;
   }).length;
 
   const nearingExpiry = allData.filter(r => {
@@ -114,12 +139,14 @@ export default function Dashboard() {
             datasets: [{
               data: catData.length ? catData : [1],
               backgroundColor: catData.length ? [
-                '#0C4A6E', // Blue 900
-                '#0284C7', // Blue 600
-                '#0EA5E9', // Blue 500
-                '#38BDF8', // Blue 400
-                '#7DD3FC', // Blue 300
-                '#BAE6FD'  // Blue 200
+                '#4338ca', // Indigo 700
+                '#10b981', // Emerald 500
+                '#f59e0b', // Amber 500
+                '#f43f5e', // Rose 500
+                '#8b5cf6', // Violet 500
+                '#06b6d4', // Cyan 500
+                '#64748b', // Slate 500
+                '#ec4899'  // Pink 500
               ] : ['#e2e8f0'],
               borderWidth: 0,
               hoverOffset: 12
@@ -145,13 +172,8 @@ export default function Dashboard() {
       }
 
       // Status Polar
-      const statusCounts = { 'Berlaku': 0, 'Tidak Berlaku': 0, 'Lainnya': 0 };
-      allData.forEach(r => {
-        const s = String(r.status || '').toLowerCase();
-        if (s.includes('berlaku') && !s.includes('tidak')) statusCounts['Berlaku']++;
-        else if (s.includes('tidak')) statusCounts['Tidak Berlaku']++;
-        else statusCounts['Lainnya']++;
-      });
+      const polarLabels = ['Berlaku', 'Tidak Berlaku', 'Akan Berakhir'];
+      const polarData = [pureBerlakuCount, tidakBerlakuCount, akanBerakhirCount];
 
       const polarCtx = document.getElementById('statusPolarChart');
       if (polarCtx) {
@@ -160,11 +182,11 @@ export default function Dashboard() {
           data: {
             labels: Object.keys(statusCounts),
             datasets: [{
-              data: Object.values(statusCounts),
+              data: polarData,
               backgroundColor: [
                 'rgba(16, 185, 129, 0.8)', // Success
                 'rgba(239, 68, 68, 0.8)',  // Danger
-                'rgba(100, 116, 139, 0.8)' // Neutral
+                'rgba(245, 158, 11, 0.8)'  // Warning
               ],
               borderColor: '#fff',
               borderWidth: 3
@@ -247,7 +269,11 @@ export default function Dashboard() {
       <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
           <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Monev Dashboard</h1>
-          <p style={{ margin: '4px 0 0 0', color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+            <span style={{ color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</span>
+            <span style={{ color: 'var(--neutral-300)' }}>•</span>
+            <span style={{ color: 'var(--primary-600)', fontSize: '12px', fontWeight: 700 }}>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
           <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto', minHeight: '40px' }} onClick={exportReport}>
@@ -261,8 +287,32 @@ export default function Dashboard() {
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
+          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto' }}>
+            <span style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-700)', whiteSpace: 'nowrap' }}>Kategori:</span>
+            <select className="form-select" style={{ padding: '8px 12px', fontSize: 'clamp(11px, 2vw, 13px)', minWidth: '140px' }} onChange={(e) => setFilterKategori(e.target.value)} value={filterKategori}>
+              <option value="all">Semua Kategori</option>
+              {availableKategoris.map(k => <option key={k} value={k}>{k}</option>)}
+            </select>
+          </div>
         </div>
-      </div>      <div className="dashboard-stats-grid" style={{ marginBottom: 'clamp(24px, 5vw, 32px)', gap: '24px' }}>
+      </div>
+
+      {urgentCount > 0 && !dismissAlert && (
+        <div style={{ marginBottom: '24px', padding: '16px 20px', background: 'linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%)', border: '1px solid #fecaca', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 4px 12px rgba(239,68,68,0.1)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, color: '#b91c1c', fontSize: '14px', marginBottom: '2px' }}>Perhatian! Terdapat {urgentCount} dokumen yang akan berakhir dalam 30 hari</div>
+            <div style={{ fontSize: '12px', color: '#dc2626' }}>Segera lakukan peninjauan untuk proses perpanjangan kerja sama.</div>
+          </div>
+          <button onClick={() => setDismissAlert(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', padding: '4px', display: 'flex', alignItems: 'center' }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      )}
+
+      <div className="dashboard-stats-grid" style={{ marginBottom: 'clamp(24px, 5vw, 32px)', gap: '24px' }}>
         {/* Card 1: Total Mitra */}
         <div className="card fade-in-up" style={{ 
           padding: '24px', 
@@ -309,8 +359,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Card 3: Status Aktif */}
-        <div className="card fade-in-up" style={{ 
+        {/* Card 3: Status Berlaku */}
+        <div className="card fade-in-up" 
+          onClick={() => router.push('/database-kerja-sama')}
+          style={{ 
           padding: '24px', 
           background: 'rgba(255, 255, 255, 0.8)',
           backdropFilter: 'blur(10px)',
@@ -319,14 +371,15 @@ export default function Dashboard() {
           position: 'relative', 
           overflow: 'hidden',
           borderRadius: '20px',
-          animationDelay: '0.2s'
+          animationDelay: '0.2s',
+          cursor: 'pointer'
         }}>
           <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.1, color: 'var(--success-600)' }}>
             <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
           </div>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Status Aktif</div>
-            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px', letterSpacing: '-0.02em' }}>{aktifCount}</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Status Berlaku</div>
+            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px', letterSpacing: '-0.02em' }}>{berlakuCount}</div>
             <div style={{ fontSize: '12px', color: 'var(--success-500)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success-500)', display: 'inline-block' }}></span>
               Sedang berjalan
@@ -334,8 +387,35 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Card 4: Akan Berakhir */}
-        <div className="card fade-in-up" style={{ 
+        {/* Card 4: Tidak Berlaku */}
+        <div className="card fade-in-up" 
+          onClick={() => router.push('/database-kerja-sama')}
+          style={{ 
+          padding: '24px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', 
+          position: 'relative', 
+          overflow: 'hidden',
+          borderRadius: '20px',
+          animationDelay: '0.25s',
+          cursor: 'pointer'
+        }}>
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.08, color: 'var(--danger-600)' }}>
+            <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Tidak Berlaku</div>
+            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--danger-600)', marginBottom: '4px', letterSpacing: '-0.02em' }}>{tidakBerlakuCount}</div>
+            <div style={{ fontSize: '12px', color: 'var(--danger-500)', fontWeight: 500 }}>Sudah berakhir</div>
+          </div>
+        </div>
+
+        {/* Card 5: Akan Berakhir */}
+        <div className="card fade-in-up" 
+          onClick={() => router.push('/database-kerja-sama')}
+          style={{ 
           padding: '24px', 
           background: 'linear-gradient(135deg, #fffcf0 0%, #fef9c3 100%)',
           border: '1px solid #fde047',
@@ -343,7 +423,8 @@ export default function Dashboard() {
           position: 'relative', 
           overflow: 'hidden',
           borderRadius: '20px',
-          animationDelay: '0.3s'
+          animationDelay: '0.3s',
+          cursor: 'pointer'
         }}>
           <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.1, color: 'var(--warning-600)' }}>
             <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -403,11 +484,10 @@ export default function Dashboard() {
       <div className="dashboard-charts-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
         <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', overflowX: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(12px, 3vw, 16px)', flexWrap: 'wrap', gap: '8px' }}>
-            <h3 style={{ margin: 0, fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <h3 style={{ margin: 0, fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, flex: 1 }}>
               Dokumen Mendekati Akhir
             </h3>
-            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }} onClick={() => router.push('/kebijakan-prioritas')}>
+            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>
               Lihat Semua
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </button>
@@ -426,6 +506,7 @@ export default function Dashboard() {
                 <thead>
                   <tr style={{ background: 'var(--neutral-50)' }}>
                     <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Nama Mitra</th>
+                    <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Kategori</th>
                     <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Jenis Kerja Sama</th>
                     <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Masa Berlaku</th>
                     <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Sisa Hari</th>
@@ -439,11 +520,16 @@ export default function Dashboard() {
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--neutral-100)' }}>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><strong>{r.mitra}</strong></td>
+                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>
+                          <span className="badge badge-info" style={{ fontSize: '10px' }}>{r.kategoriMitra || '-'}</span>
+                        </td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>{r.jenisKerjasama || '-'}</td>
-                        <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>{r.tanggalSelesai}</td>
+                        <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
+                          {new Date(r.tanggalSelesai).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><span style={{ fontWeight: 700, color: diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>{diff} Hari</span></td>
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
-                          <span className={`badge badge-${diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>● {diff <= 30 ? 'Segera Berakhir' : 'Akan Berakhir'}</span>
+                          <span className={`badge badge-${diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>Akan Berakhir</span>
                         </td>
                         <td style={{ padding: '12px 10px', textAlign: 'right' }}>
                           <button className="btn btn-primary btn-sm" style={{ fontSize: 'clamp(10px, 2vw, 11px)', padding: '6px 10px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>Perbarui Data</button>
@@ -457,29 +543,44 @@ export default function Dashboard() {
           )}
         </div>
         <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
-          <h3 style={{ margin: '0 0 clamp(12px, 3vw, 20px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          <h3 style={{ margin: '0 0 clamp(12px, 3vw, 20px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)' }}>
             Progress Penyusunan
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
-            {(data.progressDokumen || []).slice(0, 4).map((p, i) => {
-              let color = p.progress >= 80 ? 'success' : p.progress >= 40 ? 'primary' : 'warning';
-              return (
-                <div key={i} style={{ padding: 'clamp(10px, 2vw, 12px)', background: 'var(--neutral-50)', borderRadius: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: 'clamp(12px, 2vw, 13px)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70%' }}>{p.mitra}</span>
-                    <span style={{ fontSize: 'clamp(11px, 2vw, 12px)', fontWeight: 600, color: `var(--${color}-600)`, whiteSpace: 'nowrap' }}>{p.progress}%</span>
+            {!data.progressDokumen || data.progressDokumen.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 20px', background: 'var(--neutral-50)', borderRadius: '12px' }}>
+                <p style={{ margin: 0, color: 'var(--neutral-500)', fontSize: '13px' }}>Belum ada data progress penyusunan dokumen.</p>
+              </div>
+            ) : (
+              data.progressDokumen.slice(0, 4).map((p, i) => {
+                const color = p.progress >= 80 ? 'success' : p.progress >= 40 ? 'primary' : 'warning';
+                const colorHex = p.progress >= 80 ? '#10b981' : p.progress >= 40 ? '#3b82f6' : '#f59e0b';
+                const timelineSteps = [
+                  'Surat Penyusunan/Perpanjangan','Disposisi','Pembahasan Naskah (3H)','Surat ke Mitra (1H)',
+                  'Masukan dari Mitra (3H)','Memo Rokum Roren - Masukan (1H)','Memo Rokum Roren - Final (3H)',
+                  'Memo Roren Sekjen (2H)','Memo Sekjen MKP (1H)','Penandatanganan Final'
+                ];
+                const stepLabel = p.step && timelineSteps[p.step - 1] ? timelineSteps[p.step - 1] : `Tahap ${p.step}`;
+                return (
+                  <div key={i} style={{ padding: 'clamp(10px, 2vw, 14px)', background: 'var(--neutral-50)', borderRadius: '12px', border: '1px solid var(--neutral-100)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', gap: '8px' }}>
+                      <span style={{ fontWeight: 700, fontSize: 'clamp(12px, 2vw, 13px)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '70%', whiteSpace: 'nowrap' }}>{p.mitra}</span>
+                      <span style={{ fontSize: 'clamp(11px, 2vw, 12px)', fontWeight: 800, color: colorHex, whiteSpace: 'nowrap' }}>{p.progress}%</span>
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--neutral-500)', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.judul || 'Dokumen Kerja Sama'}
+                    </div>
+                    <div style={{ height: '8px', background: 'var(--neutral-200)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${p.progress}%`, background: `linear-gradient(90deg, ${colorHex}99, ${colorHex})`, borderRadius: '4px', transition: 'width 1s ease-out' }}></div>
+                    </div>
+                    <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--neutral-500)', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ background: 'var(--neutral-200)', padding: '2px 8px', borderRadius: '20px', fontWeight: 600, fontSize: '10px' }}>Tahap {p.step}: {stepLabel}</span>
+                      <span>{p.update}</span>
+                    </div>
                   </div>
-                  <div style={{ height: '6px', background: 'var(--neutral-200)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${p.progress}%`, background: `var(--${color}-500)` }}></div>
-                  </div>
-                  <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--neutral-500)', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Tahap {p.step}</span>
-                    <span>{p.update}</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
             <button className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }} onClick={() => router.push('/progress-dokumen')}>
               Lihat Semua Progress
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
