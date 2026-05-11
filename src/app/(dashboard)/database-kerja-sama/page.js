@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import * as XLSX from 'xlsx';
+import Portal from '@/components/Portal';
 
 export default function DatabaseKerjaSama() {
   const { data, updateDatabase } = useData();
@@ -17,60 +18,35 @@ export default function DatabaseKerjaSama() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  
   const [formData, setFormData] = useState({
-    kategoriMitra: '', mitra: '', jenisKerjasama: '', noUtama: '', pihak1: '', noPihak1: '', pihak2: '', noPihak2: '', tanggalMulai: '', tanggalSelesai: '', masaBerlaku: '', status: 'Berlaku', linkDokumen: ''
+    tahun: new Date().getFullYear().toString(),
+    kategoriMitra: '',
+    mitra: '',
+    jenisKerjasama: '',
+    pihak1: '',
+    noPihak1: '',
+    pihak2: '',
+    noPihak2: '',
+    tanggalMulai: '',
+    tanggalSelesai: '',
+    status: 'Aktif',
+    fileDokumen: '',
+    linkDokumen: ''
   });
 
-  const getFilteredData = () => {
-    let filtered = [...dbData];
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(r =>
-        String(r.mitra || '').toLowerCase().includes(q) ||
-        String(r.noPihak1 || '').toLowerCase().includes(q) ||
-        String(r.noPihak2 || '').toLowerCase().includes(q) ||
-        String(r.jenisKerjasama || '').toLowerCase().includes(q) ||
-        String(r.pihak1 || '').toLowerCase().includes(q) ||
-        String(r.pihak2 || '').toLowerCase().includes(q)
-      );
-    }
-    if (filterYear !== 'all') {
-      filtered = filtered.filter(r => String(r.tahun || '').trim() === String(filterYear).trim());
-    }
-    if (filterCategory !== 'all') {
-      filtered = filtered.filter(r => String(r.kategoriMitra || '').trim() === String(filterCategory).trim());
-    }
-    if (filterStatus !== 'all') {
-      if (filterStatus === 'Berlaku') {
-        filtered = filtered.filter(r => {
-          const s = String(r.status || '').toLowerCase();
-          return s.includes('berlaku') && !s.includes('tidak');
-        });
-      } else if (filterStatus === 'Tidak Berlaku') {
-        filtered = filtered.filter(r => String(r.status || '').toLowerCase().includes('tidak'));
-      }
-    }
-    return filtered;
-  };
+  const filteredData = dbData.filter(item => {
+    const matchesSearch = !searchQuery || 
+      Object.values(item).some(val => val?.toString().toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesYear = filterYear === 'all' || item.tahun === filterYear;
+    const matchesCategory = filterCategory === 'all' || item.kategoriMitra === filterCategory;
+    const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
+    return matchesSearch && matchesYear && matchesCategory && matchesStatus;
+  });
 
-  const filteredData = getFilteredData();
   const totalData = filteredData.length;
-  const totalPages = Math.max(1, Math.ceil(totalData / perPage));
+  const totalPages = Math.ceil(totalData / perPage);
   const startIndex = (page - 1) * perPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + perPage);
-
-  const aktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('berlaku') && !String(r.status || '').toLowerCase().includes('tidak')).length;
-  const tidakAktifCount = filteredData.filter(r => String(r.status || '').toLowerCase().includes('tidak')).length;
-  const lainnyaCount = totalData - aktifCount - tidakAktifCount;
-
-  const years = [...new Set(dbData.map(r => String(r.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))].sort().reverse();
-  const categories = ['Pemda', 'K/L', 'BUMN', 'Universitas', 'Ormas', 'Swasta', 'Lainnya'];
-
-  const handleFilter = (setter) => (e) => {
-    setter(e.target.value);
-    setPage(1);
-  };
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -80,261 +56,138 @@ export default function DatabaseKerjaSama() {
     setPage(1);
   };
 
-  const renderStatusBadge = (status) => {
-    const s = String(status || '').toLowerCase();
-    if (s.includes('berlaku') && !s.includes('tidak')) {
-      return (
-        <span className="badge badge-success">
-          <svg viewBox="0 0 24 24" width="8" height="8" fill="currentColor" style={{ marginRight: '4px' }}><circle cx="12" cy="12" r="12"></circle></svg>
-          Berlaku
-        </span>
-      );
-    }
-    if (s.includes('tidak')) {
-      return (
-        <span className="badge badge-danger">
-          <svg viewBox="0 0 24 24" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}><circle cx="12" cy="12" r="10"></circle></svg>
-          Tidak Berlaku
-        </span>
-      );
-    }
-    return <span className="badge badge-info">{status || '-'}</span>;
-  };
-
-  const exportToExcel = () => {
-    const formattedData = dbData.map((row, index) => ({
-      "No": index + 1,
-      "Tahun": row.tahun || '-',
-      "Kategori Mitra": row.kategoriMitra || '-',
-      "Nama Mitra": row.mitra || '-',
-      "Jenis Kerja Sama": row.jenisKerjasama || '-',
-      "Nomor Dokumen": row.noUtama || '-',
-      "Pihak 1 (KKP)": `${row.pihak1 || '-'} ${row.noPihak1 ? '(' + row.noPihak1 + ')' : ''}`,
-      "Pihak 2 (Mitra)": `${row.pihak2 || '-'} ${row.noPihak2 ? '(' + row.noPihak2 + ')' : ''}`,
-      "Tanggal Mulai": row.tanggalMulai || '-',
-      "Berlaku Hingga": row.tanggalSelesai || '-',
-      "Status": row.status || '-'
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Database Kerja Sama");
-    XLSX.writeFile(workbook, `Data_Kerja_Sama_KKP_${new Date().toLocaleDateString('id-ID')}.xlsx`);
-  };
-
-  const exportToPDF = async () => {
-    const { default: jsPDF } = await import('jspdf');
-    await import('jspdf-autotable');
-    
-    const doc = new jsPDF('landscape');
-    
-    doc.setFontSize(16);
-    doc.text('Database Kerja Sama KKP', 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Tanggal Ekspor: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
-    
-    const tableData = dbData.map((row, index) => [
-      index + 1,
-      row.noUtama || '-',
-      row.mitra || '-',
-      `${row.pihak1 || '-'} & ${row.pihak2 || '-'}`,
-      row.jenisKerjasama || '-',
-      row.tanggalMulai || '-',
-      row.tanggalSelesai || '-',
-      row.status || '-'
-    ]);
-    
-    doc.autoTable({
-      startY: 35,
-      head: [['No', 'Nomor Dokumen', 'Nama Mitra', 'Pihak Terlibat', 'Jenis Kerja Sama', 'Tgl Mulai', 'Tgl Berakhir', 'Status']],
-      body: tableData,
-      theme: 'grid',
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [12, 74, 110] }
-    });
-    
-    doc.save(`Data_Kerja_Sama_KKP_${new Date().toLocaleDateString('id-ID')}.pdf`);
-  };
-
   const openModal = (id = null) => {
     if (id) {
-      const r = dbData.find(x => x.id === id);
-      if (r) {
-        setEditData(id);
-        setFormData({ ...r, tanggalMulai: parseDateToISO(r.tanggalMulai), tanggalSelesai: parseDateToISO(r.tanggalSelesai) });
-      }
+      const item = dbData.find(d => d.id === id);
+      setEditData(item);
+      setFormData({ ...item });
     } else {
       setEditData(null);
-      setFormData({ kategoriMitra: '', mitra: '', jenisKerjasama: '', noUtama: '', pihak1: '', noPihak1: '', pihak2: '', noPihak2: '', tanggalMulai: '', tanggalSelesai: '', masaBerlaku: '', status: 'Berlaku', linkDokumen: '' });
+      setFormData({
+        tahun: new Date().getFullYear().toString(),
+        kategoriMitra: '',
+        mitra: '',
+        jenisKerjasama: '',
+        pihak1: 'Biro Perencanaan',
+        noPihak1: '',
+        pihak2: '',
+        noPihak2: '',
+        tanggalMulai: '',
+        tanggalSelesai: '',
+        status: 'Aktif',
+        fileDokumen: '',
+        linkDokumen: ''
+      });
     }
     setModalOpen(true);
   };
 
   const closeModal = () => setModalOpen(false);
 
-  const parseDateToISO = (dateStr) => {
-    if (!dateStr || dateStr === '-') return '';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    try {
-      const d = new Date(dateStr);
-      if (!isNaN(d)) return d.toISOString().split('T')[0];
-    } catch (e) { }
-    return '';
-  };
-
   const saveForm = (e) => {
     e.preventDefault();
-    const tglMulai = formData.tanggalMulai;
-    const tglSelesai = formData.tanggalSelesai;
+    const newData = editData 
+      ? dbData.map(d => d.id === editData.id ? { ...formData } : d)
+      : [...dbData, { ...formData, id: Date.now() }];
     
-    // Validasi Tanggal
-    if (tglMulai && tglSelesai) {
-      if (new Date(tglSelesai) < new Date(tglMulai)) {
-        alert('Validasi Gagal: Tanggal Berakhir tidak boleh mendahului Tanggal Mulai!');
-        return;
-      }
-    }
-
-    const autoTahun = tglMulai ? tglMulai.split('-')[0] : new Date().getFullYear().toString();
-    
-    const item = {
-      ...formData,
-      id: editData || 'KSM-' + Date.now(),
-      tahun: autoTahun,
-    };
-
-    let newData;
-    if (editData) {
-      newData = dbData.map(x => x.id === editData ? item : x);
-    } else {
-      newData = [item, ...dbData];
-    }
-
     updateDatabase(newData);
     closeModal();
-    alert(editData ? 'Data diperbarui!' : 'Data ditambahkan!');
   };
 
   const deleteItem = (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      const newData = dbData.filter(x => x.id !== id);
-      updateDatabase(newData);
-      alert('Data berhasil dihapus');
+      updateDatabase(dbData.filter(d => d.id !== id));
     }
   };
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Database Kerja Sama");
+    XLSX.writeFile(wb, "Database_Kerja_Sama.xlsx");
+  };
+
+  const renderStatusBadge = (status) => {
+    const isAktif = status?.toLowerCase() === 'aktif' || status?.toLowerCase() === 'berlaku';
+    return (
+      <span className={`badge ${isAktif ? 'badge-success' : 'badge-danger'}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content' }}>
+        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }}></span>
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div style={{ padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="page-fade-in">
+      <div className="page-header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 className="page-title">Database Kerja Sama</h1>
-          <p className="text-muted" style={{ marginTop: '4px' }}>Manajemen data MoU dan PKS Kementerian Kelautan dan Perikanan</p>
+          <h1 className="page-title" style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Database Kerja Sama</h1>
+          <p style={{ color: 'var(--neutral-500)', margin: 0 }}>Kelola dan monitor seluruh dokumen kerja sama Biro Perencanaan KKP</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={exportToExcel}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Ekspor Excel
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-ghost" onClick={exportToExcel} style={{ background: '#fff', border: '1px solid var(--neutral-200)', boxShadow: 'var(--shadow-sm)' }}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export Excel
           </button>
-          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={exportToPDF}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-            Ekspor PDF
-          </button>
-          <button className="btn btn-primary" onClick={() => openModal()}>
-            <span>+</span> Tambah Data
+          <button className="btn btn-primary" onClick={() => openModal()} style={{ background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))', border: 'none', boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.3)' }}>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Tambah Kerja Sama
           </button>
         </div>
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: '32px' }}>
-        <div className="card" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--primary-50) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--primary-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          </div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-700)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Kerja Sama</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary-900)', lineHeight: 1 }}>{totalData}</div>
-          <div style={{ fontSize: '12px', color: 'var(--neutral-500)', marginTop: '8px' }}>Data terfilter</div>
+      <div className="stats-grid" style={{ marginBottom: '32px', gap: '24px' }}>
+        <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0s' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Kerja Sama</div>
+          <div className="page-title" style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px' }}>{totalData}</div>
+          <div style={{ fontSize: '12px', color: 'var(--neutral-400)' }}>Semua kategori</div>
         </div>
-        <div className="card" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--success-100) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--success-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.1s' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--success-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Aktif / Berlaku</div>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px' }}>{dbData.filter(d => d.status?.toLowerCase() === 'aktif' || d.status?.toLowerCase() === 'berlaku').length}</div>
+          <div style={{ fontSize: '12px', color: 'var(--success-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }}></span> Status Aktif
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--success-600)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Berlaku</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)', lineHeight: 1 }}>{aktifCount}</div>
-          <div style={{ fontSize: '12px', color: 'var(--success-500)', marginTop: '8px' }}>Status aktif</div>
         </div>
-        <div className="card" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--danger-100) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--danger-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          </div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tidak Berlaku</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--danger-600)', lineHeight: 1 }}>{tidakAktifCount}</div>
-          <div style={{ fontSize: '12px', color: 'var(--danger-500)', marginTop: '8px' }}>Masa berlaku habis</div>
-        </div>
-        <div className="card" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--neutral-100) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--neutral-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          </div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--neutral-600)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Lainnya</div>
-          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--neutral-800)', lineHeight: 1 }}>{lainnyaCount}</div>
-          <div style={{ fontSize: '12px', color: 'var(--neutral-500)', marginTop: '8px' }}>Status lainnya</div>
+        <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.2s' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Berakhir</div>
+          <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--danger-600)', marginBottom: '4px' }}>{dbData.filter(d => d.status?.toLowerCase() === 'berakhir' || d.status?.toLowerCase() === 'tidak berlaku').length}</div>
+          <div style={{ fontSize: '12px', color: 'var(--danger-500)' }}>Perlu tindak lanjut</div>
         </div>
       </div>
 
-      <div className="card glass page-filter-bar" style={{ marginBottom: '24px', padding: '24px', border: 'none', boxShadow: 'var(--shadow-lg)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)' }}>
-        <div className="search-container" style={{ flex: 2, minWidth: '250px', position: 'relative' }}>
-          <span className="search-icon" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--neutral-400)', display: 'flex' }}>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          </span>
-          <input type="text" className="search-input" style={{ width: '100%', padding: '12px 12px 12px 45px', borderRadius: 'var(--radius-md)', border: '1px solid var(--neutral-200)', background: '#fff', fontSize: '14px' }} placeholder="Cari mitra, jenis, nomor, atau pihak..." value={searchQuery} onChange={handleFilter(setSearchQuery)} />
-        </div>
-        
-        <div style={{ flex: 1, minWidth: '100px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-800)', display: 'block', marginBottom: '8px' }}>Tahun</label>
-          <select className="form-select" style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--neutral-200)', background: '#fff', fontSize: '14px' }} value={filterYear} onChange={handleFilter(setFilterYear)}>
-            <option value="all">Semua</option>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
+      <div className="card" style={{ border: 'none', boxShadow: 'var(--shadow-lg)', borderRadius: '24px', overflow: 'hidden', background: '#fff' }}>
+        <div style={{ padding: '24px', borderBottom: '1px solid var(--neutral-100)', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center', background: 'linear-gradient(to right, #fff, var(--neutral-50))' }}>
+          <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--neutral-400)' }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" className="form-input" placeholder="Cari mitra, jenis kerja sama, atau nomor surat..." style={{ width: '100%', paddingLeft: '48px', borderRadius: '12px', border: '1px solid var(--neutral-200)', height: '48px' }} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          </div>
+          <select className="form-select" style={{ minWidth: '150px', height: '48px', borderRadius: '12px' }} value={filterYear} onChange={e => setFilterYear(e.target.value)}>
+            <option value="all">Semua Tahun</option>
+            {[...new Set(dbData.map(d => d.tahun))].sort().reverse().map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-        </div>
-
-        <div style={{ flex: 1.5, minWidth: '160px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-800)', display: 'block', marginBottom: '8px' }}>Kategori</label>
-          <select className="form-select" style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--neutral-200)', background: '#fff', fontSize: '14px' }} value={filterCategory} onChange={handleFilter(setFilterCategory)}>
+          <select className="form-select" style={{ minWidth: '180px', height: '48px', borderRadius: '12px' }} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Semua Kategori</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            {[...new Set(dbData.map(d => d.kategoriMitra))].map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
 
-        <div style={{ flex: 1.5, minWidth: '160px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-800)', display: 'block', marginBottom: '8px' }}>Status</label>
-          <select className="form-select" style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--neutral-200)', background: '#fff', fontSize: '14px' }} value={filterStatus} onChange={handleFilter(setFilterStatus)}>
-            <option value="all">Semua Status</option>
-            <option value="Berlaku">Berlaku</option>
-            <option value="Tidak Berlaku">Tidak Berlaku</option>
-          </select>
-        </div>
-
-        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-600)', fontWeight: 600, marginBottom: '6px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px' }} onClick={resetFilters}>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          Reset
-        </button>
-      </div>
-
-      <div className="card" style={{ overflowX: 'auto', width: '100%', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', background: '#fff' }}>
-        <div className="table-responsive" style={{ overflowX: 'auto', width: '100%' }}>
-          <table className="table" style={{ fontSize: '13px', minWidth: '1400px', width: '100%' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: 'var(--neutral-50)' }}>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>No</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Tahun</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Kategori Mitra</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Nama Mitra</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Jenis Kerja Sama</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Pihak 1 (KKP)</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Pihak 2 (Mitra)</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Tgl Mulai</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Berlaku Hingga</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Status</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px' }}>Dokumen</th>
-                <th style={{ whiteSpace: 'nowrap', padding: '12px 16px', textAlign: 'center' }}>Aksi</th>
+              <tr style={{ background: 'var(--neutral-50)', borderBottom: '2px solid var(--neutral-100)' }}>
+                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>No</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tahun</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Kategori</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Mitra</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Jenis</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Pihak 1 (KKP)</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Pihak 2 (Mitra)</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tgl Mulai</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tgl Selesai</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Status</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Dokumen</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -342,50 +195,46 @@ export default function DatabaseKerjaSama() {
                 <tr>
                   <td colSpan="12" style={{ textAlign: 'center', padding: '64px 24px', background: '#fff' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ opacity: 0.5 }}>
-                      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
+                      <div style={{ opacity: 0.3 }}>
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                      </div>
                       <div>
                         <h3 style={{ margin: '0 0 8px 0', color: 'var(--neutral-800)', fontWeight: 700 }}>Data Tidak Ditemukan</h3>
-                        <p style={{ margin: 0, color: 'var(--neutral-500)', fontSize: '14px', maxWidth: '400px' }}>Kami tidak dapat menemukan data dengan kata kunci atau filter tersebut. Silakan gunakan kata kunci lain.</p>
+                        <p style={{ margin: 0, color: 'var(--neutral-500)', fontSize: '14px' }}>Coba ubah kata kunci atau filter Anda</p>
                       </div>
-                      <button className="btn btn-primary btn-sm" onClick={resetFilters} style={{ marginTop: '8px' }}>Reset Filter</button>
                     </div>
                   </td>
                 </tr>
               ) : paginatedData.map((r, i) => (
-                <tr key={r.id} style={{ borderBottom: '1px solid var(--neutral-100)' }}>
+                <tr key={r.id} style={{ borderBottom: '1px solid var(--neutral-100)', transition: 'background 0.2s' }} className="table-row-hover">
                   <td style={{ padding: '16px', color: 'var(--neutral-500)', fontWeight: 600, textAlign: 'center' }}>{startIndex + i + 1}</td>
                   <td style={{ padding: '16px' }}>{r.tahun || '-'}</td>
                   <td style={{ padding: '16px' }}><span className="badge badge-info">{r.kategoriMitra || '-'}</span></td>
-                  <td style={{ padding: '16px', maxWidth: '250px', whiteSpace: 'normal', lineHeight: 1.5 }}><strong style={{ color: 'var(--primary-900)' }}>{r.mitra || '-'}</strong></td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</td>
-                  <td style={{ padding: '16px', maxWidth: '200px', whiteSpace: 'normal', lineHeight: 1.4 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)', marginBottom: '4px' }}>{r.pihak1 || '-'}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)', wordBreak: 'break-all', opacity: 0.8 }}>{r.noPihak1 || ''}</div>
+                  <td style={{ padding: '16px' }}><strong style={{ color: 'var(--primary-900)' }}>{r.mitra || '-'}</strong></td>
+                  <td style={{ padding: '16px', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)' }}>{r.pihak1 || '-'}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)' }}>{r.noPihak1 || ''}</div>
                   </td>
-                  <td style={{ padding: '16px', maxWidth: '200px', whiteSpace: 'normal', lineHeight: 1.4 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)', marginBottom: '4px' }}>{r.pihak2 || '-'}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)', wordBreak: 'break-all', opacity: 0.8 }}>{r.noPihak2 || ''}</div>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)' }}>{r.pihak2 || '-'}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)' }}>{r.noPihak2 || ''}</div>
                   </td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap', color: 'var(--neutral-600)' }}>{r.tanggalMulai || '-'}</td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap', color: 'var(--neutral-600)' }}>{r.tanggalSelesai || '-'}</td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>{renderStatusBadge(r.status)}</td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                    {r.linkDokumen ? <a href={r.linkDokumen} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '6px 12px', background: 'var(--primary-50)', color: 'var(--primary-700)', borderRadius: 'var(--radius-md)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                      Lihat
-                    </a> : '-'}
+                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalMulai || '-'}</td>
+                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalSelesai || '-'}</td>
+                  <td style={{ padding: '16px' }}>{renderStatusBadge(r.status)}</td>
+                  <td style={{ padding: '16px', textAlign: 'center' }}>
+                    {r.linkDokumen ? <a href={r.linkDokumen} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '6px 12px', background: 'var(--primary-50)', color: 'var(--primary-700)', borderRadius: '8px', fontWeight: 600 }}>Lihat</a> : '-'}
                   </td>
-                  <td style={{ padding: '16px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                    <button className="btn btn-primary btn-sm" onClick={() => openModal(r.id)} style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                      Edit
-                    </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => deleteItem(r.id)} style={{ padding: '8px 12px', color: 'var(--danger-600)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                      Hapus
-                    </button>
+                  <td style={{ padding: '16px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openModal(r.id)} style={{ color: 'var(--primary-600)' }}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => deleteItem(r.id)} style={{ color: 'var(--danger-600)' }}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -393,110 +242,116 @@ export default function DatabaseKerjaSama() {
           </table>
         </div>
         
-        <div style={{ background: '#fff', padding: '16px', borderTop: '1px solid var(--neutral-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--neutral-500)', fontSize: '13px' }}>
+        <div style={{ background: '#fff', padding: '16px 24px', borderTop: '1px solid var(--neutral-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--neutral-500)', fontSize: '13px' }}>
           <div>Menampilkan {totalData === 0 ? 0 : startIndex + 1} - {Math.min(startIndex + perPage, totalData)} dari {totalData} data</div>
           <div style={{ display: 'flex', gap: '4px' }}>
             <button className="btn btn-ghost btn-sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Sebelumnya</button>
-            <span style={{ padding: '4px 10px', fontWeight: 500 }}>Halaman {page} / {totalPages}</span>
+            <span style={{ padding: '6px 12px', borderRadius: '8px', background: 'var(--primary-50)', color: 'var(--primary-700)', fontWeight: 700 }}>{page}</span>
             <button className="btn btn-ghost btn-sm" disabled={page === totalPages || totalPages === 0} onClick={() => setPage(page + 1)}>Selanjutnya</button>
           </div>
         </div>
       </div>
 
       {modalOpen && (
-        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div className="modal-content" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '12px', padding: 0, boxShadow: 'var(--shadow-2xl)', background: '#fff', position: 'relative' }}>
-            <div style={{ padding: '24px 32px 16px 32px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid var(--neutral-100)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--neutral-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-600)' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <Portal>
+          <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+            <div className="modal-content" style={{ width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', padding: 0, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', background: '#fff', position: 'relative' }}>
+              <div style={{ padding: '24px 32px 16px 32px', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', zIndex: 10, borderBottom: '1px solid var(--neutral-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--neutral-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-600)' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                   {editData ? 'Edit Kerja Sama' : 'Tambah Kerja Sama'}
                 </h3>
-              </div>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', padding: 0, marginTop: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                Tutup
-              </button>
-            </div>
-            <form onSubmit={saveForm} style={{ padding: '24px 32px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Kategori Mitra <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.kategoriMitra} onChange={e => setFormData({ ...formData, kategoriMitra: e.target.value })}>
-                    <option value="">Pilih Kategori...</option>
-                    <option>K/L</option>
-                    <option>BUMN</option>
-                    <option>Universitas</option>
-                    <option>Pemda</option>
-                    <option>Swasta</option>
-                    <option>Ormas</option>
-                    <option>Lainnya</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Nama Mitra <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <input type="text" className="form-input" required placeholder="Contoh: PT Telkom" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.mitra} onChange={e => setFormData({ ...formData, mitra: e.target.value })} />
-                </div>
-                {/* Omitted other fields for brevity but included all required */}
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Jenis Kerja Sama <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.jenisKerjasama} onChange={e => setFormData({ ...formData, jenisKerjasama: e.target.value })}>
-                    <option value="">Pilih Jenis...</option>
-                    <option>Perjanjian Kerja Sama</option>
-                    <option>Nota Kesepahaman</option>
-                    <option>Kesepakatan Bersama</option>
-                    <option>Memorandum Saling Pengertian</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Pihak 1 (KKP) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <input type="text" className="form-input" required placeholder="Contoh: Dirjen PRL" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.pihak1} onChange={e => setFormData({ ...formData, pihak1: e.target.value })} />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Pihak 2 (Mitra) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <input type="text" className="form-input" required placeholder="Contoh: Pemkab Bandung" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.pihak2} onChange={e => setFormData({ ...formData, pihak2: e.target.value })} />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tanggal Mulai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.tanggalMulai} onChange={e => setFormData({ ...formData, tanggalMulai: e.target.value })} />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Status <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                  <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                    <option>Berlaku</option>
-                    <option>Tidak Berlaku</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Upload File (Excel, Word, PDF)</label>
-                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" className="form-input" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px', background: '#fff' }} onChange={e => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      if (file.size > 5 * 1024 * 1024) {
-                        alert("⚠️ Ukuran file maksimal 5MB!");
-                        e.target.value = '';
-                        return;
-                      }
-                      setFormData({ ...formData, fileDokumen: file.name });
-                    }
-                  }} />
-                  {formData.fileDokumen && <div style={{ fontSize: '11px', color: 'var(--primary-600)', marginTop: '4px' }}>File terpilih: {formData.fileDokumen}</div>}
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Link Dokumen</label>
-                  <input type="url" className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', borderTop: '1px solid var(--neutral-100)', paddingTop: '24px', marginTop: '24px' }}>
-                <button type="button" className="btn btn-ghost" onClick={closeModal} style={{ fontSize: '13px', fontWeight: 600, padding: '10px 20px' }}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ padding: '10px 24px', fontSize: '13px', fontWeight: 600, background: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  Simpan Data
+                <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: 'var(--neutral-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  Tutup
                 </button>
               </div>
-            </form>
+              <form onSubmit={saveForm} style={{ padding: '32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Kategori Mitra <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.kategoriMitra} onChange={e => setFormData({ ...formData, kategoriMitra: e.target.value })}>
+                      <option value="">Pilih Kategori...</option>
+                      <option>K/L</option>
+                      <option>BUMN</option>
+                      <option>Universitas</option>
+                      <option>Pemda</option>
+                      <option>Swasta</option>
+                      <option>Ormas</option>
+                      <option>Lainnya</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Nama Mitra <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <input type="text" className="form-input" required placeholder="Contoh: PT Telkom" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.mitra} onChange={e => setFormData({ ...formData, mitra: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Jenis Kerja Sama <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.jenisKerjasama} onChange={e => setFormData({ ...formData, jenisKerjasama: e.target.value })}>
+                      <option value="">Pilih Jenis...</option>
+                      <option>Perjanjian Kerja Sama</option>
+                      <option>Nota Kesepahaman</option>
+                      <option>Kesepakatan Bersama</option>
+                      <option>Memorandum Saling Pengertian</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Pihak 1 (KKP) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                      <input type="text" className="form-input" required placeholder="Unit Kerja" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.pihak1} onChange={e => setFormData({ ...formData, pihak1: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>No. Pihak 1</label>
+                      <input type="text" className="form-input" placeholder="Nomor Surat" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.noPihak1} onChange={e => setFormData({ ...formData, noPihak1: e.target.value })} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Pihak 2 (Mitra) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                      <input type="text" className="form-input" required placeholder="Mitra" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.pihak2} onChange={e => setFormData({ ...formData, pihak2: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>No. Pihak 2</label>
+                      <input type="text" className="form-input" placeholder="Nomor Surat" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.noPihak2} onChange={e => setFormData({ ...formData, noPihak2: e.target.value })} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tahun <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                      <input type="number" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tahun} onChange={e => setFormData({ ...formData, tahun: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tgl Mulai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                      <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalMulai} onChange={e => setFormData({ ...formData, tanggalMulai: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tgl Selesai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                      <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalSelesai} onChange={e => setFormData({ ...formData, tanggalSelesai: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Status <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                      <option>Aktif</option>
+                      <option>Berakhir</option>
+                      <option>Lainnya</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Link Dokumen</label>
+                    <input type="url" className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--neutral-100)', paddingTop: '24px' }}>
+                  <button type="button" className="btn btn-ghost" onClick={closeModal} style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 600 }}>Batal</button>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '12px 32px', borderRadius: '12px', fontWeight: 700, background: 'linear-gradient(135deg, var(--primary-600), var(--primary-800))', border: 'none', color: '#fff' }}>
+                    {editData ? 'Simpan Perubahan' : 'Tambah Data'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

@@ -62,9 +62,17 @@ export default function Dashboard() {
             datasets: [{
               label: 'Jumlah Dokumen',
               data: trendData.length ? trendData : [0],
-              backgroundColor: '#0ea5e9',
-              hoverBackgroundColor: '#0284c7',
-              borderRadius: 4,
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return '#0ea5e9';
+                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                gradient.addColorStop(0, '#0ea5e9');
+                gradient.addColorStop(1, '#0C4A6E');
+                return gradient;
+              },
+              hoverBackgroundColor: '#075985',
+              borderRadius: 6,
               maxBarThickness: 48
             }]
           },
@@ -105,23 +113,30 @@ export default function Dashboard() {
             labels: catLabels.length ? catLabels : ['Belum ada data'],
             datasets: [{
               data: catData.length ? catData : [1],
-              backgroundColor: catData.length ? ['#0C4A6E', '#0284c7', '#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd'] : ['#e2e8f0'],
-              borderWidth: 2,
-              borderColor: '#ffffff',
-              hoverOffset: 8
+              backgroundColor: catData.length ? [
+                '#0C4A6E', // Blue 900
+                '#0284C7', // Blue 600
+                '#0EA5E9', // Blue 500
+                '#38BDF8', // Blue 400
+                '#7DD3FC', // Blue 300
+                '#BAE6FD'  // Blue 200
+              ] : ['#e2e8f0'],
+              borderWidth: 0,
+              hoverOffset: 12
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '65%',
+            cutout: '70%',
             plugins: { 
               legend: { 
                 position: isMobile ? 'bottom' : 'right', 
                 labels: { 
                   usePointStyle: true, 
-                  padding: isMobile ? 10 : 16, 
-                  font: { size: 10 } 
+                  padding: isMobile ? 12 : 20, 
+                  font: { size: 11, weight: '600' },
+                  color: '#475569'
                 } 
               } 
             }
@@ -146,9 +161,13 @@ export default function Dashboard() {
             labels: Object.keys(statusCounts),
             datasets: [{
               data: Object.values(statusCounts),
-              backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(100, 116, 139, 0.7)'],
+              backgroundColor: [
+                'rgba(16, 185, 129, 0.8)', // Success
+                'rgba(239, 68, 68, 0.8)',  // Danger
+                'rgba(100, 116, 139, 0.8)' // Neutral
+              ],
               borderColor: '#fff',
-              borderWidth: 2
+              borderWidth: 3
             }]
           },
           options: {
@@ -179,7 +198,15 @@ export default function Dashboard() {
             datasets: [{
               label: 'Jumlah Kerja Sama',
               data: sortedMitra.map(m => m[1]),
-              backgroundColor: 'rgba(2, 132, 199, 0.8)',
+              backgroundColor: (context) => {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return '#0284c7';
+                const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+                gradient.addColorStop(0, '#38bdf8');
+                gradient.addColorStop(1, '#0284c7');
+                return gradient;
+              },
               borderRadius: 6,
               maxBarThickness: 30
             }]
@@ -216,10 +243,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div id="main-content" style={{ padding: 'clamp(12px, 3vw, 24px)', animation: 'fadeIn 0.3s ease-out' }}>
+    <div className="page-fade-in">
       <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, color: 'var(--neutral-900)' }}>Monev Dashboard</h1>
+          <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Monev Dashboard</h1>
           <p style={{ margin: '4px 0 0 0', color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
@@ -235,43 +262,99 @@ export default function Dashboard() {
             </select>
           </div>
         </div>
-      </div>
+      </div>      <div className="dashboard-stats-grid" style={{ marginBottom: 'clamp(24px, 5vw, 32px)', gap: '24px' }}>
+        {/* Card 1: Total Mitra */}
+        <div className="card fade-in-up" style={{ 
+          padding: '24px', 
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', 
+          color: '#fff', 
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)', 
+          position: 'relative', 
+          overflow: 'hidden',
+          borderRadius: '20px',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          animationDelay: '0s'
+        }}>
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.15, color: '#38bdf8' }}>
+            <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
+          </div>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#38bdf8', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Total Mitra</div>
+            <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em' }}>{totalMitra}</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Entitas unik terdaftar</div>
+          </div>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #38bdf8, #818cf8)' }}></div>
+        </div>
 
-      <div className="dashboard-stats-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
-        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, var(--primary-900) 0%, #082235 100%)', color: '#fff', border: 'none', boxShadow: 'var(--shadow-lg)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22"></line><line x1="15" y1="22" x2="15" y2="22"></line></svg>
+        {/* Card 2: Total Dokumen */}
+        <div className="card fade-in-up" style={{ 
+          padding: '24px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', 
+          position: 'relative', 
+          overflow: 'hidden',
+          borderRadius: '20px',
+          animationDelay: '0.1s'
+        }}>
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.1, color: 'var(--primary-600)' }}>
+            <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
           </div>
-          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, opacity: 0.7, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Mitra</div>
-          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800 }}>{totalMitra}</div>
-          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', opacity: 0.6, marginTop: '8px' }}>Entitas unik terdaftar</div>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Total Dokumen</div>
+            <div className="page-title" style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em' }}>{totalDokumen}</div>
+            <div style={{ fontSize: '12px', color: 'var(--neutral-400)', fontWeight: 500 }}>NK, PKS, dan MSP</div>
+          </div>
         </div>
-        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, #fff 0%, var(--primary-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--primary-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+
+        {/* Card 3: Status Aktif */}
+        <div className="card fade-in-up" style={{ 
+          padding: '24px', 
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', 
+          position: 'relative', 
+          overflow: 'hidden',
+          borderRadius: '20px',
+          animationDelay: '0.2s'
+        }}>
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.1, color: 'var(--success-600)' }}>
+            <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
           </div>
-          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Dokumen</div>
-          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--primary-900)' }}>{totalDokumen}</div>
-          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--neutral-400)', marginTop: '8px' }}>NK, PKS, dan MSP</div>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Status Aktif</div>
+            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px', letterSpacing: '-0.02em' }}>{aktifCount}</div>
+            <div style={{ fontSize: '12px', color: 'var(--success-500)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success-500)', display: 'inline-block' }}></span>
+              Sedang berjalan
+            </div>
+          </div>
         </div>
-        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', background: 'linear-gradient(135deg, #fff 0%, var(--success-50) 100%)', border: '1px solid var(--neutral-100)', boxShadow: 'var(--shadow-md)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--success-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+
+        {/* Card 4: Akan Berakhir */}
+        <div className="card fade-in-up" style={{ 
+          padding: '24px', 
+          background: 'linear-gradient(135deg, #fffcf0 0%, #fef9c3 100%)',
+          border: '1px solid #fde047',
+          boxShadow: '0 10px 25px -5px rgba(234,179,8,0.15)', 
+          position: 'relative', 
+          overflow: 'hidden',
+          borderRadius: '20px',
+          animationDelay: '0.3s'
+        }}>
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.1, color: 'var(--warning-600)' }}>
+            <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
-          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Aktif</div>
-          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--success-600)' }}>{aktifCount}</div>
-          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--success-500)', marginTop: '8px' }}>Sedang berjalan</div>
-        </div>
-        <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)', background: 'linear-gradient(135deg, #fff 0%, var(--warning-100) 100%)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.05, color: 'var(--warning-600)' }}>
-            <svg viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--warning-700)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Akan Berakhir</div>
+            <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--warning-600)', marginBottom: '4px', letterSpacing: '-0.02em' }}>{akanBerakhirCount}</div>
+            <div style={{ fontSize: '12px', color: 'var(--warning-700)', fontWeight: 500 }}>Dalam 90 hari ke depan</div>
           </div>
-          <div style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Akan Berakhir</div>
-          <div style={{ fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 800, color: 'var(--warning-600)' }}>{akanBerakhirCount}</div>
-          <div style={{ fontSize: 'clamp(10px, 2vw, 11px)', color: 'var(--warning-500)', marginTop: '8px' }}>Dalam 90 hari ke depan</div>
         </div>
       </div>
-
       <div className="dashboard-charts-grid" style={{ marginBottom: 'clamp(20px, 5vw, 32px)' }}>
         <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)', border: 'none', boxShadow: 'var(--shadow-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(16px, 4vw, 24px)', flexWrap: 'wrap', gap: '8px' }}>

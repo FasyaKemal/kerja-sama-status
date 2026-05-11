@@ -69,7 +69,7 @@ export default function ProfilPage() {
   };
 
   return (
-    <div className="dashboard-content" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+    <div className="dashboard-content" style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--neutral-900)' }}>Profil Saya</h1>
         <p style={{ color: 'var(--neutral-500)', fontSize: '14px' }}>Kelola informasi data diri dan keamanan akun Anda.</p>

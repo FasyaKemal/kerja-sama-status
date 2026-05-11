@@ -121,7 +121,7 @@ export default function ProgressDokumen() {
   };
 
   return (
-    <div style={{ padding: '24px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div className="page-fade-in">
       <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 className="page-title">Progress Penyusunan Dokumen Kerja Sama</h1>
