@@ -113,7 +113,7 @@ export function sisaHari(tanggalSelesai) {
  * @returns {'Berlaku'|'Akan Berakhir'|'Tidak Berlaku'}
  */
 export function hitungStatus(item) {
-  if (!item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
+  if (!item || !item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
   const diff = sisaHari(item.tanggalSelesai);
   if (diff <= 0) return 'Tidak Berlaku';
   if (diff <= 90) return 'Akan Berakhir';

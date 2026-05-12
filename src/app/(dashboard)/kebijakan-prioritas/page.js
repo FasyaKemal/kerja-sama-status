@@ -8,6 +8,7 @@ import SuccessPopup from '@/components/SuccessPopup';
 import { formatDateShort, hitungStatus, sisaHari } from '@/lib/formatDate';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import toast from 'react-hot-toast';
+import { buildErrorMap, compareIsoDates, isBlank, isValidUrl, validateIsoDate } from '@/lib/validation';
 
 function subscribeLocation(cb) {
   if (typeof window === 'undefined') return () => {};
@@ -30,13 +31,34 @@ export default function KebijakanPrioritas() {
       return null;
     }
   }, [search]);
+  const shouldCreateNew = useMemo(() => {
+    if (!search) return false;
+    try {
+      return new URLSearchParams(search).get('new') === '1';
+    } catch {
+      return false;
+    }
+  }, [search]);
+  const initialFilters = useMemo(() => {
+    if (!search) return { year: null, category: null, status: null };
+    try {
+      const p = new URLSearchParams(search);
+      return {
+        year: p.get('year'),
+        category: p.get('category'),
+        status: p.get('status'),
+      };
+    } catch {
+      return { year: null, category: null, status: null };
+    }
+  }, [search]);
   const { data, updateKebijakan } = useData();
   const dbData = data.kebijakanPrioritas || [];
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterYear, setFilterYear] = useState('all');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterYear, setFilterYear] = useState(initialFilters.year || 'all');
+  const [filterCategory, setFilterCategory] = useState(initialFilters.category || 'all');
+  const [filterStatus, setFilterStatus] = useState(initialFilters.status || 'all');
   const [page, setPage] = useState(1);
   const perPage = 20;
 
@@ -46,6 +68,7 @@ export default function KebijakanPrioritas() {
   const [successMessage, setSuccessMessage] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
     kategoriMitra: '',
@@ -151,6 +174,7 @@ export default function KebijakanPrioritas() {
         linkDokumen: ''
       });
     }
+    setFormErrors({});
     setModalOpen(true);
   };
 
@@ -161,29 +185,54 @@ export default function KebijakanPrioritas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId]);
 
+  useEffect(() => {
+    if (!shouldCreateNew) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    openModal(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldCreateNew]);
+
   const closeModal = () => setModalOpen(false);
+
+  const validateForm = (draft) => {
+    const startVal = validateIsoDate(draft.tanggalMulai);
+    const endVal = validateIsoDate(draft.tanggalSelesai);
+
+    const nextErrors = buildErrorMap([
+      ['kategoriMitra', isBlank(draft.kategoriMitra) ? 'Wajib dipilih.' : ''],
+      ['mitra', isBlank(draft.mitra) ? 'Wajib diisi.' : ''],
+      ['jenisKerjasama', isBlank(draft.jenisKerjasama) ? 'Wajib dipilih.' : ''],
+      ['pihak1', isBlank(draft.pihak1) ? 'Wajib diisi.' : ''],
+      ['pihak2', isBlank(draft.pihak2) ? 'Wajib diisi.' : ''],
+      ['tanggalMulai', startVal.ok ? '' : startVal.message],
+      ['tanggalSelesai', endVal.ok ? '' : endVal.message],
+      ['linkDokumen', isValidUrl(draft.linkDokumen) ? '' : 'Link tidak valid.'],
+      ['fileDokumenDataUrl', isBlank(draft.fileDokumenDataUrl) ? 'Wajib upload dokumen.' : ''],
+    ]);
+
+    const diff = compareIsoDates(draft.tanggalSelesai, draft.tanggalMulai);
+    if (diff !== null && diff < 0) nextErrors.tanggalSelesai = 'Tanggal selesai harus setelah tanggal mulai.';
+
+    const sig = `${String(draft.mitra || '').trim().toLowerCase()}|${String(draft.jenisKerjasama || '').trim().toLowerCase()}|${String(draft.tanggalMulai || '').trim()}`;
+    const dup = dbData.some((x) => {
+      if (editData && String(x.id) === String(editData.id)) return false;
+      const xsig = `${String(x.mitra || '').trim().toLowerCase()}|${String(x.jenisKerjasama || '').trim().toLowerCase()}|${String(x.tanggalMulai || '').trim()}`;
+      return xsig === sig;
+    });
+    if (dup) nextErrors.mitra = 'Data mirip sudah ada (cek Mitra/Jenis/Tgl Mulai).';
+
+    return nextErrors;
+  };
 
   const saveForm = (e) => {
     e.preventDefault();
     const isEdit = !!editData;
     const payload = normalizeDatesAndYear(formData);
-    const requiredFields = [
-      'kategoriMitra',
-      'mitra',
-      'jenisKerjasama',
-      'pihak1',
-      'pihak2',
-      'tanggalMulai',
-      'tanggalSelesai',
-      'linkDokumen',
-      'fileDokumenDataUrl',
-    ];
-    for (const key of requiredFields) {
-      const val = payload[key];
-      if (!val || String(val).trim() === '') {
-        toast.error('Semua kolom wajib diisi sebelum menyimpan.');
-        return;
-      }
+    const errs = validateForm(payload);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) {
+      toast.error('Periksa kembali form yang belum valid.');
+      return;
     }
     const newData = isEdit
       ? dbData.map(d => d.id === editData.id ? { ...payload } : d)
@@ -309,8 +358,8 @@ export default function KebijakanPrioritas() {
           </select>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="lg-only" style={{ overflowX: 'auto' }}>
+          <table className="table-modern" style={{ width: '100%', minWidth: '1100px' }}>
             <thead>
               <tr style={{ background: 'var(--neutral-50)', borderBottom: '2px solid var(--neutral-100)' }}>
                 <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>No</th>
@@ -378,6 +427,39 @@ export default function KebijakanPrioritas() {
             </tbody>
           </table>
         </div>
+
+        <div className="data-cards sm-only" style={{ marginTop: '16px', padding: '0 4px' }}>
+          {paginatedData.length === 0 ? (
+            <div className="data-card" style={{ textAlign: 'center', padding: '18px' }}>
+              <div className="data-card-title">Data Tidak Ditemukan</div>
+              <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--neutral-600)' }}>Coba ubah kata kunci atau filter.</div>
+              <button className="btn btn-primary btn-sm" style={{ marginTop: '12px' }} onClick={() => openModal()}>
+                Tambah Data
+              </button>
+            </div>
+          ) : (
+            paginatedData.map((r, i) => (
+              <div key={r.id || i} className="data-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'flex-start' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="data-card-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.mitra || '-'}</div>
+                    <div className="data-card-meta">
+                      <span className="badge badge-info" style={{ fontSize: '10px' }}>{r.kategoriMitra || '-'}</span>
+                      <span style={{ color: 'var(--neutral-600)' }}>{formatDateShort(r.tanggalMulai)} - {formatDateShort(r.tanggalSelesai)}</span>
+                    </div>
+                  </div>
+                  <button className="btn btn-primary btn-sm" style={{ padding: '8px 10px', borderRadius: '10px', background: 'var(--primary-700)', border: 'none' }} onClick={() => openModal(r.id)}>
+                    Detail
+                  </button>
+                </div>
+                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</div>
+                  <div>{renderStatusBadge(r)}</div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
         
         <div style={{ background: '#fff', padding: '16px 24px', borderTop: '1px solid var(--neutral-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--neutral-500)', fontSize: '13px' }}>
           <div>Menampilkan {totalData === 0 ? 0 : startIndex + 1} - {Math.min(startIndex + perPage, totalData)} dari {totalData} data</div>
@@ -417,10 +499,12 @@ export default function KebijakanPrioritas() {
                       <option>Ormas</option>
                       <option>Lainnya</option>
                     </select>
+                    {formErrors.kategoriMitra && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.kategoriMitra}</div>}
                   </div>
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Nama Mitra <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                     <input type="text" className="form-input" required placeholder="Contoh: PT Telkom" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.mitra} onChange={e => setFormData({ ...formData, mitra: e.target.value })} />
+                    {formErrors.mitra && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.mitra}</div>}
                   </div>
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Jenis Kerja Sama <span style={{ color: 'var(--danger-500)' }}>*</span></label>
@@ -431,11 +515,13 @@ export default function KebijakanPrioritas() {
                       <option>Kesepakatan Bersama</option>
                       <option>Memorandum Saling Pengertian</option>
                     </select>
+                    {formErrors.jenisKerjasama && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.jenisKerjasama}</div>}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Pihak 1 (KKP) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                       <input type="text" className="form-input" required placeholder="Unit Kerja" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.pihak1} onChange={e => setFormData({ ...formData, pihak1: e.target.value })} />
+                      {formErrors.pihak1 && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.pihak1}</div>}
                     </div>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>No. Pihak 1</label>
@@ -446,6 +532,7 @@ export default function KebijakanPrioritas() {
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Pihak 2 (Mitra) <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                       <input type="text" className="form-input" required placeholder="Mitra" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.pihak2} onChange={e => setFormData({ ...formData, pihak2: e.target.value })} />
+                      {formErrors.pihak2 && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.pihak2}</div>}
                     </div>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>No. Pihak 2</label>
@@ -456,10 +543,12 @@ export default function KebijakanPrioritas() {
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tgl Mulai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                       <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalMulai} onChange={e => setFormData({ ...formData, tanggalMulai: e.target.value })} />
+                      {formErrors.tanggalMulai && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.tanggalMulai}</div>}
                     </div>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tgl Selesai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                       <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalSelesai} onChange={e => setFormData({ ...formData, tanggalSelesai: e.target.value })} />
+                      {formErrors.tanggalSelesai && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.tanggalSelesai}</div>}
                     </div>
                   </div>
 
@@ -471,11 +560,13 @@ export default function KebijakanPrioritas() {
                         File terpilih: <strong>{formData.fileDokumenName}</strong>
                       </div>
                     ) : null}
+                    {formErrors.fileDokumenDataUrl && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.fileDokumenDataUrl}</div>}
                   </div>
 
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Link Dokumen <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                     <input type="url" required className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
+                    {formErrors.linkDokumen && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.linkDokumen}</div>}
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--neutral-100)', paddingTop: '24px' }}>

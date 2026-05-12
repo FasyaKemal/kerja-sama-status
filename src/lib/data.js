@@ -5484,5 +5484,6 @@ MockData.kebijakanPrioritas = [
       "status": "Berlaku",
       "linkDokumen": "https://drive.google.com/file/d/1Zt6iXWz78vL0-eH-fQp-d7Vv7q2V6mU_/view?usp=drive_link"
     }
-  ].map((x, i) => ({ id: `KP-${Date.now()}-${i}`, ...x }));
+  // Stable ids to avoid hydration mismatch when this module is imported during SSR.
+  ].map((x, i) => ({ id: `KP-SEED-${String(i + 1).padStart(3, '0')}`, ...x }));
   

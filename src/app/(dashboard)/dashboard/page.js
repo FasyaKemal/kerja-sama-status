@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import { useRouter } from 'next/navigation';
 import { hitungStatus, sisaHari, formatDateShort, parseDate } from '@/lib/formatDate';
@@ -14,14 +14,30 @@ export default function Dashboard() {
   const [filterKategori, setFilterKategori] = useState('all');
   const [dismissAlert, setDismissAlert] = useState(false);
   const chartRefs = useRef({});
-  const goToDatabase = () => router.push('/database-kerja-sama');
   const [detailItem, setDetailItem] = useState(null);
+
+  const goToDatabaseWithFilters = useCallback((next = {}) => {
+    const params = new URLSearchParams();
+    const year = next.year ?? (filterTahun !== 'all' ? filterTahun : null);
+    const category = next.category ?? (filterKategori !== 'all' ? filterKategori : null);
+    const status = next.status ?? null;
+
+    if (year) params.set('year', String(year));
+    if (category) params.set('category', String(category));
+    if (status) params.set('status', String(status));
+
+    const qs = params.toString();
+    router.push(qs ? `/database-kerja-sama?${qs}` : '/database-kerja-sama');
+  }, [filterKategori, filterTahun, router]);
+
+  const goToDatabase = () => goToDatabaseWithFilters();
 
   const db = useMemo(() => data.databaseKerjaSama ?? [], [data.databaseKerjaSama]);
   const kp = useMemo(() => data.kebijakanPrioritas ?? [], [data.kebijakanPrioritas]);
 
   const rawAllData = useMemo(() => {
-    return [...db, ...kp];
+    // Guard against corrupted localStorage (null/undefined items).
+    return [...db, ...kp].filter(Boolean);
   }, [db, kp]);
 
   const allData = useMemo(() => {
@@ -42,6 +58,7 @@ export default function Dashboard() {
   const totalDokumen = allData.length;
   
   const statusCounts = allData.reduce((acc, item) => {
+    if (!item) return acc;
     const s = hitungStatus(item);
     acc[s] = (acc[s] || 0) + 1;
     return acc;
@@ -53,14 +70,18 @@ export default function Dashboard() {
   const tidakBerlakuCount = statusCounts['Tidak Berlaku'];
 
   const urgentCount = allData.filter(r => {
+    if (!r) return false;
     const diff = sisaHari(r.tanggalSelesai);
     return diff !== null && diff > 0 && diff <= 30;
   }).length;
 
   const nearingExpiry = allData.filter(r => {
+    if (!r) return false;
     const diff = sisaHari(r.tanggalSelesai);
     return diff !== null && diff > 0 && diff <= 120;
   }).sort((a,b) => {
+    if (!a) return 1;
+    if (!b) return -1;
     const da = parseDate(a.tanggalSelesai) || new Date(0);
     const db = parseDate(b.tanggalSelesai) || new Date(0);
     return da - db;
@@ -142,10 +163,23 @@ export default function Dashboard() {
             onClick: (e, activeEls) => {
               if (activeEls.length > 0) {
                 const idx = activeEls[0].index;
-                setFilterTahun(trendLabels[idx]);
+            setFilterTahun(trendLabels[idx]);
+            goToDatabaseWithFilters({ year: trendLabels[idx] });
+          }
+        },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const v = Number(ctx.parsed?.y ?? 0);
+                    const total = trendData.reduce((a, b) => a + b, 0) || 0;
+                    const pct = total ? Math.round((v / total) * 100) : 0;
+                    return ` ${v} dokumen (${pct}%) dari total ${total}`;
+                  }
+                }
               }
             },
-            plugins: { legend: { display: false } },
             scales: {
               y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, ticks: { stepSize: 1 } },
               x: { grid: { display: false } }
@@ -191,16 +225,35 @@ export default function Dashboard() {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '70%',
-            plugins: { 
-              legend: { 
-                position: isMobile ? 'bottom' : 'right', 
-                labels: { 
-                  usePointStyle: true, 
-                  padding: isMobile ? 12 : 20, 
+            plugins: {
+              legend: {
+                position: isMobile ? 'bottom' : 'right',
+                onClick: (e, legendItem, legend) => {
+                  const chart = legend.chart;
+                  const idx = legendItem.index;
+                  const meta = chart.getDatasetMeta(0);
+                  if (!meta?.data?.[idx]) return;
+                  meta.data[idx].hidden = !meta.data[idx].hidden;
+                  chart.update();
+                },
+                labels: {
+                  usePointStyle: true,
+                  padding: isMobile ? 12 : 20,
                   font: { size: 11, weight: '600' },
                   color: '#475569'
-                } 
-              } 
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => {
+                    const label = context.label || '';
+                    const value = Number(context.raw || 0);
+                    const total = (context.dataset.data || []).reduce((a, b) => a + b, 0) || 0;
+                    const pct = total ? Math.round((value / total) * 100) : 0;
+                    return `${label}: ${value} (${pct}%)`;
+                  }
+                }
+              }
             }
           }
         });
@@ -284,7 +337,7 @@ export default function Dashboard() {
       Object.values(currentCharts).forEach(chart => chart && chart.destroy());
       chartRefs.current = {};
     };
-  }, [allData, akanBerakhirCount, pureBerlakuCount, statusCounts, tidakBerlakuCount]);
+  }, [allData, akanBerakhirCount, pureBerlakuCount, statusCounts, tidakBerlakuCount, goToDatabaseWithFilters]);
 
 
   const exportReport = () => {
@@ -304,31 +357,42 @@ export default function Dashboard() {
   return (
     <div id="main-content" className="page-fade-in">
 
-      <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+      <div className="page-header" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
           <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Monev Dashboard</h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
             <span style={{ color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</span>
-            <span style={{ color: 'var(--neutral-300)' }}>•</span>
-            <span style={{ color: 'var(--primary-600)', fontSize: '12px', fontWeight: 700 }}>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
-          <button className="btn btn-ghost" style={{ border: '1px solid var(--neutral-300)', display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto', minHeight: '40px' }} onClick={exportReport}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-            <span style={{ whiteSpace: 'nowrap' }}>Ekspor Laporan</span>
-          </button>
-          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto' }}>
-            <span style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-700)', whiteSpace: 'nowrap' }}>Filter Tahun:</span>
-            <select className="form-select" style={{ padding: '8px 12px', fontSize: 'clamp(11px, 2vw, 13px)', minWidth: '120px' }} onChange={(e) => setFilterTahun(e.target.value)} value={filterTahun}>
+      </div>
+
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="form-group" style={{ margin: 0 }}>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--neutral-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+              Tahun
+            </div>
+            <select
+              className="form-select"
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }}
+              onChange={(e) => setFilterTahun(e.target.value)}
+              value={filterTahun}
+            >
               <option value="all">Semua Tahun</option>
               {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
-          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '0 1 auto' }}>
-            <span style={{ fontSize: 'clamp(11px, 2vw, 13px)', fontWeight: 600, color: 'var(--neutral-700)', whiteSpace: 'nowrap' }}>Kategori:</span>
-            <select className="form-select" style={{ padding: '8px 12px', fontSize: 'clamp(11px, 2vw, 13px)', minWidth: '140px' }} onChange={(e) => setFilterKategori(e.target.value)} value={filterKategori}>
+          <div className="form-group" style={{ margin: 0 }}>
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--neutral-500)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+              Kategori Mitra
+            </div>
+            <select
+              className="form-select"
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }}
+              onChange={(e) => setFilterKategori(e.target.value)}
+              value={filterKategori}
+            >
               <option value="all">Semua Kategori</option>
               {availableKategoris.map(k => <option key={k} value={k}>{k}</option>)}
             </select>
@@ -536,7 +600,7 @@ export default function Dashboard() {
             <h3 style={{ margin: 0, fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, flex: 1 }}>
               Dokumen Mendekati Akhir
             </h3>
-            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>
+            <button className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }} onClick={() => goToDatabaseWithFilters()}>
               Lihat Semua
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </button>
@@ -550,8 +614,9 @@ export default function Dashboard() {
               <p style={{ color: 'var(--neutral-600)', fontSize: 'clamp(12px, 2vw, 14px)', margin: 0 }}>Tidak ada dokumen kerja sama yang mendekati masa kedaluwarsa dalam 4 bulan ke depan.</p>
             </div>
           ) : (
+            <>
             <div className="table-responsive" style={{ overflowX: 'auto', width: '100%', marginTop: '16px' }}>
-              <table className="table" style={{ fontSize: 'clamp(11px, 2vw, 13px)', width: '100%', minWidth: '600px' }}>
+              <table className="table-modern" style={{ fontSize: 'clamp(11px, 2vw, 13px)', width: '100%', minWidth: '680px' }}>
                 <thead>
                   <tr style={{ background: 'var(--neutral-50)' }}>
                     <th style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(10px, 2vw, 11px)' }}>Nama Mitra</th>
@@ -565,9 +630,10 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {nearingExpiry.map((r, i) => {
+                    if (!r) return null;
                     const diff = sisaHari(r.tanggalSelesai);
                     return (
-                      <tr key={i} style={{ borderBottom: '1px solid var(--neutral-100)' }}>
+                      <tr key={i} style={{ borderBottom: '1px solid var(--neutral-100)' }} className={detailItem && detailItem.id === r.id ? 'is-selected' : ''}>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><strong>{r.mitra}</strong></td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>
                           <span className="badge badge-info" style={{ fontSize: '10px' }}>{r.kategoriMitra || '-'}</span>
@@ -595,6 +661,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
         <DetailPanel

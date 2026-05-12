@@ -5,6 +5,7 @@ import { useData } from '@/context/DataContext';
 import SuccessPopup from '@/components/SuccessPopup';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { formatDate } from '@/lib/formatDate';
+import { compareIsoDates, isBlank, isValidUrl, validateIsoDate } from '@/lib/validation';
 import toast from 'react-hot-toast';
 
 
@@ -23,7 +24,16 @@ export default function ProgressDokumen() {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   
   const [formData, setFormData] = useState({
-    no: '', judul: '', mitra: '', step: 1, tahun: '2026', tanggalMulai: '', tanggalSelesai: '', linkDokumen: '', fileDokumen: null
+    no: '',
+    judul: '',
+    mitra: '',
+    step: 1,
+    tahun: '2026',
+    tanggalMulai: '',
+    tanggalSelesai: '',
+    linkDokumen: '',
+    fileDokumenName: '',
+    fileDokumenDataUrl: ''
   });
 
 
@@ -71,11 +81,37 @@ export default function ProgressDokumen() {
       const r = progressData.find(x => x.id === id);
       if (r) {
         setEditData(id);
-        setFormData({ ...r });
+        setFormData({
+          no: '',
+          judul: '',
+          mitra: '',
+          step: 1,
+          tahun: '2026',
+          tanggalMulai: '',
+          tanggalSelesai: '',
+          linkDokumen: '',
+          fileDokumenName: '',
+          fileDokumenDataUrl: '',
+          ...r,
+          // Legacy fallback (older versions stored File object which isn't serializable)
+          fileDokumenName: r.fileDokumenName || r.fileDokumen?.name || '',
+          fileDokumenDataUrl: r.fileDokumenDataUrl || ''
+        });
       }
     } else {
       setEditData(null);
-      setFormData({ no: '', judul: '', mitra: '', step: 1, tahun: '2026', tanggalMulai: '', tanggalSelesai: '', linkDokumen: '', fileDokumen: null });
+      setFormData({
+        no: '',
+        judul: '',
+        mitra: '',
+        step: 1,
+        tahun: '2026',
+        tanggalMulai: '',
+        tanggalSelesai: '',
+        linkDokumen: '',
+        fileDokumenName: '',
+        fileDokumenDataUrl: ''
+      });
 
     }
     setModalOpen(true);
@@ -85,6 +121,37 @@ export default function ProgressDokumen() {
 
   const saveForm = (e) => {
     e.preventDefault();
+
+    const requiredFields = ['no', 'judul', 'mitra', 'tahun', 'tanggalMulai', 'tanggalSelesai', 'step'];
+    for (const key of requiredFields) {
+      if (isBlank(formData[key])) {
+        toast.error('Semua kolom wajib diisi.');
+        return;
+      }
+    }
+    if (!validateIsoDate(formData.tanggalMulai).ok || !validateIsoDate(formData.tanggalSelesai).ok) {
+      toast.error('Format tanggal tidak valid.');
+      return;
+    }
+    const diff = compareIsoDates(formData.tanggalSelesai, formData.tanggalMulai);
+    if (diff == null) {
+      toast.error('Format tanggal tidak valid.');
+      return;
+    }
+    if (diff < 0) {
+      toast.error('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
+      return;
+    }
+    const hasLink = !isBlank(formData.linkDokumen);
+    const hasFile = !isBlank(formData.fileDokumenDataUrl);
+    if (!hasLink && !hasFile) {
+      toast.error('Link dokumen atau upload file wajib diisi.');
+      return;
+    }
+    if (hasLink && !isValidUrl(formData.linkDokumen)) {
+      toast.error('Link dokumen tidak valid.');
+      return;
+    }
     
     const step = parseInt(formData.step);
     const progress = Math.round((step / timelineSteps.length) * 100);
@@ -136,14 +203,26 @@ export default function ProgressDokumen() {
 
   const handleFileUpload = (e) => {
     const file = e.target.files && e.target.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-        toast.error('Ukuran file maksimal 5MB.');
-        e.target.value = '';
-        return;
-        }
-        setFormData({ ...formData, fileDokumen: file });
-      }
+    if (!file) return;
+    // LocalStorage-friendly: store as data URL with a conservative cap.
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error('Ukuran file maksimal 1MB (untuk penyimpanan lokal).');
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData({
+        ...formData,
+        fileDokumenName: file.name,
+        fileDokumenDataUrl: String(reader.result || '')
+      });
+    };
+    reader.onerror = () => {
+      toast.error('Gagal membaca file. Coba lagi.');
+      e.target.value = '';
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -388,14 +467,14 @@ export default function ProgressDokumen() {
                   <input type="url" className="form-input" placeholder="https://drive.google.com/..." style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.linkDokumen} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Upload Dokumen Kerja Sama (Opsional)</label>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Upload Dokumen Kerja Sama</label>
                   <div style={{ border: '2px dashed var(--neutral-300)', borderRadius: '8px', padding: '24px', textAlign: 'center', background: 'var(--neutral-50)', cursor: 'pointer' }} onClick={() => document.getElementById('file-upload').click()}>
-                    {formData.fileDokumen ? (
+                    {formData.fileDokumenDataUrl ? (
                       <div>
                         <div style={{ marginBottom: '12px', color: 'var(--success-500)' }}>
                           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--success-600)', marginBottom: '4px' }}>{formData.fileDokumen.name || 'Dokumen Terpilih'}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--success-600)', marginBottom: '4px' }}>{formData.fileDokumenName || 'Dokumen Terpilih'}</div>
                       </div>
                     ) : (
                       <div>

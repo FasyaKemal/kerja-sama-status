@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
 import Image from 'next/image';
@@ -12,12 +12,15 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [{ num1, num2 }] = useState(() => {
-    return {
+  // Avoid hydration mismatch: random numbers must be generated only on client after mount.
+  const [{ num1, num2 }, setCaptchaNums] = useState({ num1: 0, num2: 0 });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCaptchaNums({
       num1: Math.floor(Math.random() * 10) + 1,
       num2: Math.floor(Math.random() * 10) + 1,
-    };
-  });
+    });
+  }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
