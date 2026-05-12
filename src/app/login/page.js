@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useData } from '@/context/DataContext';
+import Image from 'next/image';
 import '../../../public/styles/login.css';
 
 export default function Login() {
@@ -11,19 +12,15 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
+  const [{ num1, num2 }] = useState(() => {
+    return {
+      num1: Math.floor(Math.random() * 10) + 1,
+      num2: Math.floor(Math.random() * 10) + 1,
+    };
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // We use functional updates or eslint disable to avoid cascading render warnings in strict environments
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNum1(Math.floor(Math.random() * 10) + 1);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNum2(Math.floor(Math.random() * 10) + 1);
-  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -67,7 +64,7 @@ export default function Login() {
       <div className="login-left">
         <div className="login-left-content">
           <div className="kkp-logo-wrapper" style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-            <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '150px', height: 'auto', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }} />
+            <Image src="/logo-kkp.png" alt="Logo KKP" width={150} height={150} style={{ height: 'auto', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }} priority />
           </div>
           <h1 className="branding-title">Biro Perencanaan</h1>
           <h2 className="branding-subtitle">Kementerian Kelautan dan Perikanan</h2>

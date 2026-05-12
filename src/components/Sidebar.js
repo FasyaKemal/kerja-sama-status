@@ -1,6 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+const defaultUserData = {
+  fullName: 'admin',
+  role: 'Administrator'
+};
+
+function subscribeUserData(callback) {
+  if (typeof window === 'undefined') return () => {};
+
+  window.addEventListener('storage', callback);
+  window.addEventListener('profileUpdated', callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('profileUpdated', callback);
+  };
+}
+
+function getUserSnapshot() {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('kinerjaku_user') || '';
+}
+
+function parseUserData(userJson) {
+  if (!userJson) return defaultUserData;
+  try {
+    const parsed = JSON.parse(userJson);
+    return {
+      fullName: parsed.fullName || defaultUserData.fullName,
+      role: parsed.role || defaultUserData.role
+    };
+  } catch (e) {
+    console.error("Gagal memuat profil");
+    return defaultUserData;
+  }
+}
 
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarCollapsed }) {
   const pathname = usePathname();
@@ -8,31 +44,35 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
   const [expandedMenus, setExpandedMenus] = useState({});
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [userData, setUserData] = useState({
-    fullName: 'admin',
-    role: 'Administrator'
-  });
 
-  const loadUserData = () => {
-    const savedUser = localStorage.getItem('kinerjaku_user');
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        setUserData({
-          fullName: parsed.fullName || 'admin',
-          role: parsed.role || 'Administrator'
-        });
-      } catch (e) {
-        console.error("Gagal memuat profil");
-      }
-    }
-  };
+  // Avoid hydration mismatch: first render (server + client hydration) uses defaultUserData.
+  // After hydration, this store causes a re-render with localStorage values.
+  const userJson = useSyncExternalStore(subscribeUserData, getUserSnapshot, () => '');
+  const userData = useMemo(() => parseUserData(userJson), [userJson]);
+  const profileMenuRef = useRef(null);
+  const profileButtonRef = useRef(null);
 
   useEffect(() => {
-    loadUserData();
-    window.addEventListener('profileUpdated', loadUserData);
-    return () => window.removeEventListener('profileUpdated', loadUserData);
-  }, []);
+    if (!profileDropdownOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setProfileDropdownOpen(false);
+    };
+    const onPointerDown = (e) => {
+      const menuEl = profileMenuRef.current;
+      const buttonEl = profileButtonRef.current;
+      if (!menuEl || !buttonEl) return;
+      if (menuEl.contains(e.target) || buttonEl.contains(e.target)) return;
+      setProfileDropdownOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [profileDropdownOpen]);
 
   const handleLogoutClick = (e) => {
     if (e) e.preventDefault();
@@ -60,7 +100,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
         {!sidebarCollapsed && (
           <div className="sidebar-brand">
             <div className="sidebar-brand-icon">
-              <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '40px', height: 'auto', marginRight: '8px' }} />
+              <Image src="/logo-kkp.png" alt="Logo KKP" width={40} height={40} style={{ height: 'auto', marginRight: '8px' }} priority />
             </div>
             <div>
               <div className="sidebar-brand-text">Database Kerja Sama</div>
@@ -70,7 +110,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
         )}
         {sidebarCollapsed && (
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <img src="/logo-kkp.png" alt="Logo KKP" style={{ width: '32px', height: 'auto' }} />
+            <Image src="/logo-kkp.png" alt="Logo KKP" width={32} height={32} style={{ height: 'auto' }} priority />
           </div>
         )}
       </div>
@@ -89,7 +129,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
       
       <div className="sidebar-footer" style={{ padding: '16px', position: 'relative', marginTop: 'auto' }}>
         {profileDropdownOpen && (
-          <div role="menu" style={{ position: 'absolute', bottom: '100%', left: '0', right: '0', marginBottom: '8px', background: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 100 }}>
+          <div ref={profileMenuRef} role="menu" style={{ position: 'absolute', bottom: '100%', left: '0', right: '0', marginBottom: '8px', background: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', zIndex: 100 }}>
             <button role="menuitem" onClick={() => { setProfileDropdownOpen(false); router.push('/profil'); }} aria-label="Buka halaman profil pengguna" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.15s ease' }}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
               <span style={{ fontSize: '14px', fontWeight: 500 }}>Profile</span>
@@ -100,7 +140,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarColl
             </button>
           </div>
         )}
-        <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} aria-label={profileDropdownOpen ? 'Tutup menu profil' : 'Buka menu profil'} aria-expanded={profileDropdownOpen} aria-haspopup="true" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', background: 'transparent', borderRadius: '0', cursor: 'pointer', border: 'none', transition: 'background 0.2s', width: '100%', textAlign: 'left' }}>
+        <button ref={profileButtonRef} onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} aria-label={profileDropdownOpen ? 'Tutup menu profil' : 'Buka menu profil'} aria-expanded={profileDropdownOpen} aria-haspopup="true" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', background: 'transparent', borderRadius: '0', cursor: 'pointer', border: 'none', transition: 'background 0.2s', width: '100%', textAlign: 'left' }}>
           <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#00bcd4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '16px' }} aria-label={`Avatar ${userData.fullName}`}>{userData.fullName.substring(0, 1).toUpperCase()}</div>
           {!sidebarCollapsed && (
             <>

@@ -1,22 +1,18 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+function getCurrentDateLabel() {
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const now = new Date();
+
+  return {
+    label: `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`,
+    iso: now.toISOString().split('T')[0],
+  };
+}
 
 export default function Header({ toggleMobileMenu, toggleSidebar }) {
-  const [currentDate, setCurrentDate] = useState('');
-
-  useEffect(() => {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
-    const now = new Date();
-    const day = days[now.getDay()];
-    const date = now.getDate();
-    const month = months[now.getMonth()];
-    const year = now.getFullYear();
-
-    setCurrentDate(`${day}, ${date} ${month} ${year}`);
-  }, []);
+  const currentDate = getCurrentDateLabel();
 
   const handleHamburgerClick = (e) => {
     e.preventDefault();
@@ -77,8 +73,8 @@ export default function Header({ toggleMobileMenu, toggleSidebar }) {
             <line x1="8" y1="2" x2="8" y2="6"></line>
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
-          <time dateTime={new Date().toISOString().split('T')[0]}>
-            {currentDate}
+          <time dateTime={currentDate.iso}>
+            {currentDate.label}
           </time>
         </div>
       </div>

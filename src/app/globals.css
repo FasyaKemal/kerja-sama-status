@@ -47,6 +47,7 @@
   --primary-200: #BAE6FD;
   --primary-100: #E0F2FE;
   --primary-50: #F4F7F9;
+  --primary-rgb: 13, 45, 62;
 
   /* Accent — Teal */
   --accent-700: #0F766E;
@@ -67,15 +68,20 @@
   --neutral-300: #E2E8F0;
   --neutral-200: #F1F5F9;
   --neutral-100: #F8FAFC;
+  --neutral-50: #FBFDFF;
   --neutral-white: #FFFFFF;
 
   /* Status */
   --success-600: #16A34A;
   --success-500: #22C55E;
+  --success-700: #15803D;
   --success-100: #DCFCE7;
+  --green-700: #15803D;
   --warning-600: #CA8A04;
   --warning-500: #EAB308;
+  --warning-700: #A16207;
   --warning-100: #FEF9C3;
+  --orange-700: #C2410C;
   --danger-600: #DC2626;
   --danger-500: #EF4444;
   --danger-100: #FEE2E2;
@@ -217,11 +223,12 @@ body {
 
 /* Global button and input focus styles */
 *:focus {
-  outline: none !important;
+  outline: none;
 }
 
 *:focus-visible {
-  outline: none !important;
+  outline: 2px solid var(--primary-400) !important;
+  outline-offset: 2px;
 }
 
 button::-moz-focus-inner,
@@ -386,8 +393,18 @@ a:hover {
 /* Remove focus outlines from all buttons */
 button:focus-visible,
 button:focus {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary-400) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.12) !important;
 }
 
 button:active {
@@ -1031,6 +1048,7 @@ button:active {
   font: var(--font-h1);
   background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }

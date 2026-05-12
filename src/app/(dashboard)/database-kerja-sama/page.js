@@ -5,6 +5,9 @@ import { useData } from '@/context/DataContext';
 import * as XLSX from 'xlsx';
 import Portal from '@/components/Portal';
 import SuccessPopup from '@/components/SuccessPopup';
+import { formatDate, formatDateShort, hitungStatus, sisaHari } from '@/lib/formatDate';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 export default function DatabaseKerjaSama() {
   const { data, updateDatabase } = useData();
@@ -21,6 +24,8 @@ export default function DatabaseKerjaSama() {
   const [editData, setEditData] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
     kategoriMitra: '',
@@ -33,23 +38,51 @@ export default function DatabaseKerjaSama() {
     tanggalMulai: '',
     tanggalSelesai: '',
     status: '', // Automatically calculated
-    fileDokumen: '',
+    fileDokumenName: '',
+    fileDokumenDataUrl: '',
     linkDokumen: ''
   });
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // localStorage is limited; keep this conservative.
+    const maxBytes = 1024 * 1024; // 1MB
+    if (file.size > maxBytes) {
+      toast.error('Ukuran file maksimal 1MB (untuk penyimpanan lokal).');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+      setFormData((prev) => ({
+        ...prev,
+        fileDokumenName: file.name,
+        fileDokumenDataUrl: dataUrl,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const normalizeDatesAndYear = (draft) => {
+    const tanggalMulai = String(draft.tanggalMulai || '').trim();
+    const tanggalSelesai = String(draft.tanggalSelesai || '').trim();
+
+    const yearMatch = tanggalMulai.match(/(\d{4})$/);
+    const tahun = yearMatch ? yearMatch[1] : draft.tahun;
+
+    return { ...draft, tanggalMulai, tanggalSelesai, tahun };
+  };
 
   const filteredData = dbData.filter(item => {
     const matchesSearch = !searchQuery || 
       Object.values(item).some(val => val?.toString().toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesYear = filterYear === 'all' || item.tahun === filterYear;
     const matchesCategory = filterCategory === 'all' || item.kategoriMitra === filterCategory;
-    const itemStatus = (() => {
-      if (!item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
-      const end = new Date(item.tanggalSelesai);
-      const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-      if (diff <= 0) return 'Tidak Berlaku';
-      if (diff <= 90) return 'Akan Berakhir';
-      return 'Berlaku';
-    })();
+    const itemStatus = hitungStatus(item);
 
     let matchesStatus = filterStatus === 'all' || itemStatus === filterStatus;
     
@@ -96,7 +129,8 @@ export default function DatabaseKerjaSama() {
         tanggalMulai: '',
         tanggalSelesai: '',
         status: 'Aktif',
-        fileDokumen: '',
+        fileDokumenName: '',
+        fileDokumenDataUrl: '',
         linkDokumen: ''
       });
     }
@@ -108,9 +142,28 @@ export default function DatabaseKerjaSama() {
   const saveForm = (e) => {
     e.preventDefault();
     const isEdit = !!editData;
+    const payload = normalizeDatesAndYear(formData);
+    const requiredFields = [
+      'kategoriMitra',
+      'mitra',
+      'jenisKerjasama',
+      'pihak1',
+      'pihak2',
+      'tanggalMulai',
+      'tanggalSelesai',
+      'linkDokumen',
+      'fileDokumenDataUrl',
+    ];
+    for (const key of requiredFields) {
+      const val = payload[key];
+      if (!val || String(val).trim() === '') {
+        toast.error('Semua kolom wajib diisi sebelum menyimpan.');
+        return;
+      }
+    }
     const newData = isEdit
-      ? dbData.map(d => d.id === editData.id ? { ...formData } : d)
-      : [...dbData, { ...formData, id: Date.now() }];
+      ? dbData.map(d => d.id === editData.id ? { ...payload } : d)
+      : [...dbData, { ...payload, id: Date.now() }];
     
     updateDatabase(newData);
     closeModal();
@@ -118,10 +171,23 @@ export default function DatabaseKerjaSama() {
     setShowSuccess(true);
   };
 
-  const deleteItem = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      updateDatabase(dbData.filter(d => d.id !== id));
-    }
+  const requestDelete = (id) => {
+    setPendingDeleteId(id);
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (pendingDeleteId == null) return;
+    updateDatabase(dbData.filter(d => d.id !== pendingDeleteId));
+    setConfirmDeleteOpen(false);
+    setPendingDeleteId(null);
+    setSuccessMessage('Berhasil Dihapus!');
+    setShowSuccess(true);
+  };
+
+  const cancelDelete = () => {
+    setConfirmDeleteOpen(false);
+    setPendingDeleteId(null);
   };
 
   const exportToExcel = () => {
@@ -132,21 +198,13 @@ export default function DatabaseKerjaSama() {
   };
 
   const renderStatusBadge = (item) => {
-    let displayStatus = 'Berlaku';
-    let badgeClass = 'badge-success';
-
-    if (item.tanggalSelesai && item.tanggalSelesai !== '-') {
-      const end = new Date(item.tanggalSelesai);
-      const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-      
-      if (diff <= 0) {
-        displayStatus = 'Berakhir';
-        badgeClass = 'badge-danger';
-      } else if (diff <= 90) {
-        displayStatus = 'Akan Berakhir';
-        badgeClass = 'badge-warning';
-      }
-    }
+    const displayStatus = hitungStatus(item);
+    const badgeClass =
+      displayStatus === 'Tidak Berlaku'
+        ? 'badge-danger'
+        : displayStatus === 'Akan Berakhir'
+          ? 'badge-warning'
+          : 'badge-success';
 
     return (
       <span className={`badge ${badgeClass}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content', textTransform: 'uppercase', fontSize: '10px', fontWeight: 700 }}>
@@ -185,20 +243,18 @@ export default function DatabaseKerjaSama() {
           <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--success-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status Berlaku</div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--success-600)', marginBottom: '4px' }}>
             {dbData.filter(item => {
-              if (!item.tanggalSelesai || item.tanggalSelesai === '-') return true;
-              const end = new Date(item.tanggalSelesai);
-              return (end - new Date()) > 0;
+              const diff = sisaHari(item.tanggalSelesai);
+              return diff === null ? true : diff > 0;
             }).length}
           </div>
           <div style={{ fontSize: '12px', color: 'var(--success-500)' }}>Sedang berjalan</div>
         </div>
         <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.2s' }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Berakhir / Tidak Berlaku</div>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--danger-600)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tidak Berlaku</div>
           <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--danger-600)', marginBottom: '4px' }}>
             {dbData.filter(item => {
-              if (!item.tanggalSelesai || item.tanggalSelesai === '-') return false;
-              const end = new Date(item.tanggalSelesai);
-              return (end - new Date()) <= 0;
+              const diff = sisaHari(item.tanggalSelesai);
+              return diff !== null && diff <= 0;
             }).length}
           </div>
           <div style={{ fontSize: '12px', color: 'var(--danger-500)' }}>Perlu tindak lanjut</div>
@@ -275,8 +331,8 @@ export default function DatabaseKerjaSama() {
                     <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)' }}>{r.pihak2 || '-'}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)' }}>{r.noPihak2 || ''}</div>
                   </td>
-                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalMulai || '-'}</td>
-                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{r.tanggalSelesai || '-'}</td>
+                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{formatDateShort(r.tanggalMulai)}</td>
+                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{formatDateShort(r.tanggalSelesai)}</td>
                   <td style={{ padding: '16px' }}>{renderStatusBadge(r)}</td>
                   <td style={{ padding: '16px', textAlign: 'center' }}>
                     {r.linkDokumen ? <a href={r.linkDokumen} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '6px 12px', background: 'var(--primary-50)', color: 'var(--primary-700)', borderRadius: '8px', fontWeight: 600 }}>Lihat</a> : '-'}
@@ -286,7 +342,7 @@ export default function DatabaseKerjaSama() {
                       <button className="btn btn-ghost btn-sm" onClick={() => openModal(r.id)} style={{ color: 'var(--primary-600)' }}>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                       </button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => deleteItem(r.id)} style={{ color: 'var(--danger-600)' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => requestDelete(r.id)} style={{ color: 'var(--danger-600)' }}>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                       </button>
                     </div>
@@ -370,11 +426,7 @@ export default function DatabaseKerjaSama() {
                       <input type="text" className="form-input" placeholder="Nomor Surat" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.noPihak2} onChange={e => setFormData({ ...formData, noPihak2: e.target.value })} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tahun <span style={{ color: 'var(--danger-500)' }}>*</span></label>
-                      <input type="number" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tahun} onChange={e => setFormData({ ...formData, tahun: e.target.value })} />
-                    </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Tgl Mulai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                       <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.tanggalMulai} onChange={e => setFormData({ ...formData, tanggalMulai: e.target.value })} />
@@ -386,8 +438,18 @@ export default function DatabaseKerjaSama() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Link Dokumen</label>
-                    <input type="url" className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Upload Dokumen <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <input type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx" className="form-input" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} onChange={handleFileUpload} />
+                    {formData.fileDokumenName ? (
+                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--neutral-600)' }}>
+                        File terpilih: <strong>{formData.fileDokumenName}</strong>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Link Dokumen <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <input type="url" required className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--neutral-100)', paddingTop: '24px' }}>
@@ -401,6 +463,13 @@ export default function DatabaseKerjaSama() {
           </div>
         </Portal>
       )}
+      <ConfirmDialog
+        show={confirmDeleteOpen}
+        title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
       <SuccessPopup show={showSuccess} message={successMessage} onClose={() => setShowSuccess(false)} />
     </div>
   );

@@ -1,15 +1,31 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+const defaultUser = {
+  username: '',
+  fullName: '',
+  role: '',
+  email: 'admin.pusat@kkp.go.id',
+};
+
+function readStoredUser() {
+  if (typeof window === 'undefined') return defaultUser;
+
+  const savedUser = localStorage.getItem('kinerjaku_user');
+  if (!savedUser) return defaultUser;
+
+  try {
+    return { ...defaultUser, ...JSON.parse(savedUser) };
+  } catch (e) {
+    console.error("Gagal memuat profil pengguna");
+    return defaultUser;
+  }
+}
+
 export default function ProfilPage() {
-  const [user, setUser] = useState({
-    username: '',
-    fullName: '',
-    role: '',
-    email: 'admin.pusat@kkp.go.id',
-  });
+  const [user, setUser] = useState(() => readStoredUser());
 
   const [passwordData, setPasswordData] = useState({
     oldPassword: '',
@@ -18,18 +34,6 @@ export default function ProfilPage() {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('kinerjaku_user');
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        setUser(prev => ({ ...prev, ...parsed }));
-      } catch (e) {
-        console.error("Gagal memuat profil pengguna");
-      }
-    }
-  }, []);
 
   const handleSave = (e) => {
     e.preventDefault();

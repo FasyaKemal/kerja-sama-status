@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import { useRouter } from 'next/navigation';
+import { hitungStatus, sisaHari, formatDateShort } from '@/lib/formatDate';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -11,35 +12,34 @@ export default function Dashboard() {
   const [filterKategori, setFilterKategori] = useState('all');
   const [dismissAlert, setDismissAlert] = useState(false);
   const chartRefs = useRef({});
+  const goToDatabase = () => router.push('/database-kerja-sama');
 
-  const db = data.databaseKerjaSama || [];
-  const kp = data.kebijakanPrioritas || [];
-  let allData = [...db, ...kp];
+  const db = useMemo(() => data.databaseKerjaSama ?? [], [data.databaseKerjaSama]);
+  const kp = useMemo(() => data.kebijakanPrioritas ?? [], [data.kebijakanPrioritas]);
+
+  const rawAllData = useMemo(() => {
+    return [...db, ...kp];
+  }, [db, kp]);
+
+  const allData = useMemo(() => {
+    let merged = rawAllData;
+    if (filterTahun !== 'all') {
+      merged = merged.filter(r => String(r.tahun || '').trim() === filterTahun);
+    }
+    if (filterKategori !== 'all') {
+      merged = merged.filter(r => r.kategoriMitra === filterKategori);
+    }
+    return merged;
+  }, [rawAllData, filterTahun, filterKategori]);
 
   const availableYears = [...new Set(allData.map(r => String(r.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))].sort().reverse();
   const availableKategoris = [...new Set(allData.map(r => r.kategoriMitra).filter(Boolean))].sort();
-
-  if (filterTahun !== 'all') {
-    allData = allData.filter(r => String(r.tahun || '').trim() === filterTahun);
-  }
-  if (filterKategori !== 'all') {
-    allData = allData.filter(r => r.kategoriMitra === filterKategori);
-  }
-
-  const calculateItemStatus = (item) => {
-    if (!item.tanggalSelesai || item.tanggalSelesai === '-') return 'Berlaku';
-    const end = new Date(item.tanggalSelesai);
-    const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-    if (diff <= 0) return 'Tidak Berlaku';
-    if (diff <= 90) return 'Akan Berakhir';
-    return 'Berlaku';
-  };
 
   const totalMitra = new Set(allData.map(r => r.mitra)).size;
   const totalDokumen = allData.length;
   
   const statusCounts = allData.reduce((acc, item) => {
-    const s = calculateItemStatus(item);
+    const s = hitungStatus(item);
     acc[s] = (acc[s] || 0) + 1;
     return acc;
   }, { 'Berlaku': 0, 'Tidak Berlaku': 0, 'Akan Berakhir': 0 });
@@ -50,24 +50,31 @@ export default function Dashboard() {
   const tidakBerlakuCount = statusCounts['Tidak Berlaku'];
 
   const urgentCount = allData.filter(r => {
-    if (!r.tanggalSelesai || r.tanggalSelesai === '-') return false;
-    const end = new Date(r.tanggalSelesai);
-    const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-    return diff > 0 && diff <= 30;
+    const diff = sisaHari(r.tanggalSelesai);
+    return diff !== null && diff > 0 && diff <= 30;
   }).length;
 
   const nearingExpiry = allData.filter(r => {
-    if (!r.tanggalSelesai || r.tanggalSelesai === '-') return false;
-    const end = new Date(r.tanggalSelesai);
-    const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-    return diff > 0 && diff <= 120;
+    const diff = sisaHari(r.tanggalSelesai);
+    return diff !== null && diff > 0 && diff <= 120;
   }).sort((a,b) => new Date(a.tanggalSelesai) - new Date(b.tanggalSelesai)).slice(0, 5);
 
   useEffect(() => {
     import('chart.js/auto').then((ChartModule) => {
       const Chart = ChartModule.default;
-      
-      Object.values(chartRefs.current).forEach(chart => chart && chart.destroy());
+      const upsert = (key, ctx, cfg) => {
+        if (!ctx) return;
+        const existing = chartRefs.current[key];
+        if (!existing) {
+          chartRefs.current[key] = new Chart(ctx, cfg);
+          return;
+        }
+        existing.config.type = cfg.type;
+        existing.data.labels = cfg.data.labels;
+        existing.data.datasets = cfg.data.datasets;
+        existing.options = cfg.options;
+        existing.update();
+      };
 
       // Bar Chart (Trend)
       const yearCounts = {};
@@ -80,7 +87,7 @@ export default function Dashboard() {
 
       const trendCtx = document.getElementById('trendChart');
       if (trendCtx) {
-        chartRefs.current.trend = new Chart(trendCtx, {
+        upsert('trend', trendCtx, {
           type: 'bar',
           data: {
             labels: trendLabels.length ? trendLabels : ['-'],
@@ -132,7 +139,7 @@ export default function Dashboard() {
       
       const donutCtx = document.getElementById('donutChart');
       if (donutCtx) {
-        chartRefs.current.donut = new Chart(donutCtx, {
+        upsert('donut', donutCtx, {
           type: 'doughnut',
           data: {
             labels: catLabels.length ? catLabels : ['Belum ada data'],
@@ -177,7 +184,7 @@ export default function Dashboard() {
 
       const polarCtx = document.getElementById('statusPolarChart');
       if (polarCtx) {
-        chartRefs.current.polar = new Chart(polarCtx, {
+        upsert('polar', polarCtx, {
           type: 'polarArea',
           data: {
             labels: Object.keys(statusCounts),
@@ -213,7 +220,7 @@ export default function Dashboard() {
 
       const topMitraCtx = document.getElementById('topMitraChart');
       if (topMitraCtx) {
-        chartRefs.current.topMitra = new Chart(topMitraCtx, {
+        upsert('topMitra', topMitraCtx, {
           type: 'bar',
           data: {
             labels: sortedMitra.map(m => m[0].length > 20 ? m[0].substring(0, 20) + '...' : m[0]),
@@ -248,7 +255,7 @@ export default function Dashboard() {
     return () => {
       Object.values(currentCharts).forEach(chart => chart && chart.destroy());
     };
-  }, [allData]);
+  }, [allData, akanBerakhirCount, pureBerlakuCount, statusCounts, tidakBerlakuCount]);
 
   const exportReport = () => {
     import('html2pdf.js').then((html2pdfModule) => {
@@ -360,8 +367,11 @@ export default function Dashboard() {
         </div>
 
         {/* Card 3: Status Berlaku */}
-        <div className="card fade-in-up" 
-          onClick={() => router.push('/database-kerja-sama')}
+        <div className="card fade-in-up"
+          role="button"
+          tabIndex={0}
+          onClick={goToDatabase}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
           style={{ 
           padding: '24px', 
           background: 'rgba(255, 255, 255, 0.8)',
@@ -388,8 +398,11 @@ export default function Dashboard() {
         </div>
 
         {/* Card 4: Tidak Berlaku */}
-        <div className="card fade-in-up" 
-          onClick={() => router.push('/database-kerja-sama')}
+        <div className="card fade-in-up"
+          role="button"
+          tabIndex={0}
+          onClick={goToDatabase}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
           style={{ 
           padding: '24px', 
           background: 'rgba(255, 255, 255, 0.8)',
@@ -413,8 +426,11 @@ export default function Dashboard() {
         </div>
 
         {/* Card 5: Akan Berakhir */}
-        <div className="card fade-in-up" 
-          onClick={() => router.push('/database-kerja-sama')}
+        <div className="card fade-in-up"
+          role="button"
+          tabIndex={0}
+          onClick={goToDatabase}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
           style={{ 
           padding: '24px', 
           background: 'linear-gradient(135deg, #fffcf0 0%, #fef9c3 100%)',
@@ -525,7 +541,7 @@ export default function Dashboard() {
                         </td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>{r.jenisKerjasama || '-'}</td>
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
-                          {new Date(r.tanggalSelesai).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {formatDateShort(r.tanggalSelesai)}
                         </td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><span style={{ fontWeight: 700, color: diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>{diff} Hari</span></td>
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
