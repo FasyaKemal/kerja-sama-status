@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import SuccessPopup from '@/components/SuccessPopup';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import Portal from '@/components/Portal';
 import { formatDate } from '@/lib/formatDate';
 import { compareIsoDates, isBlank, isValidUrl, validateIsoDate } from '@/lib/validation';
 import toast from 'react-hot-toast';
@@ -406,8 +407,30 @@ export default function ProgressDokumen() {
       </div>
 
       {modalOpen && (
-        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div className="modal-content" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '12px', padding: 0, boxShadow: 'var(--shadow-2xl)', background: '#fff', position: 'relative' }}>
+        <Portal>
+        <div
+          className="modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(8px)',
+            padding: '16px'
+          }}
+          onClick={closeModal}
+          role="button"
+          tabIndex={0}
+          aria-label="Tutup modal"
+        >
+          <div
+            className="modal-content"
+            style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '12px', padding: 0, boxShadow: 'var(--shadow-2xl)', background: '#fff', position: 'relative' }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div style={{ padding: '24px 32px 16px 32px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid var(--neutral-100)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--neutral-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -498,6 +521,7 @@ export default function ProgressDokumen() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
       <ConfirmDialog
         show={confirmDeleteOpen}

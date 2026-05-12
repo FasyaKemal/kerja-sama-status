@@ -54,6 +54,147 @@ export default function KebijakanPrioritas() {
   }, [search]);
   const { data, updateKebijakan } = useData();
   const dbData = data.kebijakanPrioritas || [];
+
+  useEffect(() => {
+    // Initialize from Excel if localStorage hasn't been set yet.
+    if (typeof window === 'undefined') return;
+    let shouldInitFromExcel = true;
+    try {
+      const raw = localStorage.getItem('kp_prioritas_persistent');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // If there is meaningful saved data, keep it.
+        if (Array.isArray(parsed) && parsed.length > 0) shouldInitFromExcel = false;
+      }
+    } catch {
+      // If corrupted, re-init from Excel.
+      shouldInitFromExcel = true;
+    }
+    if (!shouldInitFromExcel) return;
+
+    const excelCandidates = [
+      // URL-safe (space encoded)
+      '/Database_KEB_Ruang%20Lingkup.xlsx',
+      // fallback (some servers may still accept raw space)
+      '/Database_KEB_Ruang Lingkup.xlsx',
+    ];
+    const toIsoDate = (v) => {
+      if (v == null || v === '') return '';
+      // Excel date serial
+      if (typeof v === 'number' && Number.isFinite(v)) {
+        const dc = XLSX.SSF.parse_date_code(v);
+        if (!dc) return '';
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${dc.y}-${pad(dc.m)}-${pad(dc.d)}`;
+      }
+      const s = String(v).trim();
+      // Common formats: DD/MM/YYYY or D/M/YYYY
+      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (m) {
+        const d = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        let y = parseInt(m[3], 10);
+        if (y < 100) y += 2000;
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${y}-${pad(mo)}-${pad(d)}`;
+      }
+      // ISO already
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      // Fall back: try Date
+      const dt = new Date(s);
+      if (Number.isNaN(dt.getTime())) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+    };
+
+    const load = async () => {
+      try {
+        let lastErr = null;
+        let buf = null;
+        for (const url of excelCandidates) {
+          try {
+            const res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            buf = await res.arrayBuffer();
+            lastErr = null;
+            break;
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+        if (!buf) throw new Error(`Gagal memuat file Excel. (${String(lastErr || '')})`);
+
+        const wb = XLSX.read(buf, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (!rows || rows.length < 2) throw new Error('Excel kosong.');
+        // Some sheets have an empty first row; find the real header row.
+        const headerRowIdx = rows.findIndex((r) => {
+          if (!Array.isArray(r)) return false;
+          const cells = r.map((c) => String(c || '').trim().toLowerCase());
+          return cells.includes('no') && cells.includes('tahun');
+        });
+        if (headerRowIdx < 0) throw new Error('Header kolom tidak ditemukan di Excel.');
+
+        const header = rows[headerRowIdx].map((h) => String(h || '').trim());
+        const idx = (name) => header.findIndex((h) => h.toLowerCase() === String(name).toLowerCase());
+
+        const iNo = idx('No');
+        const iTahun = idx('Tahun');
+        const iKategori = idx('Kategori Mitra');
+        const iMitra = idx('Mitra Kerja Sama');
+        const iJenis = idx('Jenis Kerja Sama');
+        const iP1 = idx('Penandatangan KKP/Pihak 1');
+        const iP2 = idx('Penandatangan Mitra/Pihak 2');
+        const iMulai = idx('Mulai');
+        const iHingga = idx('Berlaku Hingga');
+        const iStatus = idx('Status');
+        const iRuang = idx('Ruang Lingkup (dengan Kode KEB)');
+        const iUrl = idx('URL Dokumen');
+        const iLink = idx('Link Dokumen');
+
+        const parsed = rows.slice(headerRowIdx + 1).map((r, rowIdx) => {
+          const no = iNo >= 0 ? r[iNo] : rowIdx + 1;
+          const tahun = iTahun >= 0 ? String(r[iTahun] || '').trim() : '';
+          const kategoriMitra = iKategori >= 0 ? String(r[iKategori] || '').trim() : '';
+          const mitra = iMitra >= 0 ? String(r[iMitra] || '').trim() : '';
+          const jenisKerjasama = iJenis >= 0 ? String(r[iJenis] || '').trim() : '';
+          const pihak1 = iP1 >= 0 ? String(r[iP1] || '').trim() : '';
+          const pihak2 = iP2 >= 0 ? String(r[iP2] || '').trim() : '';
+          const tanggalMulai = iMulai >= 0 ? toIsoDate(r[iMulai]) : '';
+          const tanggalSelesai = iHingga >= 0 ? toIsoDate(r[iHingga]) : '';
+          const status = iStatus >= 0 ? String(r[iStatus] || '').trim() : '';
+          const ruangLingkup = iRuang >= 0 ? String(r[iRuang] || '').trim() : '';
+          const linkDokumen = (iUrl >= 0 ? String(r[iUrl] || '').trim() : '') || (iLink >= 0 ? String(r[iLink] || '').trim() : '');
+          return {
+            id: `KP-EXCEL-${String(no || rowIdx + 1).toString().replace(/\s+/g, '')}`,
+            no,
+            tahun,
+            kategoriMitra,
+            mitra,
+            jenisKerjasama,
+            pihak1,
+            pihak2,
+            tanggalMulai,
+            tanggalSelesai,
+            status,
+            linkDokumen,
+            ruangLingkup,
+          };
+        }).filter((x) => x && (x.mitra || x.jenisKerjasama || x.ruangLingkup));
+
+        updateKebijakan(parsed);
+      } catch (e) {
+        console.error('Gagal inisialisasi dari Excel:', e);
+        try {
+          toast.error('Gagal memuat database dari Excel. Pastikan file Excel ada di folder public.');
+        } catch {}
+      }
+    };
+
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filterYear, setFilterYear] = useState(initialFilters.year || 'all');
@@ -69,6 +210,9 @@ export default function KebijakanPrioritas() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [ruangModalOpen, setRuangModalOpen] = useState(false);
+  const [ruangModalTitle, setRuangModalTitle] = useState('');
+  const [ruangModalValue, setRuangModalValue] = useState('');
   const [formData, setFormData] = useState({
     tahun: new Date().getFullYear().toString(),
     kategoriMitra: '',
@@ -83,7 +227,8 @@ export default function KebijakanPrioritas() {
     status: '', // Automatically calculated
     fileDokumenName: '',
     fileDokumenDataUrl: '',
-    linkDokumen: ''
+    linkDokumen: '',
+    ruangLingkup: ''
   });
 
   const handleFileUpload = (e) => {
@@ -171,7 +316,8 @@ export default function KebijakanPrioritas() {
         status: 'Aktif',
         fileDokumenName: '',
         fileDokumenDataUrl: '',
-        linkDokumen: ''
+        linkDokumen: '',
+        ruangLingkup: ''
       });
     }
     setFormErrors({});
@@ -208,6 +354,7 @@ export default function KebijakanPrioritas() {
       ['tanggalSelesai', endVal.ok ? '' : endVal.message],
       ['linkDokumen', isValidUrl(draft.linkDokumen) ? '' : 'Link tidak valid.'],
       ['fileDokumenDataUrl', isBlank(draft.fileDokumenDataUrl) ? 'Wajib upload dokumen.' : ''],
+      ['ruangLingkup', isBlank(draft.ruangLingkup) ? 'Wajib diisi.' : ''],
     ]);
 
     const diff = compareIsoDates(draft.tanggalSelesai, draft.tanggalMulai);
@@ -359,27 +506,28 @@ export default function KebijakanPrioritas() {
         </div>
 
         <div className="lg-only" style={{ overflowX: 'auto' }}>
-          <table className="table-modern" style={{ width: '100%', minWidth: '1100px' }}>
+          <table className="table-modern" style={{ width: '100%', minWidth: '1400px' }}>
             <thead>
               <tr style={{ background: 'var(--neutral-50)', borderBottom: '2px solid var(--neutral-100)' }}>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>No</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tahun</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Kategori</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Mitra</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Jenis</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Pihak 1 (KKP)</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Pihak 2 (Mitra)</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tgl Mulai</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Tgl Selesai</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Dokumen</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>Aksi</th>
+                <th style={{ padding: '14px 12px', width: '64px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>No</th>
+                <th style={{ padding: '14px 12px', width: '90px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Tahun</th>
+                <th style={{ padding: '14px 12px', width: '110px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Kategori</th>
+                <th style={{ padding: '14px 12px', width: '260px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Mitra</th>
+                <th style={{ padding: '14px 12px', width: '180px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Jenis</th>
+                <th style={{ padding: '14px 12px', width: '200px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Pihak 1 (KKP)</th>
+                <th style={{ padding: '14px 12px', width: '200px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Pihak 2 (Mitra)</th>
+                <th style={{ padding: '14px 12px', width: '120px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Tanggal Mulai</th>
+                <th style={{ padding: '14px 12px', width: '120px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Tanggal Selesai</th>
+                <th style={{ padding: '14px 12px', width: '120px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Status</th>
+                <th style={{ padding: '14px 12px', width: '110px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Dokumen</th>
+                <th style={{ padding: '14px 12px', width: '170px', textAlign: 'left', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Ruang Lingkup</th>
+                <th style={{ padding: '14px 12px', width: '110px', textAlign: 'center', color: 'var(--neutral-600)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan="12" style={{ textAlign: 'center', padding: '64px 24px', background: '#fff' }}>
+                  <td colSpan="13" style={{ textAlign: 'center', padding: '64px 24px', background: '#fff' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                       <div style={{ opacity: 0.3 }}>
                         <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -393,26 +541,42 @@ export default function KebijakanPrioritas() {
                 </tr>
               ) : paginatedData.map((r, i) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--neutral-100)', transition: 'background 0.2s' }} className="table-row-hover">
-                  <td style={{ padding: '16px', color: 'var(--neutral-500)', fontWeight: 600, textAlign: 'center' }}>{startIndex + i + 1}</td>
-                  <td style={{ padding: '16px' }}>{r.tahun || '-'}</td>
-                  <td style={{ padding: '16px' }}><span className="badge badge-info">{r.kategoriMitra || '-'}</span></td>
-                  <td style={{ padding: '16px' }}><strong style={{ color: 'var(--primary-900)' }}>{r.mitra || '-'}</strong></td>
-                  <td style={{ padding: '16px', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)' }}>{r.pihak1 || '-'}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)' }}>{r.noPihak1 || ''}</div>
-                  </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary-800)' }}>{r.pihak2 || '-'}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--neutral-500)' }}>{r.noPihak2 || ''}</div>
-                  </td>
-                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{formatDateShort(r.tanggalMulai)}</td>
-                  <td style={{ padding: '16px', color: 'var(--neutral-600)' }}>{formatDateShort(r.tanggalSelesai)}</td>
-                  <td style={{ padding: '16px' }}>{renderStatusBadge(r)}</td>
-                  <td style={{ padding: '16px', textAlign: 'center' }}>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-500)', fontWeight: 700, textAlign: 'center' }}>{startIndex + i + 1}</td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-700)', fontWeight: 700 }}>{r.tahun || '-'}</td>
+                  <td style={{ padding: '14px 12px' }}><span className="badge badge-info">{r.kategoriMitra || '-'}</span></td>
+                  <td style={{ padding: '14px 12px' }}><strong style={{ color: 'var(--primary-900)' }}>{r.mitra || '-'}</strong></td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-800)', fontWeight: 700 }}>{r.pihak1 || '-'}</td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-800)', fontWeight: 700 }}>{r.pihak2 || '-'}</td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-600)', whiteSpace: 'nowrap' }}>{formatDateShort(r.tanggalMulai)}</td>
+                  <td style={{ padding: '14px 12px', color: 'var(--neutral-600)', whiteSpace: 'nowrap' }}>{formatDateShort(r.tanggalSelesai)}</td>
+                  <td style={{ padding: '14px 12px' }}>{renderStatusBadge(r)}</td>
+                  <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                     {r.linkDokumen ? <a href={r.linkDokumen} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '6px 12px', background: 'var(--primary-50)', color: 'var(--primary-700)', borderRadius: '8px', fontWeight: 600 }}>Lihat</a> : '-'}
                   </td>
-                  <td style={{ padding: '16px', textAlign: 'center' }}>
+                  <td style={{ padding: '14px 12px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '10px',
+                        background: 'var(--neutral-100)',
+                        border: '1px solid var(--neutral-200)',
+                        fontWeight: 800,
+                        color: 'var(--neutral-700)',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onClick={() => {
+                        setRuangModalTitle(r.mitra || 'Ruang Lingkup');
+                        setRuangModalValue(r.ruangLingkup || '-');
+                        setRuangModalOpen(true);
+                      }}
+                    >
+                      Lihat Ruang Lingkup
+                    </button>
+                  </td>
+                  <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                       <button className="btn btn-ghost btn-sm" onClick={() => openModal(r.id)} style={{ color: 'var(--primary-600)' }}>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -455,6 +619,28 @@ export default function KebijakanPrioritas() {
                 <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center' }}>
                   <div style={{ fontSize: '12px', color: 'var(--neutral-700)' }}>{r.jenisKerjasama || '-'}</div>
                   <div>{renderStatusBadge(r)}</div>
+                </div>
+                <div style={{ marginTop: '10px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '12px',
+                      background: 'var(--neutral-100)',
+                      border: '1px solid var(--neutral-200)',
+                      fontWeight: 800,
+                      color: 'var(--neutral-800)',
+                      width: '100%'
+                    }}
+                    onClick={() => {
+                      setRuangModalTitle(r.mitra || 'Ruang Lingkup');
+                      setRuangModalValue(r.ruangLingkup || '-');
+                      setRuangModalOpen(true);
+                    }}
+                  >
+                    Lihat Ruang Lingkup
+                  </button>
                 </div>
               </div>
             ))
@@ -568,6 +754,20 @@ export default function KebijakanPrioritas() {
                     <input type="url" required className="form-input" placeholder="https://..." style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)' }} value={formData.linkDokumen || ''} onChange={e => setFormData({ ...formData, linkDokumen: e.target.value })} />
                     {formErrors.linkDokumen && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.linkDokumen}</div>}
                   </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', display: 'block' }}>Ruang Lingkup <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <textarea
+                      className="form-input"
+                      required
+                      rows={4}
+                      placeholder="Tuliskan ruang lingkup kerja sama..."
+                      style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--neutral-200)', resize: 'vertical' }}
+                      value={formData.ruangLingkup || ''}
+                      onChange={e => setFormData({ ...formData, ruangLingkup: e.target.value })}
+                    />
+                    {formErrors.ruangLingkup && <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--danger-600)', fontWeight: 600 }}>{formErrors.ruangLingkup}</div>}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px', borderTop: '1px solid var(--neutral-100)', paddingTop: '24px' }}>
                   <button type="button" className="btn btn-ghost" onClick={closeModal} style={{ padding: '12px 24px', borderRadius: '12px', fontWeight: 600 }}>Batal</button>
@@ -576,6 +776,44 @@ export default function KebijakanPrioritas() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {ruangModalOpen && (
+        <Portal>
+          <div
+            className="modal-overlay"
+            style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
+            onClick={() => setRuangModalOpen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '680px', maxHeight: '85vh', overflow: 'auto', background: '#fff', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Ruang lingkup"
+            >
+              <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--neutral-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '11px', fontWeight: 900, color: 'var(--neutral-500)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ruang Lingkup</div>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--neutral-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ruangModalTitle}</div>
+                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setRuangModalOpen(false)}
+                  aria-label="Tutup"
+                  style={{ border: '1px solid var(--neutral-200)', borderRadius: '12px' }}
+                >
+                  Tutup
+                </button>
+              </div>
+              <div style={{ padding: '18px 22px' }}>
+                <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--neutral-800)', fontSize: '14px' }}>
+                  {ruangModalValue || '-'}
+                </div>
+              </div>
             </div>
           </div>
         </Portal>
