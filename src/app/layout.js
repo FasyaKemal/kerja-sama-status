@@ -5,12 +5,23 @@ import { Toaster } from 'react-hot-toast';
 export const metadata = {
   title: 'Dashboard Kerja Sama KKP',
   description: 'Database Status Kerja Sama Kementerian Kelautan dan Perikanan',
+  icons: {
+    icon: [
+      { url: '/logo-kkp.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo-kkp.png', type: 'image/png' },
+    ],
+    shortcut: ['/logo-kkp.png'],
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="id">
       <head>
+        <link rel="icon" href="/logo-kkp.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo-kkp.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
