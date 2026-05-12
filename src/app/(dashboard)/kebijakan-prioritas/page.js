@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useData } from '@/context/DataContext';
 import * as XLSX from 'xlsx';
 import Portal from '@/components/Portal';
@@ -9,7 +9,27 @@ import { formatDateShort, hitungStatus, sisaHari } from '@/lib/formatDate';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import toast from 'react-hot-toast';
 
+function subscribeLocation(cb) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('popstate', cb);
+  return () => window.removeEventListener('popstate', cb);
+}
+
+function getLocationSnapshot() {
+  if (typeof window === 'undefined') return '';
+  return window.location.search || '';
+}
+
 export default function KebijakanPrioritas() {
+  const search = useSyncExternalStore(subscribeLocation, getLocationSnapshot, () => '');
+  const editId = useMemo(() => {
+    if (!search) return null;
+    try {
+      return new URLSearchParams(search).get('edit');
+    } catch {
+      return null;
+    }
+  }, [search]);
   const { data, updateKebijakan } = useData();
   const dbData = data.kebijakanPrioritas || [];
   
@@ -109,7 +129,7 @@ export default function KebijakanPrioritas() {
 
   const openModal = (id = null) => {
     if (id) {
-      const item = dbData.find(d => d.id === id);
+      const item = dbData.find(d => String(d.id) === String(id));
       setEditData(item);
       setFormData({ ...item });
     } else {
@@ -133,6 +153,13 @@ export default function KebijakanPrioritas() {
     }
     setModalOpen(true);
   };
+
+  useEffect(() => {
+    if (!editId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    openModal(editId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   const closeModal = () => setModalOpen(false);
 

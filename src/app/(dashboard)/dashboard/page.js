@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import { useRouter } from 'next/navigation';
 import { hitungStatus, sisaHari, formatDateShort } from '@/lib/formatDate';
+import DetailPanel from '@/components/DetailPanel';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const [dismissAlert, setDismissAlert] = useState(false);
   const chartRefs = useRef({});
   const goToDatabase = () => router.push('/database-kerja-sama');
+  const [detailItem, setDetailItem] = useState(null);
 
   const db = useMemo(() => data.databaseKerjaSama ?? [], [data.databaseKerjaSama]);
   const kp = useMemo(() => data.kebijakanPrioritas ?? [], [data.kebijakanPrioritas]);
@@ -58,6 +60,16 @@ export default function Dashboard() {
     const diff = sisaHari(r.tanggalSelesai);
     return diff !== null && diff > 0 && diff <= 120;
   }).sort((a,b) => new Date(a.tanggalSelesai) - new Date(b.tanggalSelesai)).slice(0, 5);
+
+  const handleUpdateFromDetail = (item) => {
+    if (!item) return;
+    const inDb = (data.databaseKerjaSama || []).some((x) => String(x.id) === String(item.id));
+    const inKp = (data.kebijakanPrioritas || []).some((x) => String(x.id) === String(item.id));
+    const id = encodeURIComponent(String(item.id));
+    if (inDb) router.push(`/database-kerja-sama?edit=${id}`);
+    else if (inKp) router.push(`/kebijakan-prioritas?edit=${id}`);
+    else router.push('/database-kerja-sama');
+  };
 
   useEffect(() => {
     import('chart.js/auto').then((ChartModule) => {
@@ -532,7 +544,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {nearingExpiry.map((r, i) => {
-                    const diff = Math.ceil((new Date(r.tanggalSelesai) - new Date()) / (1000 * 60 * 60 * 24));
+                    const diff = sisaHari(r.tanggalSelesai);
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--neutral-100)' }}>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><strong>{r.mitra}</strong></td>
@@ -543,12 +555,16 @@ export default function Dashboard() {
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
                           {formatDateShort(r.tanggalSelesai)}
                         </td>
-                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}><span style={{ fontWeight: 700, color: diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>{diff} Hari</span></td>
+                        <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>
+                          <span style={{ fontWeight: 700, color: diff !== null && diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>
+                            {diff === null ? '-' : `${diff} Hari`}
+                          </span>
+                        </td>
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
-                          <span className={`badge badge-${diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>Akan Berakhir</span>
+                          <span className={`badge badge-${diff !== null && diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>Akan Berakhir</span>
                         </td>
                         <td style={{ padding: '12px 10px', textAlign: 'right' }}>
-                          <button className="btn btn-primary btn-sm" style={{ fontSize: 'clamp(10px, 2vw, 11px)', padding: '6px 10px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => router.push('/database-kerja-sama')}>Perbarui Data</button>
+                          <button className="btn btn-primary btn-sm" style={{ fontSize: 'clamp(10px, 2vw, 11px)', padding: '6px 10px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => setDetailItem(r)}>Detail</button>
                         </td>
                       </tr>
                     );
@@ -558,6 +574,11 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+        <DetailPanel
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+          onUpdate={() => handleUpdateFromDetail(detailItem)}
+        />
         <div className="card fade-in" style={{ padding: 'clamp(16px, 4vw, 24px)' }}>
           <h3 style={{ margin: '0 0 clamp(12px, 3vw, 20px) 0', fontSize: 'clamp(14px, 3vw, 16px)', fontWeight: 700, color: 'var(--primary-900)' }}>
             Progress Penyusunan

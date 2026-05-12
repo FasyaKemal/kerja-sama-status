@@ -18,7 +18,7 @@ function Row({ label, value, children }) {
   );
 }
 
-export default function DetailPanel({ item, onClose }) {
+export default function DetailPanel({ item, onClose, onUpdate }) {
   if (!item) return null;
 
   const status = statusStyles[hitungStatus(item)];
@@ -172,6 +172,28 @@ export default function DetailPanel({ item, onClose }) {
             </div>
 
             <div className="no-print" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {onUpdate && (
+                <button
+                  onClick={onUpdate}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    width: '100%', padding: '14px', borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                    color: '#fff', border: 'none', fontWeight: 800, fontSize: '14px',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 22px -8px rgba(15, 23, 42, 0.45)',
+                    transition: 'opacity 0.15s'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.opacity = '0.9'}
+                  onMouseOut={e => e.currentTarget.style.opacity = '1'}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                  </svg>
+                  Perbarui Data
+                </button>
+              )}
               {item.linkDokumen && (
                 <a
                   href={item.linkDokumen}
