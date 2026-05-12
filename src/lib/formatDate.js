@@ -45,9 +45,10 @@ export function parseDate(d) {
     } else if (b > 12) {
       month = a; day = b;
     } else {
-      // ambiguous: default D/M/YYYY
-      day = a; month = b;
+      // ambiguous: prefer M/D/YYYY because the database uses it
+      month = a; day = b;
     }
+
 
     const dt = new Date(y, month - 1, day);
     return isNaN(dt) ? null : dt;
@@ -93,9 +94,18 @@ export function sisaHari(tanggalSelesai) {
   if (!tanggalSelesai || tanggalSelesai === '-') return null;
   const end = parseDate(tanggalSelesai);
   if (!end) return null;
-  const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
-  return Math.ceil(diff);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const target = new Date(end);
+  target.setHours(0, 0, 0, 0);
+  
+  const diffTime = target - today;
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
 }
+
 
 /**
  * Hitung status dokumen berdasarkan tanggal selesai

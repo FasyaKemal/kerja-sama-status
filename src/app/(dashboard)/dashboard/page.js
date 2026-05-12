@@ -3,7 +3,8 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useData } from '@/context/DataContext';
 import { useRouter } from 'next/navigation';
-import { hitungStatus, sisaHari, formatDateShort } from '@/lib/formatDate';
+import { hitungStatus, sisaHari, formatDateShort, parseDate } from '@/lib/formatDate';
+
 import DetailPanel from '@/components/DetailPanel';
 
 export default function Dashboard() {
@@ -59,7 +60,12 @@ export default function Dashboard() {
   const nearingExpiry = allData.filter(r => {
     const diff = sisaHari(r.tanggalSelesai);
     return diff !== null && diff > 0 && diff <= 120;
-  }).sort((a,b) => new Date(a.tanggalSelesai) - new Date(b.tanggalSelesai)).slice(0, 5);
+  }).sort((a,b) => {
+    const da = parseDate(a.tanggalSelesai) || new Date(0);
+    const db = parseDate(b.tanggalSelesai) || new Date(0);
+    return da - db;
+  }).slice(0, 5);
+
 
   const handleUpdateFromDetail = (item) => {
     if (!item) return;
@@ -77,16 +83,26 @@ export default function Dashboard() {
       const upsert = (key, ctx, cfg) => {
         if (!ctx) return;
         const existing = chartRefs.current[key];
-        if (!existing) {
+        // If chart exists but canvas changed, destroy it
+        if (existing && existing.canvas !== ctx) {
+          existing.destroy();
+          delete chartRefs.current[key];
+        }
+        
+        if (!chartRefs.current[key]) {
           chartRefs.current[key] = new Chart(ctx, cfg);
           return;
         }
-        existing.config.type = cfg.type;
-        existing.data.labels = cfg.data.labels;
-        existing.data.datasets = cfg.data.datasets;
-        existing.options = cfg.options;
-        existing.update();
+        
+        const chart = chartRefs.current[key];
+        chart.config.type = cfg.type;
+        chart.data.labels = cfg.data.labels;
+        chart.data.datasets = cfg.data.datasets;
+        chart.options = cfg.options;
+        chart.update(); 
       };
+
+
 
       // Bar Chart (Trend)
       const yearCounts = {};
@@ -266,8 +282,10 @@ export default function Dashboard() {
     const currentCharts = chartRefs.current;
     return () => {
       Object.values(currentCharts).forEach(chart => chart && chart.destroy());
+      chartRefs.current = {};
     };
   }, [allData, akanBerakhirCount, pureBerlakuCount, statusCounts, tidakBerlakuCount]);
+
 
   const exportReport = () => {
     import('html2pdf.js').then((html2pdfModule) => {
@@ -284,7 +302,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page-fade-in">
+    <div id="main-content" className="page-fade-in">
+
       <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
           <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Monev Dashboard</h1>
@@ -556,13 +575,15 @@ export default function Dashboard() {
                           {formatDateShort(r.tanggalSelesai)}
                         </td>
                         <td style={{ padding: '12px 10px', fontSize: 'clamp(11px, 2vw, 13px)' }}>
-                          <span style={{ fontWeight: 700, color: diff !== null && diff <= 30 ? 'var(--danger-600)' : 'var(--warning-600)' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--warning-600)' }}>
                             {diff === null ? '-' : `${diff} Hari`}
                           </span>
                         </td>
+
                         <td style={{ padding: '12px 10px', whiteSpace: 'nowrap', fontSize: 'clamp(11px, 2vw, 13px)' }}>
-                          <span className={`badge badge-${diff !== null && diff <= 30 ? 'danger' : 'warning'}`} style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>Akan Berakhir</span>
+                          <span className="badge badge-warning" style={{ fontSize: 'clamp(9px, 1.5vw, 10px)' }}>Akan Berakhir</span>
                         </td>
+
                         <td style={{ padding: '12px 10px', textAlign: 'right' }}>
                           <button className="btn btn-primary btn-sm" style={{ fontSize: 'clamp(10px, 2vw, 11px)', padding: '6px 10px', borderRadius: 'var(--radius-md)', background: 'var(--primary-700)', border: 'none', whiteSpace: 'nowrap' }} onClick={() => setDetailItem(r)}>Detail</button>
                         </td>
