@@ -242,7 +242,8 @@ export default function KebijakanPrioritas() {
     <div className="page-fade-in">
       <div className="page-header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 className="page-title" style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Dukungan Kebijakan Prioritas</h1>
+          <h1 className="page-title" style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px', background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Dukungan Kebijakan Prioritas</h1>
+
           <p style={{ color: 'var(--neutral-500)', margin: 0 }}>Monitor dukungan kebijakan prioritas nasional di lingkungan KKP</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -260,7 +261,8 @@ export default function KebijakanPrioritas() {
       <div className="stats-grid" style={{ marginBottom: '32px', gap: '24px' }}>
         <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0s' }}>
           <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Kerja Sama</div>
-          <div className="page-title" style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px' }}>{totalData}</div>
+          <div className="page-title" style={{ fontSize: '32px', fontWeight: 800, marginBottom: '4px', background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{totalData}</div>
+
           <div style={{ fontSize: '12px', color: 'var(--neutral-400)' }}>Semua kategori</div>
         </div>
         <div className="card fade-in-up" style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.5)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', animationDelay: '0.1s' }}>

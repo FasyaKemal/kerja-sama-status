@@ -4051,22 +4051,22 @@ table tbody tr:hover {
 /* --- Dashboard Responsive Grids --- */
 .dashboard-stats-grid, .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(12px, 2vw, 20px);
   width: 100%;
 }
 
 .dashboard-charts-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 24px);
   width: 100%;
 }
 
 .dashboard-charts-grid-equal {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(12px, 2vw, 24px);
   width: 100%;
 }
 
@@ -4158,7 +4158,7 @@ table tbody tr:hover {
 /* Chart containers responsive sizing */
 canvas {
   max-width: 100%;
-  height: auto !important;
+  display: block;
 }
 
 div[style*="position: relative"][style*="height: '320px'"],

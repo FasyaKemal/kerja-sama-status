@@ -150,7 +150,8 @@ export default function ProgressDokumen() {
     <div className="page-fade-in">
       <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="page-title">Progress Penyusunan Dokumen Kerja Sama</h1>
+          <h1 className="page-title" style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px', background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Progress Penyusunan Dokumen Kerja Sama</h1>
+
           <p className="text-muted" style={{ marginTop: '4px' }}>Monitoring tahapan penyusunan, paraf, dan penandatanganan dokumen kerja sama</p>
         </div>
         <button className="btn btn-primary" onClick={() => openModal()}>

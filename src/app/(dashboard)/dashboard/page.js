@@ -306,7 +306,8 @@ export default function Dashboard() {
 
       <div className="page-header" style={{ marginBottom: 'clamp(16px, 5vw, 24px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
-          <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800 }}>Monev Dashboard</h1>
+          <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 800, background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Monev Dashboard</h1>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
             <span style={{ color: 'var(--neutral-500)', fontSize: 'clamp(12px, 3vw, 14px)' }}>Monitoring Database Kerja Sama</span>
             <span style={{ color: 'var(--neutral-300)' }}>•</span>
@@ -392,7 +393,8 @@ export default function Dashboard() {
           </div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Total Dokumen</div>
-            <div className="page-title" style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em' }}>{totalDokumen}</div>
+            <div className="page-title" style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, var(--primary-900) 0%, var(--primary-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{totalDokumen}</div>
+
             <div style={{ fontSize: '12px', color: 'var(--neutral-400)', fontWeight: 500 }}>NK, PKS, dan MSP</div>
           </div>
         </div>
