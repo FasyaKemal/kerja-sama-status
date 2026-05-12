@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import SuccessPopup from '@/components/SuccessPopup';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { formatDate } from '@/lib/formatDate';
 import toast from 'react-hot-toast';
+
 
 export default function ProgressDokumen() {
   const { data, updateProgress } = useData();
@@ -21,8 +23,9 @@ export default function ProgressDokumen() {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   
   const [formData, setFormData] = useState({
-    no: '', judul: '', mitra: '', step: 1, tahun: '2026', linkDokumen: '', fileDokumen: null
+    no: '', judul: '', mitra: '', step: 1, tahun: '2026', tanggalMulai: '', tanggalSelesai: '', linkDokumen: '', fileDokumen: null
   });
+
 
   const timelineSteps = [
     "Surat Penyusunan/Perpanjangan Kerja Sama",
@@ -72,7 +75,8 @@ export default function ProgressDokumen() {
       }
     } else {
       setEditData(null);
-      setFormData({ no: '', judul: '', mitra: '', step: 1, tahun: '2026', linkDokumen: '', fileDokumen: null });
+      setFormData({ no: '', judul: '', mitra: '', step: 1, tahun: '2026', tanggalMulai: '', tanggalSelesai: '', linkDokumen: '', fileDokumen: null });
+
     }
     setModalOpen(true);
   };
@@ -85,8 +89,8 @@ export default function ProgressDokumen() {
     const step = parseInt(formData.step);
     const progress = Math.round((step / timelineSteps.length) * 100);
     const status = step === timelineSteps.length ? 'Selesai' : timelineSteps[step-1];
-    const date = new Date();
-    const update = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const update = formatDate(new Date());
+
 
     const item = {
       ...formData,
@@ -232,12 +236,15 @@ export default function ProgressDokumen() {
                 <tr style={{ background: 'var(--neutral-50)' }}>
                   <th style={{ padding: '16px', width: '60px', textAlign: 'center', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NO</th>
                   <th style={{ padding: '16px', width: '220px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>NOMOR & JUDUL</th>
-                  <th style={{ padding: '16px', width: '200px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MITRA</th>
+                  <th style={{ padding: '16px', width: '180px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MITRA</th>
+                  <th style={{ padding: '16px', width: '110px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TGL MULAI</th>
+                  <th style={{ padding: '16px', width: '110px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TGL SELESAI</th>
                   <th style={{ padding: '16px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TAHAPAN SAAT INI</th>
-                  <th style={{ padding: '16px', width: '140px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>UPDATE TERAKHIR</th>
-                  <th style={{ padding: '16px', width: '140px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PROGRESS</th>
-                  <th style={{ padding: '16px', width: '160px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>STATUS</th>
-                  <th style={{ padding: '16px', width: '100px', textAlign: 'right', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AKSI</th>
+                  <th style={{ padding: '16px', width: '110px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>UPDATE</th>
+                  <th style={{ padding: '16px', width: '120px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>PROGRESS</th>
+                  <th style={{ padding: '16px', width: '120px', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>STATUS</th>
+                  <th style={{ padding: '16px', width: '80px', textAlign: 'right', color: 'var(--neutral-600)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AKSI</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -271,14 +278,21 @@ export default function ProgressDokumen() {
                       <td style={{ padding: '20px 16px', verticalAlign: 'middle' }}>
                         <div style={{ fontWeight: 700, color: 'var(--neutral-800)', fontSize: '14px' }}>{r.mitra}</div>
                       </td>
+                      <td style={{ padding: '20px 16px', verticalAlign: 'middle', color: 'var(--neutral-800)', fontSize: '13px', fontWeight: 600 }}>
+                        {formatDate(r.tanggalMulai)}
+                      </td>
+                      <td style={{ padding: '20px 16px', verticalAlign: 'middle', color: 'var(--neutral-800)', fontSize: '13px', fontWeight: 600 }}>
+                        {formatDate(r.tanggalSelesai)}
+                      </td>
                       <td style={{ padding: '20px 16px', verticalAlign: 'middle' }}>
                         <div style={{ color: `var(--${color}-700)`, fontWeight: 800, fontSize: '11px', lineHeight: 1.5, maxWidth: '250px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           TAHAP {r.step}: {timelineSteps[r.step-1]}
                         </div>
                       </td>
-                      <td style={{ padding: '20px 16px', verticalAlign: 'middle', color: 'var(--neutral-600)', fontSize: '13px', fontWeight: 500 }}>
+                      <td style={{ padding: '20px 16px', verticalAlign: 'middle', color: 'var(--neutral-600)', fontSize: '12px', fontWeight: 500 }}>
                         {r.update}
                       </td>
+
                       <td style={{ padding: '20px 16px', verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <div style={{ flex: 1, height: '10px', background: 'var(--neutral-100)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--neutral-200)' }}>
@@ -348,7 +362,19 @@ export default function ProgressDokumen() {
                     <option value="2024">2024</option>
                   </select>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tgl Mulai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.tanggalMulai} onChange={e => setFormData({ ...formData, tanggalMulai: e.target.value })} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tgl Selesai <span style={{ color: 'var(--danger-500)' }}>*</span></label>
+                    <input type="date" className="form-input" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.tanggalSelesai} onChange={e => setFormData({ ...formData, tanggalSelesai: e.target.value })} />
+                  </div>
+                </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
+
                   <label className="form-label" style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tahapan Saat Ini <span style={{ color: 'var(--danger-500)' }}>*</span></label>
                   <select className="form-select" required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--neutral-200)', fontSize: '14px' }} value={formData.step} onChange={e => setFormData({ ...formData, step: e.target.value })}>
                     {timelineSteps.map((s, i) => (

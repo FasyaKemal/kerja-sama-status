@@ -17,11 +17,12 @@ const MockData = {
   ],
 
   progressDokumen: [
-    { id: '1', no: '01/PKS/2026', judul: 'Kerja Sama Pengawasan Laut', mitra: 'Kementerian Pertahanan', step: 8, update: '12 Mei 2026', progress: 80, status: 'Memo Roren Sekjen (Persetujuan Paraf) (2 Hari)', tahun: '2026' },
-    { id: '2', no: '02/NK/2026', judul: 'Pengembangan SDM Kelautan', mitra: 'Universitas Indonesia', step: 4, update: '10 Mei 2026', progress: 40, status: 'Surat ke Mitra terkait Hasil Pembahasan (1 Hari)', tahun: '2026' },
-    { id: '3', no: '03/MoU/2026', judul: 'Riset Biodiversitas Maritim', mitra: 'BRIN', step: 10, update: '05 Mei 2026', progress: 100, status: 'Selesai', tahun: '2026' },
-    { id: '4', no: '04/KB/2026', judul: 'Pemberdayaan Nelayan Lokal', mitra: 'Pemda Maluku', step: 2, update: '15 Mei 2026', progress: 20, status: 'Disposisi', tahun: '2026' }
+    { id: '1', no: '01/PKS/2026', judul: 'Kerja Sama Pengawasan Laut', mitra: 'Kementerian Pertahanan', step: 8, update: '12/05/2026', progress: 80, status: 'Memo Roren Sekjen (Persetujuan Paraf) (2 Hari)', tahun: '2026', tanggalMulai: '2026-01-01', tanggalSelesai: '2026-12-31' },
+    { id: '2', no: '02/NK/2026', judul: 'Pengembangan SDM Kelautan', mitra: 'Universitas Indonesia', step: 4, update: '10/05/2026', progress: 40, status: 'Surat ke Mitra terkait Hasil Pembahasan (1 Hari)', tahun: '2026', tanggalMulai: '2026-02-15', tanggalSelesai: '2026-08-15' },
+    { id: '3', no: '03/MoU/2026', judul: 'Riset Biodiversitas Maritim', mitra: 'BRIN', step: 10, update: '05/05/2026', progress: 100, status: 'Selesai', tahun: '2026', tanggalMulai: '2026-03-10', tanggalSelesai: '2026-05-01' },
+    { id: '4', no: '04/KB/2026', judul: 'Pemberdayaan Nelayan Lokal', mitra: 'Pemda Maluku', step: 2, update: '15/05/2026', progress: 20, status: 'Disposisi', tahun: '2026', tanggalMulai: '2026-05-01', tanggalSelesai: '2026-11-01' }
   ],
+
 
   databaseKerjaSama: [
     {

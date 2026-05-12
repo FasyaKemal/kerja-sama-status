@@ -59,7 +59,7 @@ export function parseDate(d) {
 }
 
 /**
- * Format tanggal ke "12 Mei 2026"
+ * Format tanggal ke "DD/MM/YYYY"
  * @param {string|Date} d - raw date string atau Date object
  * @returns {string}
  */
@@ -67,20 +67,22 @@ export function formatDate(d) {
   if (!d || d === '-') return '-';
   const parsed = parseDate(d);
   if (!parsed) return typeof d === 'string' ? d : '-';
-  return parsed.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  
+  const day = String(parsed.getDate()).padStart(2, '0');
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const year = parsed.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 /**
- * Format tanggal ke "12 Mei 2026" atau fallback ke nilai asli
+ * Format tanggal ke "DD/MM/YYYY" (sama dengan formatDate sesuai request)
  * @param {string} d
  * @returns {string}
  */
 export function formatDateShort(d) {
-  if (!d || d === '-') return '-';
-  const parsed = parseDate(d);
-  if (!parsed) return typeof d === 'string' ? d : '-';
-  return parsed.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDate(d);
 }
+
 
 /**
  * Hitung sisa hari dari hari ini ke tanggal tertentu
