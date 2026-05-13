@@ -43,19 +43,42 @@ export default function Login() {
     }
 
     setTimeout(() => {
-      // In a real app, validate against the accounts list or API.
-      if (username === 'admin' && (password === 'admin' || password === 'admin123')) {
+      // Demo auth: persisted in localStorage so changes from Profil page take effect.
+      const authKey = 'kinerjaku_auth';
+      const defaultAuth = { username: 'admin', password: 'admin123' };
+
+      let storedAuth = defaultAuth;
+      try {
+        const raw = localStorage.getItem(authKey);
+        if (raw) storedAuth = { ...defaultAuth, ...JSON.parse(raw) };
+        else localStorage.setItem(authKey, JSON.stringify(defaultAuth));
+      } catch (e) {
+        storedAuth = defaultAuth;
+        try { localStorage.setItem(authKey, JSON.stringify(defaultAuth)); } catch (e2) {}
+      }
+
+      if (username === storedAuth.username && password === storedAuth.password) {
         document.cookie = "auth_token=admin-token-123; path=/; max-age=86400";
         localStorage.setItem('kinerjaku_loggedIn', 'true');
-        localStorage.setItem('kinerjaku_user', JSON.stringify({
-          username: 'admin',
+        // Keep existing profile fields (fullName/role/email) if present.
+        const defaultUser = {
+          username: storedAuth.username,
           role: 'Admin Pusat',
           fullName: 'Biro Perencanaan',
-          avatar: 'BP'
-        }));
+          avatar: 'BP',
+        };
+        let nextUser = defaultUser;
+        try {
+          const existingRaw = localStorage.getItem('kinerjaku_user');
+          if (existingRaw) {
+            const existing = JSON.parse(existingRaw);
+            nextUser = { ...defaultUser, ...existing, username: storedAuth.username };
+          }
+        } catch (e) {}
+        localStorage.setItem('kinerjaku_user', JSON.stringify(nextUser));
         router.push('/dashboard');
       } else {
-        setError('Username atau password salah. (Gunakan: admin / admin123)');
+        setError('Username atau password salah.');
         setIsLoading(false);
       }
     }, 600);

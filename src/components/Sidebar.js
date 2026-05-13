@@ -41,7 +41,6 @@ function parseUserData(userJson) {
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen, sidebarCollapsed }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [expandedMenus, setExpandedMenus] = useState({});
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 

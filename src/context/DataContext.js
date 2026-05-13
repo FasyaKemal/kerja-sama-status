@@ -21,6 +21,8 @@ export function DataProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     // Load from local storage
     const loadFromStorage = (key, fallback) => {
       const saved = localStorage.getItem(key);
@@ -35,6 +37,7 @@ export function DataProvider({ children }) {
     };
 
     const hydrate = () => {
+      if (cancelled) return;
       setData({
         databaseKerjaSama: loadFromStorage(STORAGE_KEYS.databaseKerjaSama, MockDataRaw.databaseKerjaSama || []),
         kebijakanPrioritas: loadFromStorage(STORAGE_KEYS.kebijakanPrioritas, MockDataRaw.kebijakanPrioritas || []),
@@ -43,6 +46,8 @@ export function DataProvider({ children }) {
     };
 
     hydrate();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(false);
 
     // Keep state in sync if data changes in another tab or via custom events.
     const onStorage = (e) => {
@@ -57,11 +62,10 @@ export function DataProvider({ children }) {
     window.addEventListener('storage', onStorage);
     window.addEventListener('kinerjaku:data-updated', onCustom);
     return () => {
+      cancelled = true;
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('kinerjaku:data-updated', onCustom);
     };
-
-    setIsLoading(false);
   }, []);
 
   const emitDataUpdated = (key) => {

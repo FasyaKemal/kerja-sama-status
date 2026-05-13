@@ -4,11 +4,14 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 const defaultUser = {
-  username: '',
-  fullName: '',
-  role: '',
+  username: 'admin',
+  fullName: 'Biro Perencanaan',
+  role: 'Admin Pusat',
   email: 'admin.pusat@kkp.go.id',
 };
+
+const AUTH_STORAGE_KEY = 'kinerjaku_auth';
+const DEFAULT_AUTH = { username: 'admin', password: 'admin123' };
 
 function readStoredUser() {
   if (typeof window === 'undefined') return defaultUser;
@@ -21,6 +24,26 @@ function readStoredUser() {
   } catch (e) {
     console.error("Gagal memuat profil pengguna");
     return defaultUser;
+  }
+}
+
+function readStoredAuth() {
+  if (typeof window === 'undefined') return DEFAULT_AUTH;
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return DEFAULT_AUTH;
+    return { ...DEFAULT_AUTH, ...JSON.parse(raw) };
+  } catch (e) {
+    return DEFAULT_AUTH;
+  }
+}
+
+function writeStoredAuth(nextAuth) {
+  try {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
@@ -37,8 +60,26 @@ export default function ProfilPage() {
 
   const handleSave = (e) => {
     e.preventDefault();
+
+    const nextUsername = String(user.username || '').trim();
+    if (!nextUsername) {
+      toast.error('Username tidak boleh kosong.');
+      return;
+    }
+
+    const currentAuth = readStoredAuth();
+    // Keep username in auth in sync with profile username.
+    if (nextUsername !== currentAuth.username) {
+      const ok = writeStoredAuth({ ...currentAuth, username: nextUsername });
+      if (!ok) {
+        toast.error('Gagal menyimpan perubahan username.');
+        return;
+      }
+    }
+
     const updatedUser = {
       ...user,
+      username: nextUsername,
       avatar: user.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'A'
     };
     
@@ -62,9 +103,20 @@ export default function ProfilPage() {
       return;
     }
 
-    // Simulate verification
-    if (passwordData.oldPassword !== 'admin' && passwordData.oldPassword !== 'admin123') {
+    if (String(passwordData.newPassword).length < 6) {
+      toast.error('Password baru minimal 6 karakter.');
+      return;
+    }
+
+    const currentAuth = readStoredAuth();
+    if (passwordData.oldPassword !== currentAuth.password) {
       toast.error('Password lama salah.');
+      return;
+    }
+
+    const ok = writeStoredAuth({ ...currentAuth, password: passwordData.newPassword });
+    if (!ok) {
+      toast.error('Gagal menyimpan password baru.');
       return;
     }
 

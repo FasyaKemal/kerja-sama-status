@@ -34,7 +34,12 @@ export default function DashboardLayout({ children }) {
         sidebarCollapsed={sidebarCollapsed} 
         toggleSidebar={toggleSidebar} 
       />
-      <Header toggleMobileMenu={toggleMobileMenu} toggleSidebar={toggleSidebar} />
+      <Header
+        toggleMobileMenu={toggleMobileMenu}
+        toggleSidebar={toggleSidebar}
+        mobileMenuOpen={mobileMenuOpen}
+        sidebarCollapsed={sidebarCollapsed}
+      />
       <div className="main-content page-fade-in" id="main-content" onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}>
         {children}
       </div>

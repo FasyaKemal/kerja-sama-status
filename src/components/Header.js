@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from 'react';
+
 function getCurrentDateLabel() {
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -11,8 +13,26 @@ function getCurrentDateLabel() {
   };
 }
 
-export default function Header({ toggleMobileMenu, toggleSidebar }) {
+export default function Header({ toggleMobileMenu, toggleSidebar, mobileMenuOpen = false, sidebarCollapsed = false }) {
   const currentDate = getCurrentDateLabel();
+  const [menuExpanded, setMenuExpanded] = useState(false);
+
+  useEffect(() => {
+    const recompute = () => {
+      // For desktop we consider the sidebar state; for mobile we consider overlay menu state.
+      const isDesktop = window.innerWidth > 992;
+      if (isDesktop) {
+        // On desktop, "expanded" is equivalent to sidebar not collapsed.
+        setMenuExpanded(!sidebarCollapsed);
+      } else {
+        setMenuExpanded(!!mobileMenuOpen);
+      }
+    };
+
+    recompute();
+    window.addEventListener('resize', recompute);
+    return () => window.removeEventListener('resize', recompute);
+  }, [mobileMenuOpen, sidebarCollapsed]);
 
   const handleHamburgerClick = (e) => {
     e.preventDefault();
@@ -34,7 +54,7 @@ export default function Header({ toggleMobileMenu, toggleSidebar }) {
           className="hamburger-btn"
           onClick={handleHamburgerClick}
           aria-label="Toggle navigation menu"
-          aria-expanded="false"
+          aria-expanded={menuExpanded}
           title="Buka/tutup menu navigasi"
         >
           <svg

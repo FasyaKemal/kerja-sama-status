@@ -31,6 +31,7 @@ export default function Dashboard() {
   }, [filterKategori, filterTahun, router]);
 
   const goToDatabase = () => goToDatabaseWithFilters();
+  const goToDatabaseByStatus = (status) => goToDatabaseWithFilters({ status });
 
   const db = useMemo(() => data.databaseKerjaSama ?? [], [data.databaseKerjaSama]);
   const kp = useMemo(() => data.kebijakanPrioritas ?? [], [data.kebijakanPrioritas]);
@@ -51,8 +52,16 @@ export default function Dashboard() {
     return merged;
   }, [rawAllData, filterTahun, filterKategori]);
 
-  const availableYears = [...new Set(allData.map(r => String(r.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))].sort().reverse();
-  const availableKategoris = [...new Set(allData.map(r => r.kategoriMitra).filter(Boolean))].sort();
+  // Keep filter options stable: derive from unfiltered merged data.
+  const availableYears = useMemo(() => {
+    return [...new Set(rawAllData.map(r => String(r.tahun || '').trim()).filter(y => /^20\d{2}$/.test(y)))]
+      .sort()
+      .reverse();
+  }, [rawAllData]);
+
+  const availableKategoris = useMemo(() => {
+    return [...new Set(rawAllData.map(r => r.kategoriMitra).filter(Boolean))].sort();
+  }, [rawAllData]);
 
   const totalMitra = new Set(allData.map(r => r.mitra)).size;
   const totalDokumen = allData.length;
@@ -356,6 +365,16 @@ export default function Dashboard() {
 
   return (
     <div id="main-content" className="page-fade-in">
+      {isLoading && (
+        <div style={{ marginBottom: '16px', padding: '12px 16px', background: 'var(--neutral-50)', border: '1px solid var(--neutral-200)', borderRadius: '12px', color: 'var(--neutral-700)', fontWeight: 600 }}>
+          Memuat data dashboard...
+        </div>
+      )}
+      {!isLoading && rawAllData.length === 0 && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: 'var(--neutral-50)', border: '1px dashed var(--neutral-300)', borderRadius: '12px', color: 'var(--neutral-700)' }}>
+          Belum ada data. Tambahkan data di menu Database Kerja Sama atau Dukungan Kebijakan Prioritas.
+        </div>
+      )}
 
       <div className="page-header" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
@@ -467,8 +486,8 @@ export default function Dashboard() {
         <div className="card fade-in-up"
           role="button"
           tabIndex={0}
-          onClick={goToDatabase}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
+          onClick={() => goToDatabaseByStatus('Berlaku')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabaseByStatus('Berlaku'); }}
           style={{ 
           padding: '24px', 
           background: 'rgba(255, 255, 255, 0.8)',
@@ -498,8 +517,8 @@ export default function Dashboard() {
         <div className="card fade-in-up"
           role="button"
           tabIndex={0}
-          onClick={goToDatabase}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
+          onClick={() => goToDatabaseByStatus('Tidak Berlaku')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabaseByStatus('Tidak Berlaku'); }}
           style={{ 
           padding: '24px', 
           background: 'rgba(255, 255, 255, 0.8)',
@@ -526,8 +545,8 @@ export default function Dashboard() {
         <div className="card fade-in-up"
           role="button"
           tabIndex={0}
-          onClick={goToDatabase}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabase(); }}
+          onClick={() => goToDatabaseByStatus('Akan Berakhir')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToDatabaseByStatus('Akan Berakhir'); }}
           style={{ 
           padding: '24px', 
           background: 'linear-gradient(135deg, #fffcf0 0%, #fef9c3 100%)',

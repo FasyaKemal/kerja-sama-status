@@ -9,7 +9,9 @@ export function proxy(request) {
     '/dashboard',
     '/database-kerja-sama',
     '/kebijakan-prioritas',
-    '/progress-dokumen'
+    '/progress-dokumen',
+    '/profil',
+    '/pengaturan'
   ];
 
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
